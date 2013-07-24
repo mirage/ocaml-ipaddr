@@ -1,0 +1,3 @@
+0.1.0 (2013-07-24):
+* Initial public release.
+* Includes IPv4 and IPv4 CIDR prefix support.
