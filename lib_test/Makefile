@@ -5,4 +5,4 @@ all: test_ipaddr.ml
 		../_build/lib/ipaddr.cmo -linkpkg test_ipaddr.ml
 	./test_ipaddr
 	@echo
-	@rm test_ipaddr.cmi test_ipaddr.cmo
+	@rm test_ipaddr.cmi test_ipaddr.cmo test_ipaddr
