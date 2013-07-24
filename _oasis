@@ -1,0 +1,20 @@
+OASISFormat: 0.3
+Name:        ipaddr
+Version:     0.1.0
+Synopsis:    A library for manipulation of IP address representations
+Authors:     David Sheets
+License:     ISC
+Plugins:     META (0.3)
+BuildTools:  ocamlbuild
+
+Library ipaddr
+  Path: lib
+  Findlibname: ipaddr
+  Modules: Ipaddr
+  NativeOpt: -w @f@p@u
+  ByteOpt:   -w @f@p@u
+
+Test ipaddr
+  Run: true
+  Command: make
+  WorkingDirectory: lib_test
