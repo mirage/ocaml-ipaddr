@@ -1,4 +1,4 @@
-.PHONY: all test build install reinstall uninstall
+.PHONY: all test build install reinstall uninstall clean
 
 all: build test install
 
@@ -16,3 +16,6 @@ reinstall:
 
 uninstall:
 	ocaml setup.ml -uninstall
+
+clean:
+	ocaml setup.ml -clean
