@@ -1,0 +1,22 @@
+# OASIS_START
+# DO NOT EDIT (digest: 8dbef0c7db09ede1c7ff04b3f6fe2590)
+# Ignore VCS directories, you can use the same kind of rule outside 
+# OASIS_START/STOP if you want to exclude directories that contains 
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library ipaddr
+"lib/ipaddr.cmxs": use_ipaddr
+<lib/ipaddr.{cma,cmxa}>: oasis_library_ipaddr_byte
+<lib/*.ml{,i}>: oasis_library_ipaddr_byte
+<lib/ipaddr.{cma,cmxa}>: oasis_library_ipaddr_native
+<lib/*.ml{,i}>: oasis_library_ipaddr_native
+# OASIS_STOP
