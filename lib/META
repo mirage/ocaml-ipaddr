@@ -1,7 +1,8 @@
 # OASIS_START
-# DO NOT EDIT (digest: 749300c4c0b3828ae92fcd34f9ba16e6)
+# DO NOT EDIT (digest: 6f1cd4f3a8beab853de2d34acf419411)
 version = "0.2.0"
-description = "A library for manipulation of IP address representations"
+description =
+"A library for manipulation of IP (and MAC) address representations"
 archive(byte) = "ipaddr.cma"
 archive(byte, plugin) = "ipaddr.cma"
 archive(native) = "ipaddr.cmxa"
