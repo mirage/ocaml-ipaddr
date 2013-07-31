@@ -10,7 +10,7 @@ BuildTools:  ocamlbuild
 Library ipaddr
   Path: lib
   Findlibname: ipaddr
-  Modules: Ipaddr
+  Modules: Ipaddr, Macaddr
   NativeOpt: -w @f@p@u
   ByteOpt:   -w @f@p@u
 
