@@ -4,7 +4,7 @@ Version:     0.1.0
 Synopsis:    A library for manipulation of IP address representations
 Authors:     David Sheets
 License:     ISC
-Plugins:     META (0.3)
+Plugins:     META (0.3), DevFiles (0.3)
 BuildTools:  ocamlbuild
 
 Library ipaddr
