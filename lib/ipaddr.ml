@@ -116,7 +116,9 @@ module V4 = struct
     let private_172 = make 12 (ip 172_l  16_l 0_l 0_l)
     let private_192 = make 16 (ip 192_l 168_l 0_l 0_l)
 
-    let private_blocks = [ private_10 ; private_172 ; private_192 ]
+    let private_blocks = [
+      loopback ; link ; private_10 ; private_172 ; private_192
+    ]
 
     let broadcast (pre,sz) = pre ||| (0x0_FF_FF_FF_FF_l >|> sz)
   end
