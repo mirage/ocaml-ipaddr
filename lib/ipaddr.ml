@@ -15,9 +15,9 @@
  *
  *)
 
-exception Parse_error of string
+exception Parse_error of string * string
 
-let need_more = Parse_error "not enough data"
+let need_more x = Parse_error ("not enough data", x)
 
 module V4 = struct
   type t = int32
@@ -43,15 +43,16 @@ module V4 = struct
               && b = (b <! 0)
               && c = (c <! 0)
               && d = (d <! 0)
-            then make a b c d else raise (Parse_error "octet out of bounds"))
+            then make a b c d
+            else raise (Parse_error ("octet out of bounds", s)))
     with
-    | Scanf.Scan_failure msg -> raise (Parse_error msg)
-    | End_of_file -> raise need_more
+    | Scanf.Scan_failure msg -> raise (Parse_error (msg, s))
+    | End_of_file -> raise (need_more s)
 
   let of_string s = try Some (of_string_exn s) with _ -> None
 
   let of_bytes_exn bs =
-    if String.length bs > 4 then raise (Parse_error "too much data");
+    if String.length bs > 4 then raise (Parse_error ("too much data", bs));
     try
       make
         (Int32.of_int (Char.code bs.[0]))
@@ -59,7 +60,7 @@ module V4 = struct
         (Int32.of_int (Char.code bs.[2]))
         (Int32.of_int (Char.code bs.[3]))
     with
-    | Invalid_argument "index out of bounds" -> raise need_more
+    | Invalid_argument "index out of bounds" -> raise (need_more bs)
 
   let of_bytes bs = try Some (of_bytes_exn bs) with _ -> None
 
@@ -95,11 +96,12 @@ module V4 = struct
     let of_string_exn s =
       try Scanf.sscanf s "%ld.%ld.%ld.%ld/%d%!"
             (fun a b c d p ->
-              if p > 32 || p < 0 then raise (Parse_error "invalid prefix size");
+              if p > 32 || p < 0
+              then raise (Parse_error ("invalid prefix size", s));
               make p (ip a b c d))
       with
-      | Scanf.Scan_failure msg -> raise (Parse_error msg)
-      | End_of_file -> raise need_more
+      | Scanf.Scan_failure msg -> raise (Parse_error (msg, s))
+      | End_of_file -> raise (need_more s)
 
     let of_string s = try Some (of_string_exn s) with _ -> None
 
