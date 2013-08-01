@@ -61,6 +61,15 @@ module V4 : sig
   (** [to_int32 ipv4] is the 32-bit packed encoding of [ipv4]. *)
   val to_int32 : t -> int32
 
+  (** [blank] is 0.0.0.0. *)
+  val blank : t
+
+  (** [broadcast] is 255.255.255.255. *)
+  val broadcast : t
+
+  (** [localhost] is 127.0.0.1. *)
+  val localhost : t
+
   (** A module for manipulating IPv4 network prefixes. *)
   module Prefix : sig
     type addr = t
