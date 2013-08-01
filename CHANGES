@@ -1,3 +1,9 @@
+0.2.1 (2013-08-01):
+* Add `Ipaddr.V4.any`, `Ipaddr.V4.broadcast`, `Ipaddr.V4.localhost`
+  special constant addresses.
+* Add `Ipaddr.V4.Prefix.global` (0.0.0.0/0) subnet constant
+* Add `Ipaddr.V4.Prefix.network` function to produce subnet address from prefix
+
 0.2.0 (2013-08-01):
 * Add `Macaddr` module for handling MAC-48 (Ethernet) addresses.
 * `Ipaddr.Parse_error` now contains both the error condition and the
