@@ -61,8 +61,8 @@ module V4 : sig
   (** [to_int32 ipv4] is the 32-bit packed encoding of [ipv4]. *)
   val to_int32 : t -> int32
 
-  (** [blank] is 0.0.0.0. *)
-  val blank : t
+  (** [any] is 0.0.0.0. *)
+  val any : t
 
   (** [broadcast] is 255.255.255.255. *)
   val broadcast : t
@@ -100,6 +100,9 @@ module V4 : sig
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
 
+    (** The default route, all addresses in IPv4-space, 0.0.0.0/0. *)
+    val global    : t
+
     (** The host loopback network, 127.0.0.0/8. *)
     val loopback  : t
 
@@ -127,6 +130,9 @@ module V4 : sig
 
     (** [broadcast subnet] is the broadcast address for [subnet]. *)
     val broadcast : t -> addr
+
+    (** [network subnet] is the network address for [subnet]. *)
+    val network : t -> addr
 
     include Map.OrderedType with type t := t
   end

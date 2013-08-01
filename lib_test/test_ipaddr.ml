@@ -129,6 +129,11 @@ let test_prefix_map () =
   assert_equal ~msg:"third"
     (M.find (V4.Prefix.of_string_exn "128.0.0.0/1") m) "high-bitters"
 
+let test_special_addr () =
+  assert_equal ~msg:"broadcast" V4.broadcast V4.Prefix.(broadcast global);
+  assert_equal ~msg:"any"       V4.any       V4.Prefix.(network global);
+  assert_equal ~msg:"localhost" true V4.(Prefix.(mem localhost loopback))
+
 let suite = "Test" >::: [
   "string_rt"            >:: test_string_rt;
   "string_rt_bad"        >:: test_string_rt_bad;
@@ -141,6 +146,7 @@ let suite = "Test" >::: [
   "is_private"           >:: test_is_private;
   "map"                  >:: test_map;
   "prefix_map"           >:: test_prefix_map;
+  "special_addr"         >:: test_special_addr;
 ]
 ;;
 run_test_tt_main suite

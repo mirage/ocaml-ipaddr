@@ -79,11 +79,11 @@ module V4 = struct
 
   let to_int32 i = i
 
-  let blank = 0l
+  let any = 0_l
 
-  let broadcast = make 255l 255l 255l 255l
+  let broadcast = make 255_l 255_l 255_l 255_l
 
-  let localhost = make 127l 0l 0l 1l
+  let localhost = make 127_l 0_l 0_l 1_l
 
   module Prefix = struct
     type addr = t
@@ -115,9 +115,10 @@ module V4 = struct
 
     let mem ip (pre,sz) = let host = 32 - sz in (ip >|> host) = (pre >|> host)
 
+    let global    = make  0 (ip   0_l   0_l 0_l 0_l)
+    let relative  = make  8 (ip   0_l   0_l 0_l 0_l)
     let loopback  = make  8 (ip 127_l   0_l 0_l 0_l)
     let link      = make 16 (ip 169_l 254_l 0_l 0_l)
-    let relative  = make  8 (ip   0_l   0_l 0_l 0_l)
     let multicast = make  4 (ip 224_l   0_l 0_l 0_l)
 
     let private_10  = make 8  (ip 10_l    0_l 0_l 0_l)
@@ -129,6 +130,7 @@ module V4 = struct
     ]
 
     let broadcast (pre,sz) = pre ||| (0x0_FF_FF_FF_FF_l >|> sz)
+    let network (pre,sz) = pre
   end
 
   let is_private i = List.exists (Prefix.mem i) Prefix.private_blocks
