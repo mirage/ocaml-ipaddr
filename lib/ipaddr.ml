@@ -79,6 +79,12 @@ module V4 = struct
 
   let to_int32 i = i
 
+  let blank = 0l
+
+  let broadcast = make 255l 255l 255l 255l
+
+  let localhost = make 127l 0l 0l 1l
+
   module Prefix = struct
     type addr = t
     type t = addr * int
