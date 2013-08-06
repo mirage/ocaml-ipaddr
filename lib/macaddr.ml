@@ -57,3 +57,15 @@ let to_string x =
 let to_bytes x = x
 
 let broadcast = String.make 6 '\255'
+
+let make_local () =
+  let x = String.create 6 in
+  let i () = Char.chr (Random.int 256) in
+  (* set locally administered and unicast bits *)
+  x.[0] <- Char.chr ((((Random.int 256) lor 2) lsr 1) lsl 1);
+  x.[1] <- i ();
+  x.[2] <- i ();
+  x.[3] <- i ();
+  x.[4] <- i ();
+  x.[5] <- i ();
+  x

@@ -54,4 +54,8 @@ val to_string : t -> string
 (** [broadcast] is ff:ff:ff:ff:ff:ff. *)
 val broadcast : t
 
+(** [make_local ()] generates a random unicast, locally administered MAC
+    address. *)
+val make_local : unit -> t
+
 include Map.OrderedType with type t := t
