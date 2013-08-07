@@ -1,8 +1,16 @@
+0.2.2 (2013-08-07):
+* Add `Macaddr.make_local` function to create local unicast MAC
+  addresses from an octet generation function.
+* Add `Macaddr.get_oui` accessor to extract the Organizationally Unique
+  Identifier as an integer.
+* Add `Macaddr.is_local` predicate to test for a locally administered address.
+* Add `Macaddr.is_unicast` predicate to test for a unicast MAC address.
+
 0.2.1 (2013-08-01):
 * Add `Ipaddr.V4.any`, `Ipaddr.V4.broadcast`, `Ipaddr.V4.localhost`
   special constant addresses.
-* Add `Ipaddr.V4.Prefix.global` (0.0.0.0/0) subnet constant
-* Add `Ipaddr.V4.Prefix.network` function to produce subnet address from prefix
+* Add `Ipaddr.V4.Prefix.global` (0.0.0.0/0) subnet constant.
+* Add `Ipaddr.V4.Prefix.network` function to produce subnet address from prefix.
 
 0.2.0 (2013-08-01):
 * Add `Macaddr` module for handling MAC-48 (Ethernet) addresses.

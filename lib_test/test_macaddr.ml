@@ -46,11 +46,26 @@ let test_bytes_rt_bad () =
   List.iter (fun addr ->
     assert_equal ~msg:(String.escaped addr) (of_bytes addr) None) addrs
 
+let test_make_local () =
+  let () = Random.self_init () in
+  let bytegen i = if i = 0 then 253 else 255 - i in
+  let local_addr = make_local bytegen in
+  assert_equal ~msg:"is_local" (is_local local_addr) true;
+  assert_equal ~msg:"is_unicast" (is_unicast local_addr) true;
+  assert_equal ~msg:"localize" (to_bytes local_addr).[0] (Char.chr 254);
+  for i=1 to 5 do
+    assert_equal ~msg:("addr.["^(string_of_int i)^"]")
+      (to_bytes local_addr).[i] (Char.chr (bytegen i))
+  done;
+  assert_equal ~msg:"get_oui" (get_oui local_addr)
+    ((254 lsl 16) + (254 lsl 8) + 253)
+
 let suite = "Test" >::: [
   "string_rt"            >:: test_string_rt;
   "string_rt_bad"        >:: test_string_rt_bad;
   "bytes_rt"             >:: test_bytes_rt;
   "bytes_rt_bad"         >:: test_bytes_rt_bad;
+  "make_local"           >:: test_make_local;
 ]
 ;;
 run_test_tt_main suite
