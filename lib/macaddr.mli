@@ -54,8 +54,19 @@ val to_string : t -> string
 (** [broadcast] is ff:ff:ff:ff:ff:ff. *)
 val broadcast : t
 
-(** [make_local ()] generates a random unicast, locally administered MAC
-    address. *)
-val make_local : unit -> t
+(** [make_local bytegen] creates a unicast, locally administered MAC
+    address given a function mapping octet offset to octet value. *)
+val make_local : (int -> int) -> t
+
+(** [get_oui macaddr] is the integer organization identifier for [macaddr]. *)
+val get_oui : t -> int
+
+(** [is_local macaddr] is the predicate on the locally administered bit
+    of [macaddr]. *)
+val is_local : t -> bool
+
+(** [is_unicast macaddr] the is the predicate on the unicast bit of
+    [macaddr]. *)
+val is_unicast : t -> bool
 
 include Map.OrderedType with type t := t

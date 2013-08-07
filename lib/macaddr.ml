@@ -49,23 +49,26 @@ let of_string_exn x =
 
 let of_string x = try Some (of_string_exn x) with _ -> None
 
+let chri x i = Char.code x.[i]
+
 let to_string x =
-    let chri i = Char.code x.[i] in
-    Printf.sprintf "%02x:%02x:%02x:%02x:%02x:%02x"
-       (chri 0) (chri 1) (chri 2) (chri 3) (chri 4) (chri 5)
+  Printf.sprintf "%02x:%02x:%02x:%02x:%02x:%02x"
+    (chri x 0) (chri x 1) (chri x 2) (chri x 3) (chri x 4) (chri x 5)
 
 let to_bytes x = x
 
 let broadcast = String.make 6 '\255'
 
-let make_local () =
+let make_local bytegenf =
   let x = String.create 6 in
-  let i () = Char.chr (Random.int 256) in
   (* set locally administered and unicast bits *)
-  x.[0] <- Char.chr ((((Random.int 256) lor 2) lsr 1) lsl 1);
-  x.[1] <- i ();
-  x.[2] <- i ();
-  x.[3] <- i ();
-  x.[4] <- i ();
-  x.[5] <- i ();
+  x.[0] <- Char.chr ((((bytegenf 0) lor 2) lsr 1) lsl 1);
+  for i = 1 to 5 do x.[i] <- Char.chr (bytegenf i) done;
   x
+
+let get_oui x =
+  ((chri x 0) lsl 16) lor ((chri x 1) lsl 8) lor (chri x 2)
+
+let is_local x = (((chri x 0) lsr 1) land 1) = 1
+
+let is_unicast x = ((chri x 0) land 1) = 0
