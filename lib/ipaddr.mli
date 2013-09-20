@@ -134,6 +134,9 @@ module V4 : sig
     (** [network subnet] is the network address for [subnet]. *)
     val network : t -> addr
 
+    (** [bits subnet] is the bit size of the [subnet] prefix. *)
+    val bits : t -> int
+
     include Map.OrderedType with type t := t
   end
 

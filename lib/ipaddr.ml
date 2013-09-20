@@ -131,6 +131,8 @@ module V4 = struct
 
     let broadcast (pre,sz) = pre ||| (0x0_FF_FF_FF_FF_l >|> sz)
     let network (pre,sz) = pre
+
+    let bits (pre,sz) = sz
   end
 
   let is_private i = List.exists (Prefix.mem i) Prefix.private_blocks

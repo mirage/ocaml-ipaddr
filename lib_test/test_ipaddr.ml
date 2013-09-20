@@ -90,6 +90,22 @@ let test_prefix_broadcast () =
     assert_equal ~msg:(subnet ^ " <> " ^ r) r bcast
   ) pairs
 
+let test_prefix_bits () =
+  let pairs = V4.Prefix.([
+    global, 0;
+    loopback, 8;
+    link, 16;
+    relative, 8;
+    multicast, 4;
+    private_10, 8;
+    private_172, 12;
+    private_192, 16;
+  ]) in
+  List.iter (fun (subnet,bits) ->
+    let msg = (V4.Prefix.to_string subnet) ^ " <> " ^ (string_of_int bits) in
+    assert_equal ~msg (V4.Prefix.bits subnet) bits
+  ) pairs
+
 let test_is_private () =
   let pairs = [
     "192.168.0.1",    true;
@@ -143,6 +159,7 @@ let suite = "Test" >::: [
   "prefix_string_rt"     >:: test_prefix_string_rt;
   "prefix_string_rt_bad" >:: test_prefix_string_rt_bad;
   "prefix_broadcast"     >:: test_prefix_broadcast;
+  "prefix_bits"          >:: test_prefix_bits;
   "is_private"           >:: test_is_private;
   "map"                  >:: test_map;
   "prefix_map"           >:: test_prefix_map;
