@@ -1,3 +1,6 @@
+0.2.4 (trunk):
+* Add Travis-CI testing scripts.
+
 0.2.3 (2013-09-20):
 * Add `Ipaddr.V4.Prefix.bits` function to produce bits of prefix from prefix.
 
