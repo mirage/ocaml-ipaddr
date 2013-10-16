@@ -20,3 +20,4 @@
 <lib/ipaddr.{cma,cmxa}>: oasis_library_ipaddr_native
 <lib/*.ml{,i}>: oasis_library_ipaddr_native
 # OASIS_STOP
+true: debug, annot, bin_annot
