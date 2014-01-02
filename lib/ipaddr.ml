@@ -36,18 +36,54 @@ module V4 = struct
   let make a b c d =
     ((a <! 24) ||| (b <! 16)) ||| ((c <! 8) ||| (d <! 0))
 
-  let of_string_exn s =
-    try Scanf.sscanf s "%ld.%ld.%ld.%ld%!"
-          (fun a b c d ->
-            if a = (a <! 0)
-              && b = (b <! 0)
-              && c = (c <! 0)
-              && d = (d <! 0)
-            then make a b c d
-            else raise (Parse_error ("octet out of bounds", s)))
-    with
-    | Scanf.Scan_failure msg -> raise (Parse_error (msg, s))
-    | End_of_file -> raise (need_more s)
+  let int_of_char c = int_of_char c - 48
+  let is_decimal c =
+    let i = int_of_char c in
+    i >=0 && i < 10
+
+  let bad_char i s =
+    let msg = Printf.sprintf "invalid character '%c' at %d" s.[i] i
+    in Parse_error (msg, s)
+
+  let parse_decimal_int term s i =
+    let len = String.length s in
+    let rec dec prev =
+      let j = !i in
+      if j >= len then prev
+      else let c = s.[j] in
+           if is_decimal c
+           then (incr i; dec (prev*10 + int_of_char c))
+           else if List.mem c term
+           then prev
+           else raise (bad_char j s)
+    in
+    let i = !i in
+    if i < len
+    then if is_decimal s.[i]
+      then dec 0
+      else raise (bad_char i s)
+    else raise (need_more s)
+
+  let parse_dotted_quad term s i =
+    let bound = ['.'] in
+    let a = Int32.of_int (parse_decimal_int bound s i) in
+    incr i; (* dot *)
+    let b = Int32.of_int (parse_decimal_int bound s i) in
+    incr i; (* dot *)
+    let c = Int32.of_int (parse_decimal_int bound s i) in
+    incr i; (* dot *)
+    let d = Int32.of_int (parse_decimal_int term s i) in
+    if a <> (a <! 0)
+    then raise (Parse_error ("first octet out of bounds", s))
+    else if b <> (b <! 0)
+    then raise (Parse_error ("second octet out of bounds", s))
+    else if c <> (c <! 0)
+    then raise (Parse_error ("third octet out of bounds", s))
+    else if d <> (d <! 0)
+    then raise (Parse_error ("fourth octet out of bounds", s))
+    else make a b c d
+
+  let of_string_exn s = parse_dotted_quad [] s (ref 0)
 
   let of_string s = try Some (of_string_exn s) with _ -> None
 
@@ -100,14 +136,13 @@ module V4 = struct
     let make sz pre = (pre &&& (mask sz),sz)
 
     let of_string_exn s =
-      try Scanf.sscanf s "%ld.%ld.%ld.%ld/%d%!"
-            (fun a b c d p ->
-              if p > 32 || p < 0
-              then raise (Parse_error ("invalid prefix size", s));
-              make p (ip a b c d))
-      with
-      | Scanf.Scan_failure msg -> raise (Parse_error (msg, s))
-      | End_of_file -> raise (need_more s)
+      let i = ref 0 in
+      let quad = parse_dotted_quad ['/'] s i in
+      incr i; (* slash *)
+      let p = parse_decimal_int [] s i in
+      if p > 32 || p < 0
+      then raise (Parse_error ("invalid prefix size", s));
+      make p quad
 
     let of_string s = try Some (of_string_exn s) with _ -> None
 
