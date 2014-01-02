@@ -1,5 +1,6 @@
 (*
  * Copyright (c) 2010 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2014 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,30 +31,79 @@ let of_bytes_exn x =
 
 let of_bytes x = try Some (of_bytes_exn x) with _ -> None
 
+let int_of_hex_char c =
+  let c = int_of_char (Char.uppercase c) - 48 in
+  if c > 9
+  then if c > 16
+    then c - 7 (* upper hex offset *)
+    else -1 (* :;<=>?@ *)
+  else c
+
+let is_hex i = i >=0 && i < 16
+
+let bad_char i s =
+  let msg = Printf.sprintf "invalid character '%c' at %d" s.[i] i
+  in Parse_error (msg, s)
+
+let parse_hex_int term s i =
+  let len = String.length s in
+  let rec hex prev =
+    let j = !i in
+    if j >= len then prev
+    else let c = s.[j] in
+         let k = int_of_hex_char c in
+         if is_hex k
+         then (incr i; hex ((prev lsl 4) + k))
+         else if List.mem c term
+         then prev
+         else raise (bad_char j s)
+  in
+  let i = !i in
+  if i < len
+  then if is_hex (int_of_hex_char s.[i])
+    then hex 0
+    else raise (bad_char i s)
+  else raise (need_more s)
+
+let parse_sextuple s i =
+  let m = String.create 6 in
+  try
+    let p = !i in
+    m.[0] <- Char.chr (parse_hex_int [':';'-'] s i);
+    if !i >= String.length s
+    then raise (need_more s)
+    else
+      let sep = [s.[!i]] in
+      (if !i - p <> 2 then raise (Parse_error ("hex pairs required",s)));
+      incr i;
+      for k=1 to 4 do
+        let p = !i in
+        m.[k] <- Char.chr (parse_hex_int sep s i);
+        (if !i - p <> 2 then raise (Parse_error ("hex pairs required",s)));
+        incr i;
+      done;
+      let p = !i in
+      m.[5] <- Char.chr (parse_hex_int [] s i);
+      (if !i - p <> 2 then raise (Parse_error ("hex pairs required",s)));
+      m
+  with Invalid_argument "Char.chr" ->
+    raise (Parse_error ("address segment too large",s))
+
 (* Read a MAC address colon-separated string *)
-let of_string_exn x =
-  let s = String.create 6 in
-  try Scanf.sscanf x "%1x%1x:%1x%1x:%1x%1x:%1x%1x:%1x%1x:%1x%1x%!"
-        (fun a b c d e f g h i j k l ->
-          s.[0] <- Char.chr ((a lsl 4) + b);
-          s.[1] <- Char.chr ((c lsl 4) + d);
-          s.[2] <- Char.chr ((e lsl 4) + f);
-          s.[3] <- Char.chr ((g lsl 4) + h);
-          s.[4] <- Char.chr ((i lsl 4) + j);
-          s.[5] <- Char.chr ((k lsl 4) + l);
-          s
-        )
-  with
-  | Scanf.Scan_failure msg -> raise (Parse_error (msg, x))
-  | End_of_file -> raise (need_more x)
+let of_string_exn x = parse_sextuple x (ref 0)
 
 let of_string x = try Some (of_string_exn x) with _ -> None
 
 let chri x i = Char.code x.[i]
 
-let to_string x =
-  Printf.sprintf "%02x:%02x:%02x:%02x:%02x:%02x"
-    (chri x 0) (chri x 1) (chri x 2) (chri x 3) (chri x 4) (chri x 5)
+let to_string ?(sep=':') x =
+  Printf.sprintf "%02x%c%02x%c%02x%c%02x%c%02x%c%02x"
+    (chri x 0) sep
+    (chri x 1) sep
+    (chri x 2) sep
+    (chri x 3) sep
+    (chri x 4) sep
+    (chri x 5)
 
 let to_bytes x = x
 

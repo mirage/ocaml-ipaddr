@@ -47,9 +47,9 @@ val of_string : string -> t option
 (** [to_bytes mac_addr] is a string of size 6 encoding [mac_addr]. *)
 val to_bytes : t -> string
 
-(** [to_string mac_addr] is the colon spearated string representation
+(** [to_string ?(sep=':') mac_addr] is the [sep]-separated string representation
     of [mac_addr], i.e. xx:xx:xx:xx:xx:xx. *)
-val to_string : t -> string
+val to_string : ?sep:char -> t -> string
 
 (** [broadcast] is ff:ff:ff:ff:ff:ff. *)
 val broadcast : t

@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2013 David Sheets <sheets@alum.mit.edu>
+ * Copyright (c) 2013-2014 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,11 +18,13 @@
 open OUnit
 open Macaddr
 
-(* TODO: check that only Parse_error exceptions are raised *)
-
 let test_string_rt () =
-  let addr = "ca:fe:ba:be:ee:ee" in
-  assert_equal ~msg:addr (to_string (of_string_exn addr)) addr
+  let addrs = [
+    "ca:fe:ba:be:ee:ee", ':';
+    "ca-fe-ba-be-ee-ee", '-';
+  ] in
+  List.iter (fun (addr,sep) ->
+    assert_equal ~msg:addr (to_string ~sep (of_string_exn addr)) addr) addrs
 
 let test_string_rt_bad () =
   let addrs = [
@@ -31,6 +33,7 @@ let test_string_rt_bad () =
     "ca:fe:ba:be:eeee";
     "ca:fe:ba:be:ee::ee";
     "ca:fe:ba:be:e:eee";
+    "ca:fe:ba:be:ee-ee";
   ] in
   List.iter (fun addr -> assert_equal ~msg:addr (of_string addr) None) addrs
 
