@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2013 David Sheets <sheets@alum.mit.edu>
+ * Copyright (c) 2013-2014 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,9 +37,7 @@ module V4 = struct
     ((a <! 24) ||| (b <! 16)) ||| ((c <! 8) ||| (d <! 0))
 
   let int_of_char c = int_of_char c - 48
-  let is_decimal c =
-    let i = int_of_char c in
-    i >=0 && i < 10
+  let is_decimal i = i >=0 && i < 10
 
   let bad_char i s =
     let msg = Printf.sprintf "invalid character '%c' at %d" s.[i] i
@@ -51,15 +49,16 @@ module V4 = struct
       let j = !i in
       if j >= len then prev
       else let c = s.[j] in
-           if is_decimal c
-           then (incr i; dec (prev*10 + int_of_char c))
+           let k = int_of_char c in
+           if is_decimal k
+           then (incr i; dec (prev*10 + k))
            else if List.mem c term
            then prev
            else raise (bad_char j s)
     in
     let i = !i in
     if i < len
-    then if is_decimal s.[i]
+    then if is_decimal (int_of_char s.[i])
       then dec 0
       else raise (bad_char i s)
     else raise (need_more s)

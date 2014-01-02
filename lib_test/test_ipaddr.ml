@@ -18,8 +18,6 @@
 open OUnit
 open Ipaddr
 
-(* TODO: check that only Parse_error exceptions are raised *)
-
 let test_string_rt () =
   let addr = "192.168.0.1" in
   assert_equal ~msg:addr V4.(to_string (of_string_exn addr)) addr
