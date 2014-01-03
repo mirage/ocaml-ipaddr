@@ -1,3 +1,7 @@
+1.0.1 (trunk):
+* Add optional `sep:char` argument to `Macaddr.to_string`
+* Remove internal use of Scanf.scanf
+
 1.0.0 (2013-10-16):
 * Add Travis-CI testing scripts.
 * Include debug symbols and annot files by default.
