@@ -19,6 +19,46 @@ exception Parse_error of string * string
 
 let need_more x = Parse_error ("not enough data", x)
 
+let char_0 = Pervasives.int_of_char '0'
+let char_a = Pervasives.int_of_char 'a'
+let char_A = Pervasives.int_of_char 'A'
+
+
+let int_of_char c = match c with
+  | '0'..'9' -> Pervasives.int_of_char c - char_0
+  | 'a'..'f' -> 10 + Pervasives.int_of_char c - char_a
+  | 'A'..'F' -> 10 + Pervasives.int_of_char c - char_A
+  | _ -> -1
+
+let bad_char i s =
+  let msg = Printf.sprintf "invalid character '%c' at %d" s.[i] i
+  in Parse_error (msg, s)
+
+let is_number base n = n >=0 && n < base
+
+let parse_int base term s i =
+  let len = String.length s in
+  let rec dec prev =
+    let j = !i in
+    if j >= len then prev
+    else let c = s.[j] in
+         let k = int_of_char c in
+         if is_number base k
+         then (incr i; dec (prev*base + k))
+         else if List.mem c term
+         then prev
+         else raise (bad_char j s)
+  in
+  let i = !i in
+  if i < len
+  then if is_number base (int_of_char s.[i])
+    then dec 0
+    else raise (bad_char i s)
+  else raise (need_more s)
+
+let parse_decimal_int term s i = parse_int 10 term s i
+
+
 module V4 = struct
   type t = int32
 
@@ -35,33 +75,6 @@ module V4 = struct
 
   let make a b c d =
     ((a <! 24) ||| (b <! 16)) ||| ((c <! 8) ||| (d <! 0))
-
-  let int_of_char c = int_of_char c - 48
-  let is_decimal i = i >=0 && i < 10
-
-  let bad_char i s =
-    let msg = Printf.sprintf "invalid character '%c' at %d" s.[i] i
-    in Parse_error (msg, s)
-
-  let parse_decimal_int term s i =
-    let len = String.length s in
-    let rec dec prev =
-      let j = !i in
-      if j >= len then prev
-      else let c = s.[j] in
-           let k = int_of_char c in
-           if is_decimal k
-           then (incr i; dec (prev*10 + k))
-           else if List.mem c term
-           then prev
-           else raise (bad_char j s)
-    in
-    let i = !i in
-    if i < len
-    then if is_decimal (int_of_char s.[i])
-      then dec 0
-      else raise (bad_char i s)
-    else raise (need_more s)
 
   let parse_dotted_quad term s i =
     let bound = ['.'] in
