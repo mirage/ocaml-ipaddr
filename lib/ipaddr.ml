@@ -127,7 +127,7 @@ module V4 = struct
 
   let to_int32 i = i
 
-  let any = 0_l
+  let any = make 0_l 0_l 0_l 0_l
 
   let broadcast = make 255_l 255_l 255_l 255_l
 
