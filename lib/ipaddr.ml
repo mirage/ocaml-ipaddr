@@ -379,6 +379,8 @@ module V6 = struct
         if x = -1
         then i-missing
         else begin
+          if x land 0xffff <> x
+          then raise (Parse_error (Printf.sprintf "component %d out of bounds" i, s));
           a.(i) <- Int32.of_int x;
           pred i
         end

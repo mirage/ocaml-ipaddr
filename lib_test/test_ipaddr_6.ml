@@ -14,6 +14,7 @@ let test_string_rt_bad () =
   let addrs = [
     "::1::";
     "1:2:3:4:5:6:7";
+    "12345::12:2"
   ] in
   List.iter (fun addr -> assert_equal ~msg:addr V6.(of_string addr) None) addrs
 
