@@ -148,7 +148,7 @@ let test_special_addr () =
   assert_equal ~msg:"any"       V4.any       V4.Prefix.(network global);
   assert_equal ~msg:"localhost" true V4.(Prefix.(mem localhost loopback))
 
-let suite = "Test" >::: [
+let suite_v4 = "Test" >::: [
   "string_rt"            >:: test_string_rt;
   "string_rt_bad"        >:: test_string_rt_bad;
   "bytes_rt"             >:: test_bytes_rt;
@@ -163,5 +163,6 @@ let suite = "Test" >::: [
   "prefix_map"           >:: test_prefix_map;
   "special_addr"         >:: test_special_addr;
 ]
+
 ;;
-run_test_tt_main suite
+run_test_tt_main suite_v4
