@@ -57,7 +57,8 @@ let test_prefix_string_rt () =
   ] in
   List.iter (fun subnet ->
     assert_equal ~msg:subnet
-      V4.Prefix.(to_string (of_string_exn subnet)) subnet) subnets
+      V4.Prefix.(to_string (of_string_exn subnet)) subnet
+  ) subnets
 
 let test_prefix_string_rt_bad () =
   let subnets = [
@@ -114,7 +115,8 @@ let test_is_private () =
     "172.32.0.0",     false;
   ] in
   List.iter (fun (addr,p) ->
-    assert_equal ~msg:addr V4.(is_private (of_string_exn addr)) p) pairs
+    assert_equal ~msg:addr V4.(is_private (of_string_exn addr)) p
+  ) pairs
 
 let test_map () =
   let module M = Map.Make(V4) in
