@@ -23,7 +23,6 @@ open Ipaddr
 
   check network_address
   check of/to_address_string
-  check ipv4 scope
   check generic address fns
   check generic map support
   check multicast scopes
@@ -144,18 +143,38 @@ module Test_v4 = struct
       assert_equal ~msg (V4.Prefix.bits subnet) bits
     ) pairs
 
-  let test_is_private () =
-    let pairs = [
-      "192.168.0.1",    true;
-      "10.3.21.155",    true;
-      "172.16.0.0",     true;
-      "172.31.255.255", true;
-      "172.15.255.255", false;
-      "172.32.0.0",     false;
-    ] in
-    List.iter (fun (addr,p) ->
-      assert_equal ~msg:addr V4.(is_private (of_string_exn addr)) p
-    ) pairs
+  let test_scope () =
+    let ip = V4.of_string_exn in
+    let is subnet addr = V4.Prefix.(mem addr subnet) in
+    let is_scope scop addr = scop = V4.scope addr in
+    let ships = V4.([
+      unspecified,         "global",    is_global,          false;
+      unspecified,         "multicast", is_multicast,       false;
+      unspecified,         "point",     is_scope Point,     true;
+      localhost,           "global",    is_global,          false;
+      localhost,           "multicast", is_multicast,       false;
+      localhost,           "interface", is_scope Interface, true;
+      broadcast,           "global",    is_global,          false;
+      broadcast,           "multicast", is_multicast,       false;
+      broadcast,           "admin",     is_scope Admin,     true;
+      nodes,               "global",    is_global,          false;
+      nodes,               "multicast", is_multicast,       true;
+      nodes,               "interface", is_scope Link,      true;
+      routers,             "global",    is_global,          false;
+      routers,             "multicast", is_multicast,       true;
+      routers,             "link",      is_scope Link,      true;
+      ip "192.168.0.1",    "private",   is_private,         true;
+      ip "10.3.21.155",    "private",   is_private,         true;
+      ip "172.16.0.0",     "private",   is_private,         true;
+      ip "172.31.255.255", "private",   is_private,         true;
+      ip "172.15.255.255", "private",   is_private,         false;
+      ip "172.32.0.0",     "private",   is_private,         false;
+    ]) in
+    List.iter (fun (addr,lbl,pred,is_mem) ->
+      let mems = if is_mem then "" else " not" in
+      let msg = (V4.to_string addr)^" is"^mems^" in "^lbl in
+      assert_equal ~msg (pred addr) is_mem
+    ) ships
 
   let test_map () =
     let module M = Map.Make(V4) in
@@ -199,7 +218,7 @@ module Test_v4 = struct
     "prefix_string_rt_bad" >:: test_prefix_string_rt_bad;
     "prefix_broadcast"     >:: test_prefix_broadcast;
     "prefix_bits"          >:: test_prefix_bits;
-    "is_private"           >:: test_is_private;
+    "scope"                >:: test_scope;
     "map"                  >:: test_map;
     "prefix_map"           >:: test_prefix_map;
     "special_addr"         >:: test_special_addr;
