@@ -18,6 +18,23 @@
 exception Parse_error of string * string
 
 type bytes = string
+type scope =
+| Point
+| Interface
+| Link
+| Admin
+| Site
+| Organization
+| Global
+
+let (~|) = Int32.of_int
+let (|~) = Int32.to_int
+let (&&&) x y = Int32.logand x y
+let (|||) x y = Int32.logor x y
+let (<|<) x y = Int32.shift_left x y
+let (>|>) x y = Int32.shift_right_logical x y
+let (>!)  x y = (x >|> y) &&& 0xFF_l
+let (<!)  x y = (x &&& 0xFF_l) <|< y
 
 let need_more x = Parse_error ("not enough data", x)
 let too_much x = Parse_error ("too much data", x)
@@ -25,7 +42,6 @@ let too_much x = Parse_error ("too much data", x)
 let char_0 = Pervasives.int_of_char '0'
 let char_a = Pervasives.int_of_char 'a'
 let char_A = Pervasives.int_of_char 'A'
-
 
 let int_of_char c = match c with
   | '0'..'9' -> Pervasives.int_of_char c - char_0
@@ -57,8 +73,8 @@ let parse_int base s i =
     else raise (bad_char i s)
   else raise (need_more s)
 
-let parse_decimal_int s i = parse_int 10 s i
-let parse_hexa_int s i = parse_int 16 s i
+let parse_dec_int s i = parse_int 10 s i
+let parse_hex_int s i = parse_int 16 s i
 let expect_char s i c =
   if !i < String.length s
   then if s.[!i] <> c then raise (bad_char !i s) else incr i
@@ -69,14 +85,6 @@ let expect_end s i =
   else raise (bad_char !i s)
 
 module V4 = struct
-
-  let (&&&) x y = Int32.logand x y
-  let (|||) x y = Int32.logor x y
-  let (<|<) x y = Int32.shift_left x y
-  let (>|>) x y = Int32.shift_right_logical x y
-  let (>!)  x y = (x >|> y) &&& 0xFF_l
-  let (<!)  x y = (x &&& 0xFF_l) <|< y
-
   type t = int32
 
   let compare a b = (* ignore the sign *)
@@ -84,18 +92,18 @@ module V4 = struct
     if c = 0 then Int32.compare (a &&& 1l) (b &&& 1l) else c
 
   let make a b c d =
-    ((a <! 24) ||| (b <! 16)) ||| ((c <! 8) ||| (d <! 0))
+    ((~| a <! 24) ||| (~| b <! 16)) ||| ((~| c <! 8) ||| (~| d <! 0))
 
   (* parsing *)
 
   let parse_dotted_quad s i =
-    let a = parse_decimal_int s i in
+    let a = parse_dec_int s i in
     expect_char s i '.';
-    let b = parse_decimal_int s i in
+    let b = parse_dec_int s i in
     expect_char s i '.';
-    let c = parse_decimal_int s i in
+    let c = parse_dec_int s i in
     expect_char s i '.';
-    let d = parse_decimal_int s i in
+    let d = parse_dec_int s i in
     let valid a = a land 0xff <> a in
     if valid a
     then raise (Parse_error ("first octet out of bounds", s))
@@ -105,13 +113,11 @@ module V4 = struct
     then raise (Parse_error ("third octet out of bounds", s))
     else if valid d
     then raise (Parse_error ("fourth octet out of bounds", s))
-    else (a, b, c, d)
+    else make a b c d
 
-  (* string convertion *)
+  (* string conversion *)
 
-  let of_string_raw s offset =
-    let a,b,c,d = parse_dotted_quad s offset in
-    make (Int32.of_int a) (Int32.of_int b) (Int32.of_int c) (Int32.of_int d)
+  let of_string_raw = parse_dotted_quad
 
   let of_string_exn s =
     let o = ref 0 in
@@ -128,14 +134,14 @@ module V4 = struct
     to_buffer b i;
     Buffer.contents b
 
-  (* Byte convertion *)
+  (* Byte conversion *)
 
   let of_bytes_raw bs o =
     make
-      (Int32.of_int (Char.code bs.[0 + o]))
-      (Int32.of_int (Char.code bs.[1 + o]))
-      (Int32.of_int (Char.code bs.[2 + o]))
-      (Int32.of_int (Char.code bs.[3 + o]))
+      (Char.code bs.[0 + o])
+      (Char.code bs.[1 + o])
+      (Char.code bs.[2 + o])
+      (Char.code bs.[3 + o])
 
   let of_bytes_exn bs =
     let len = String.length bs in
@@ -146,10 +152,10 @@ module V4 = struct
   let of_bytes bs = try Some (of_bytes_exn bs) with _ -> None
 
   let to_bytes_raw i b o =
-    b.[0 + o] <- Char.chr (Int32.to_int (i >! 24));
-    b.[1 + o] <- Char.chr (Int32.to_int (i >! 16));
-    b.[2 + o] <- Char.chr (Int32.to_int (i >!  8));
-    b.[3 + o] <- Char.chr (Int32.to_int (i >!  0))
+    b.[0 + o] <- Char.chr ((|~) (i >! 24));
+    b.[1 + o] <- Char.chr ((|~) (i >! 16));
+    b.[2 + o] <- Char.chr ((|~) (i >!  8));
+    b.[3 + o] <- Char.chr ((|~) (i >!  0))
 
   let to_bytes i =
     let b = String.create 4 in
@@ -161,21 +167,17 @@ module V4 = struct
   let to_int32 i = i
 
   (* Int16 *)
-  let of_int16 (a,b) =
-    Int32.(
-      logor (shift_left a 16) b)
-  let to_int16 a =
-    Int32.(
-      shift_right_logical a 16,
-      logand a 0xffffl)
+  let of_int16 (a,b) = (~| a <|< 16) ||| (~| b)
+  let to_int16 a = ((|~) (a >|> 16), (|~) (a &&& 0xFF_FF_l))
 
   (* constant *)
 
-  let any = make 0_l 0_l 0_l 0_l
-
-  let broadcast = make 255_l 255_l 255_l 255_l
-
-  let localhost = make 127_l 0_l 0_l 1_l
+  let any         = make   0   0   0   0
+  let unspecified = make   0   0   0   0
+  let broadcast   = make 255 255 255 255
+  let localhost   = make 127   0   0   1
+  let nodes       = make 224   0   0   1
+  let routers     = make 224   0   0   2
 
   module Prefix = struct
     type addr = t
@@ -194,35 +196,60 @@ module V4 = struct
 
     let make sz pre = (pre &&& (mask sz),sz)
 
-    (* string convertion *)
+    let network_address (pre,sz) addr =
+      pre ||| (addr &&& Int32.lognot (mask sz))
 
-    let of_string_exn s =
+    (* string conversion *)
+
+    let _of_string_exn s =
       let i = ref 0 in
       let quad = of_string_raw s i in
       expect_char s i '/';
-      let p = parse_decimal_int s i in
+      let p = parse_dec_int s i in
       if p > 32 || p < 0
       then raise (Parse_error ("invalid prefix size", s));
       expect_end s i;
-      make p quad
+      (p,quad)
+
+    let of_string_exn s = let (p,quad) = _of_string_exn s in make p quad
 
     let of_string s = try Some (of_string_exn s) with _ -> None
 
-    let to_string (pre,sz) = Printf.sprintf "%s/%d" (to_string pre) sz
+    let of_address_string_exn s =
+      let (p,quad) = _of_string_exn s in (make p quad, quad)
+
+    let of_address_string s = try Some (of_address_string_exn s) with _ -> None
 
     let to_buffer buf (pre,sz) = Printf.bprintf buf "%a/%d" to_buffer pre sz
 
+    let to_string subnet =
+      let b = Buffer.create 18 in
+      to_buffer b subnet;
+      Buffer.contents b
+
+    let to_address_buffer buf ((_,sz) as subnet) addr =
+      to_buffer buf (network_address subnet addr,sz)
+
+    let to_address_string subnet addr =
+      let b = Buffer.create 18 in
+      to_address_buffer b subnet addr;
+      Buffer.contents b
+
     let mem ip (pre,sz) = let host = 32 - sz in (ip >|> host) = (pre >|> host)
 
-    let global    = make  0 (ip   0_l   0_l 0_l 0_l)
-    let relative  = make  8 (ip   0_l   0_l 0_l 0_l)
-    let loopback  = make  8 (ip 127_l   0_l 0_l 0_l)
-    let link      = make 16 (ip 169_l 254_l 0_l 0_l)
-    let multicast = make  4 (ip 224_l   0_l 0_l 0_l)
+    let global          = make  0 (ip   0   0 0 0)
+    let relative        = make  8 (ip   0   0 0 0)
+    let loopback        = make  8 (ip 127   0 0 0)
+    let link            = make 16 (ip 169 254 0 0)
+    let multicast       = make  4 (ip 224   0 0 0)
+    let multicast_org   = make 14 (ip 239 192 0 0)
+    let multicast_admin = make 16 (ip 239 255 0 0)
+    let multicast_link  = make 24 (ip 224   0 0 0)
+    (* http://tools.ietf.org/html/rfc2365 *)
 
-    let private_10  = make 8  (ip 10_l    0_l 0_l 0_l)
-    let private_172 = make 12 (ip 172_l  16_l 0_l 0_l)
-    let private_192 = make 16 (ip 192_l 168_l 0_l 0_l)
+    let private_10  = make 8  (ip 10    0 0 0)
+    let private_172 = make 12 (ip 172  16 0 0)
+    let private_192 = make 16 (ip 192 168 0 0)
 
     let private_blocks = [
       loopback ; link ; private_10 ; private_172 ; private_192
@@ -230,11 +257,28 @@ module V4 = struct
 
     let broadcast (pre,sz) = pre ||| (0x0_FF_FF_FF_FF_l >|> sz)
     let network (pre,sz) = pre
-
     let bits (pre,sz) = sz
   end
 
-  let is_private i = List.exists (Prefix.mem i) Prefix.private_blocks
+  (* TODO: this could be optimized with something trie-like *)
+  let scope i =
+    let mem = Prefix.mem i in
+    if mem Prefix.loopback then Interface
+    else if mem Prefix.link then Link
+    else if List.exists mem Prefix.private_blocks then Organization
+    else if i = unspecified then Point
+    else if i = broadcast then Admin
+    else if mem Prefix.relative then Admin
+    else if mem Prefix.multicast
+    then (if mem Prefix.multicast_org then Organization
+      else if mem Prefix.multicast_admin then Admin
+      else if mem Prefix.multicast_link then Link
+      else Global)
+    else Global
+
+  let is_global i = (scope i) = Global
+  let is_multicast i = Prefix.(mem i multicast)
+  let is_private i = (scope i) <> Global
 end
 
 module B128 = struct
@@ -296,22 +340,25 @@ module B128 = struct
       | n -> n
 
   let logand (a1,b1,c1,d1) (a2,b2,c2,d2) =
-    Int32.(logand a1 a2,logand b1 b2,logand c1 c2,logand d1 d2)
+    (a1 &&& a2, b1 &&& b2, c1 &&& c2, d1 &&& d2)
 
+  let logor (a1,b1,c1,d1) (a2,b2,c2,d2) =
+    (a1 ||| a2, b1 ||| b2, c1 ||| c2, d1 ||| d2)
+
+  let lognot (a,b,c,d) = Int32.(lognot a, lognot b, lognot c, lognot d)
 end
 
-
 module V6 = struct
-
   include B128
 
-  let make a b c d e f g h = B128.of_int16 (a,b,c,d,e,f,g,h)
+  (* TODO: Perhaps represent with bytestring? *)
+  let make a b c d e f g h = of_int16 (a,b,c,d,e,f,g,h)
 
   (* parsing *)
   let parse_ipv6 s i =
     let compressed = ref false in (* :: *)
     let len = String.length s in
-    if len < 2 then (raise (need_more s));
+    if len < !i + 2 then (raise (need_more s));
     let use_bracket = s.[!i] = '[';  in
     if use_bracket then incr i;
     (* check if it starts with :: *)
@@ -326,7 +373,8 @@ module V6 = struct
         else
           raise (bad_char !i s);
       end
-      else [] in
+      else []
+    in
 
     let rec loop nb acc =
       if nb >= 8 then acc
@@ -335,35 +383,40 @@ module V6 = struct
       else
         try
           let pos = !i in
-          let x = parse_hexa_int s i in
+          let x = parse_hex_int s i in
           if nb = 7
-            then x::acc
-            else if !i < len && s.[!i] = ':'
+          then x::acc
+          else if !i < len && s.[!i] = ':'
+          then
+            if !i + 1 < len && s.[!i+1] = ':'
             then
-              if !i + 1 < len && s.[!i+1] = ':'
-              then
-                if !compressed
-                then raise (bad_char (!i+1) s)
-                else begin compressed:=true; incr i; incr i; loop (nb + 2) (-1::x::acc) end
-              else begin incr i; loop (nb+1) (x::acc) end
-            else if !i < len && s.[!i] = '.'
-            then begin
-              i:= pos;
-              let v4 = V4.of_string_raw s i in
-              let (hi,lo) = V4.to_int16 v4 in
-              Int32.(to_int lo:: to_int hi::acc)
-            end
-            else x::acc
-          with Parse_error _ -> acc in
+              if !compressed
+              then raise (bad_char (!i+1) s) (* thrown away below *)
+              else begin
+                compressed:=true;
+                i := !i + 2;
+                loop (nb + 2) (-1::x::acc)
+              end
+            else begin incr i; loop (nb+1) (x::acc) end
+          else if !i < len && s.[!i] = '.'
+          then begin
+            i:= pos;
+            let v4 = V4.of_string_raw s i in
+            let (hi,lo) = V4.to_int16 v4 in
+            lo :: hi :: acc
+          end
+          else x::acc
+        with Parse_error _ -> acc (* catches non-hex character and extra :: *)
+    in
 
     let res = loop (List.length l) l in
     let res_len = List.length res in
     if res_len > 8
-    then raise (Parse_error ("too many component",s))
+    then raise (Parse_error ("too many components",s))
     else if res_len = 0
     then raise (need_more s)
     else
-      let a = Array.create 8 0l in
+      let a = Array.create 8 0 in
       let missing =
         if !compressed
         then 8 - (res_len - 1)
@@ -373,20 +426,19 @@ module V6 = struct
           then raise (bad_char !i s)
           else raise (need_more s)
         else 0
-
       in
       let _ = List.fold_left (fun i x ->
         if x = -1
-        then i-missing
+        then i - missing
         else begin
           if x land 0xffff <> x
-          then raise (Parse_error (Printf.sprintf "component %d out of bounds" i, s));
-          a.(i) <- Int32.of_int x;
-          pred i
+          then raise (Parse_error
+                        (Printf.sprintf "component %d out of bounds" i, s));
+          a.(i) <- x;
+          i - 1
         end
       ) 7 res in
-      if use_bracket
-      then expect_char s i ']';
+      (if use_bracket then expect_char s i ']');
       a
 
   (* string conversion *)
@@ -403,53 +455,49 @@ module V6 = struct
 
   let of_string s = try Some (of_string_exn s) with _ -> None
 
-
   (* http://tools.ietf.org/html/rfc5952 *)
-  let to_buffer ?(v4=false) buf i =
+  let to_buffer ?(v4=false) buf addr =
 
-    let (a,b,c,d,e,f,g,h) as comp = B128.to_int16 i in
-    let comp_rev = [h;g;f;e;d;c;b;a] in
-
-    let rec loop min (zeros : int32) acc = function
-      | 0l :: xs -> loop min (Int32.pred zeros) acc xs
-      | n :: xs when zeros = 0l-> loop min 0l (n::acc) xs
-      | n :: xs ->
-        let min = if min < zeros then min else zeros in
-        loop min 0l (n::zeros::acc) xs
-      | [] ->
-        if zeros = 0l
-        then (if min < -1l then Some min else None), acc
-        else let min = if min < zeros then min else zeros in
-             (if min < -1l then Some min else None), zeros::acc in
+    let (a,b,c,d,e,f,g,h) as comp = to_int16 addr in
 
     let v4 = match comp with
-      | (0l,0l,0l,0l,0l,0xFFFF_l,_,_) -> true
-      | _ -> v4 in
+      | (0,0,0,0,0,0xffff,_,_) -> true
+      | _ -> v4
+    in
 
-    let min,l = loop 0l 0l [] comp_rev in
-    assert(match min with Some x when x < -8l -> false | _ -> true);
+    let rec loop elide zeros acc = function
+      | 0 :: xs -> loop elide (zeros - 1) acc xs
+      | n :: xs when zeros = 0 -> loop elide 0 (n::acc) xs
+      | n :: xs -> loop (min elide zeros) 0 (n::zeros::acc) xs
+      | [] ->
+        let elide = min elide zeros in
+        (if elide < -1 then Some elide else None),
+        (if zeros = 0 then acc else zeros::acc)
+    in
+
+    let elide,l = loop 0 0 [] [h;g;f;e;d;c;b;a] in
+    assert(match elide with Some x when x < -8 -> false | _ -> true);
 
     let rec cons_zeros l x =
-      if x >= 0l then l
-      else cons_zeros (Some 0l::l) (Int32.succ x) in
+      if x >= 0 then l else cons_zeros (Some 0::l) (x+1)
+    in
 
     let _,lrev = List.fold_left (fun (patt, l) x ->
       if Some x = patt
       then (None, (None::l))
-      else if x < 0l
+      else if x < 0
       then (patt, (cons_zeros l x))
       else (patt, ((Some x)::l))
-    ) (min, []) l in
+    ) (elide, []) l in
 
-
-    let rec fill : int32 option list -> unit = function
+    let rec fill = function
       | [Some hi;Some lo] when v4 ->
-        let i = V4.of_int16 (hi, lo) in
-        V4.to_buffer buf i
+        let addr = V4.of_int16 (hi, lo) in
+        V4.to_buffer buf addr
       | None::xs -> Buffer.add_string buf "::"; fill xs
-      | [Some n] -> Printf.bprintf buf "%lx" n
-      | (Some n)::None::xs -> Printf.bprintf buf "%lx::" n ; fill xs
-      | (Some n)::xs -> Printf.bprintf buf "%lx:" n; fill xs
+      | [Some n] -> Printf.bprintf buf "%x" n
+      | (Some n)::None::xs -> Printf.bprintf buf "%x::" n; fill xs
+      | (Some n)::xs -> Printf.bprintf buf "%x:" n; fill xs
       | [] -> ()
     in fill (List.rev lrev)
 
@@ -465,7 +513,7 @@ module V6 = struct
     let hilo = V4.of_bytes_raw bs (o + 4) in
     let lohi = V4.of_bytes_raw bs (o + 8) in
     let lolo = V4.of_bytes_raw bs (o + 12) in
-    B128.of_int32 (hihi, hilo, lohi, lolo)
+    of_int32 (hihi, hilo, lohi, lolo)
 
   let of_bytes_exn bs = (* TODO : from cstruct *)
     let len = String.length bs in
@@ -476,17 +524,16 @@ module V6 = struct
   let of_bytes bs = try Some (of_bytes_exn bs) with _ -> None
   let to_bytes i =
     let bs = String.create 16 in
-    B128.to_bytes_raw i bs 0;
+    to_bytes_raw i bs 0;
     bs
-
-  (* int64 conversion *)
-  let of_int64 = B128.of_int64
-  let to_int64 = B128.to_int64
 
  (* constant *)
 
-  let unspecified = make 0l 0l 0l 0l 0l 0l 0l 0l
-  let localhost = make 0l 0l 0l 0l 0l 0l 0l 1l
+  let unspecified     = make      0 0 0 0 0 0 0 0
+  let localhost       = make      0 0 0 0 0 0 0 1
+  let interface_nodes = make 0xff01 0 0 0 0 0 0 1
+  let link_nodes      = make 0xff02 0 0 0 0 0 0 1
+  let link_routers    = make 0xff02 0 0 0 0 0 0 2
 
   module Prefix = struct
     type addr = t
@@ -502,46 +549,95 @@ module V6 = struct
       let f = 0x0_FFFF_FFFF_l in
       f,f,f,f
 
-    let mask sz =
-      V4.Prefix.mask (sz - 0),
-      V4.Prefix.mask (sz - 32),
-      V4.Prefix.mask (sz - 64),
-      V4.Prefix.mask (sz - 96)
+    let mask sz = V4.Prefix.(
+      mask (sz -  0),
+      mask (sz - 32),
+      mask (sz - 64),
+      mask (sz - 96))
 
-    let make sz pre = (B128.logand pre (mask sz),sz)
+    let make sz pre = (logand pre (mask sz),sz)
 
-    let of_string_exn s =
+    let network_address (pre,sz) addr =
+      logor pre (logand addr (lognot (mask sz)))
+
+    let _of_string_exn s =
       let i = ref 0 in
       let v6 = of_string_raw s i in
       expect_char s i '/';
-      let p = parse_decimal_int s i in
+      let p = parse_dec_int s i in
       if p > 128 || p < 0
       then raise (Parse_error ("invalid prefix size", s));
       expect_end s i;
-      make p v6
+      (p, v6)
+
+    let of_string_exn s = let (p,v6) = _of_string_exn s in make p v6
 
     let of_string s = try Some (of_string_exn s) with _ -> None
 
-    let to_string (pre,sz) = Printf.sprintf "%s/%d" (to_string pre) sz
+    let of_address_string_exn s =
+      let (p,v6) = _of_string_exn s in (make p v6, v6)
 
-    let to_buffer buf (pre,sz) = Printf.bprintf buf "%a/%d" (to_buffer ?v4:(Some false)) pre sz
+    let of_address_string s = try Some (of_address_string_exn s) with _ -> None
+
+    let to_buffer buf (pre,sz) =
+      Printf.bprintf buf "%a/%d" (to_buffer ~v4:false) pre sz
+
+    let to_string subnet =
+      let buf = Buffer.create 43 in
+      to_buffer buf subnet;
+      Buffer.contents buf
+
+    let to_address_buffer buf ((_,sz) as subnet) addr =
+      to_buffer buf (network_address subnet addr,sz)
+
+    let to_address_string subnet addr =
+      let b = Buffer.create 43 in
+      to_address_buffer b subnet addr;
+      Buffer.contents b
 
     let mem ip (pre,sz) =
-      let host = 128 - sz in
-      let m = mask host in
-      B128.(logand ip m = logand pre m)
+      let m = mask sz in
+      logand ip m = logand pre m
 
-    let global_unicast  = make 3 (ip 0x2000_l 0l 0l 0l 0l 0l 0l 0l)
-    let link_local = make 10 (ip 0xFE80_l 0l 0l 0l 0l 0l 0l 0l)
-    let unique_local  = make 7  (ip 0xfc00_l 0l 0l 0l 0l 0l 0l 0l)
-    let multicast  = make 8 (ip 0xFF00_l 0l 0l 0l 0l 0l 0l 0l)
-    let ipv4_mapped = make 96 (ip 0l 0l 0l 0l 0l 0xFFFF_l 0l 0l)
-
+    let global_unicast_001  = make  3 (ip 0x2000 0 0 0 0 0 0 0)
+    let link                = make 10 (ip 0xfe80 0 0 0 0 0 0 0)
+    let unique_local        = make  7 (ip 0xfc00 0 0 0 0 0 0 0)
+    let multicast           = make  8 (ip 0xff00 0 0 0 0 0 0 0)
+    let ipv4_mapped         = make 96 (ip 0 0 0 0 0 0xffff 0 0)
+    let noneui64_interface  = make  3 (ip 0x0000 0 0 0 0 0 0 0)
 
     let network (pre,sz) = pre
 
     let bits (pre,sz) = sz
   end
+
+  (* TODO: This could be optimized with something trie-like *)
+  let scope i =
+    let mem = Prefix.mem i in
+    if mem Prefix.global_unicast_001 then Global
+    else if mem Prefix.ipv4_mapped
+    (* rfc says they are technically global but... *)
+    then V4.scope (let (_,_,_,v4) = to_int32 i in V4.of_int32 v4)
+    else if mem Prefix.multicast then
+      let (x,_,_,_,_,_,_,_) = to_int16 i in
+      match x land 0xf with
+      | 0 -> Point
+      | 1 -> Interface
+      | 2 | 3 -> Link
+      | 4 -> Admin
+      | 5 | 6 | 7 -> Site
+      | 8 | 9 | 10 | 11 | 12 | 13 -> Organization
+      | 14 | 15 -> Global
+      | _ -> assert false
+    else if mem Prefix.link then Link
+    else if mem Prefix.unique_local then Global
+    else if i = localhost then Interface
+    else if i = unspecified then Point
+    else Global
+
+  let is_global i = (scope i) = Global
+  let is_multicast i = Prefix.(mem i multicast)
+  let is_private i = (scope i) <> Global
 end
 
 type t = [ `ipv4 of V4.t | `ipv6 of V6.t ]
@@ -567,12 +663,42 @@ let of_string_raw s offset =
     | '[' -> `ipv6 (V6.of_string_raw s offset)
     | _ ->
       let pos = !offset in
-      try
-        `ipv4 (V4.of_string_raw s offset)
-      with Parse_error _ ->
+      try `ipv4 (V4.of_string_raw s offset)
+      with Parse_error (v4_msg,_) ->
         offset := pos;
-        `ipv6 (V6.of_string_raw s offset)
+        try `ipv6 (V6.of_string_raw s offset)
+        with Parse_error(v6_msg,s) ->
+          let msg = Printf.sprintf
+            "not an IPv4 address: %s\nnot an IPv6 address: %s"
+            v4_msg v6_msg
+          in raise (Parse_error (msg,s))
 
 let of_string_exn s = of_string_raw s (ref 0)
 
 let of_string s = try Some (of_string_exn s) with _ -> None
+
+let v6_of_v4 v4 =
+  V6.(Prefix.(network_address ipv4_mapped (of_int32 (0l,0l,0l,v4))))
+
+let v4_of_v6 v6 =
+  if V6.Prefix.(mem v6 ipv4_mapped)
+  then let (_,_,_,v4) = V6.to_int32 v6 in Some V4.(of_int32 v4)
+  else None
+
+let to_v4 = function `ipv4 v4 -> Some v4 | `ipv6 v6 -> v4_of_v6 v6
+
+let to_v6 = function `ipv4 v4 -> v6_of_v4 v4 | `ipv6 v6 -> v6
+
+let scope = function `ipv4 v4 -> V4.scope v4 | `ipv6 v6 -> V6.scope v6
+
+let is_global = function
+  | `ipv4 v4 -> V4.is_global v4
+  | `ipv6 v6 -> V6.is_global v6
+
+let is_multicast = function
+  | `ipv4 v4 -> V4.is_multicast v4
+  | `ipv6 v6 -> V6.is_multicast v6
+
+let is_private = function
+  | `ipv4 v4 -> V4.is_private v4
+  | `ipv6 v6 -> V6.is_private v6
