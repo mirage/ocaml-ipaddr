@@ -640,33 +640,33 @@ module V6 = struct
   let is_private i = (scope i) <> Global
 end
 
-type t = [ `ipv4 of V4.t | `ipv6 of V6.t ]
+type t = V4 of V4.t | V6 of V6.t
 
 let compare a b = match a,b with
-  | `ipv4 a, `ipv4 b -> V4.compare a b
-  | `ipv6 a, `ipv6 b -> V6.compare a b
-  | `ipv4 _, `ipv6 _ -> -1
-  | `ipv6 _, `ipv4 _ -> 1
+  | V4 a, V4 b -> V4.compare a b
+  | V6 a, V6 b -> V6.compare a b
+  | V4 _, V6 _ -> -1
+  | V6 _, V4 _ -> 1
 
 let to_string = function
-  | `ipv4 x -> V4.to_string x
-  | `ipv6 x -> V6.to_string x
+  | V4 x -> V4.to_string x
+  | V6 x -> V6.to_string x
 
 let to_buffer buf = function
-  | `ipv4 x -> V4.to_buffer buf x
-  | `ipv6 x -> V6.to_buffer buf x
+  | V4 x -> V4.to_buffer buf x
+  | V6 x -> V6.to_buffer buf x
 
 let of_string_raw s offset =
   let len = String.length s in
   if len < !offset + 1 then raise (need_more s);
   match s.[0] with
-    | '[' -> `ipv6 (V6.of_string_raw s offset)
+    | '[' -> V6 (V6.of_string_raw s offset)
     | _ ->
       let pos = !offset in
-      try `ipv4 (V4.of_string_raw s offset)
+      try V4 (V4.of_string_raw s offset)
       with Parse_error (v4_msg,_) ->
         offset := pos;
-        try `ipv6 (V6.of_string_raw s offset)
+        try V6 (V6.of_string_raw s offset)
         with Parse_error(v6_msg,s) ->
           let msg = Printf.sprintf
             "not an IPv4 address: %s\nnot an IPv6 address: %s"
@@ -685,20 +685,20 @@ let v4_of_v6 v6 =
   then let (_,_,_,v4) = V6.to_int32 v6 in Some V4.(of_int32 v4)
   else None
 
-let to_v4 = function `ipv4 v4 -> Some v4 | `ipv6 v6 -> v4_of_v6 v6
+let to_v4 = function V4 v4 -> Some v4 | V6 v6 -> v4_of_v6 v6
 
-let to_v6 = function `ipv4 v4 -> v6_of_v4 v4 | `ipv6 v6 -> v6
+let to_v6 = function V4 v4 -> v6_of_v4 v4 | V6 v6 -> v6
 
-let scope = function `ipv4 v4 -> V4.scope v4 | `ipv6 v6 -> V6.scope v6
+let scope = function V4 v4 -> V4.scope v4 | V6 v6 -> V6.scope v6
 
 let is_global = function
-  | `ipv4 v4 -> V4.is_global v4
-  | `ipv6 v6 -> V6.is_global v6
+  | V4 v4 -> V4.is_global v4
+  | V6 v6 -> V6.is_global v6
 
 let is_multicast = function
-  | `ipv4 v4 -> V4.is_multicast v4
-  | `ipv6 v6 -> V6.is_multicast v6
+  | V4 v4 -> V4.is_multicast v4
+  | V6 v6 -> V6.is_multicast v6
 
 let is_private = function
-  | `ipv4 v4 -> V4.is_private v4
-  | `ipv6 v6 -> V6.is_private v6
+  | V4 v4 -> V4.is_private v4
+  | V6 v6 -> V6.is_private v6
