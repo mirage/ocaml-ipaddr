@@ -428,7 +428,7 @@ module V6 : sig
 end
 
 (** Type of any IP address *)
-type t = [ `ipv4 of V4.t | `ipv6 of V6.t ]
+type t = V4 of V4.t | V6 of V6.t
 
 val compare : t -> t -> int
 
