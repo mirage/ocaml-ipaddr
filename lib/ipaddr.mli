@@ -476,3 +476,5 @@ val is_multicast : t -> bool
 (** [is_private addr] is a predicate indicating whether [addr] privately
     addresses a node. *)
 val is_private : t -> bool
+
+include Map.OrderedType with type t := t
