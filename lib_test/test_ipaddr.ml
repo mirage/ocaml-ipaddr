@@ -20,7 +20,6 @@ open Ipaddr
 
 (*
   check offset parse errors
-  check errors
 
   check network_address
   check of/to_address_string
@@ -28,14 +27,13 @@ open Ipaddr
   check generic address fns
   check generic map support
   check multicast scopes
-
-  consolidate tests
  *)
 
 let error s msg = s, Parse_error (msg,s)
 let need_more s = error s "not enough data"
 let too_much s  = error s "too much data"
-let bad_char s c i = error s (Printf.sprintf "invalid character '%c' at %d" c i)
+let bad_char i s =
+  error s (Printf.sprintf "invalid character '%c' at %d" s.[i] i)
 
 let assert_raises ~msg exn test_fn =
   assert_raises ~msg exn (fun () ->
@@ -51,31 +49,42 @@ let assert_raises ~msg exn test_fn =
 
 module Test_v4 = struct
   let test_string_rt () =
-    let addr = "192.168.0.1" in
-    assert_equal ~msg:addr V4.(to_string (of_string_exn addr)) addr
+    let addrs = [
+      "192.168.0.1", "192.168.0.1";
+    ] in
+    List.iter (fun (addr,rt) ->
+      let os = V4.of_string_exn addr in
+      let ts = V4.to_string os in
+      assert_equal ~msg:addr ts rt
+    ) addrs
 
   let test_string_rt_bad () =
     let addrs = [
-      "192.168.0";
-      "192.168.0.1.1";
-      "192.268.2.1";
-      "192. 168.1.1";
-      "192..0.1";
-      "192,168.0.1";
+      need_more "192.168.0";
+      bad_char 11 "192.168.0.1.1";
+      error "192.268.2.1" "second octet out of bounds";
+      bad_char 4 "192. 168.1.1";
+      bad_char 4 "192..0.1";
+      bad_char 3 "192,168.0.1";
     ] in
-    List.iter (fun addr -> assert_equal ~msg:addr (V4.of_string addr) None) addrs
+    List.iter (fun (addr,exn) ->
+      assert_raises ~msg:addr exn (fun () -> V4.of_string_exn addr)
+    ) addrs
 
   let test_bytes_rt () =
     let addr = "\254\099\003\128" in
-    assert_equal ~msg:(String.escaped addr) V4.(to_bytes (of_bytes_exn addr)) addr
+    assert_equal ~msg:(String.escaped addr)
+      V4.(to_bytes (of_bytes_exn addr)) addr
 
   let test_bytes_rt_bad () =
     let addrs = [
-      "\254\099\003";
-      "\254\099\003\128\001";
+      need_more "\254\099\003";
+      too_much "\254\099\003\128\001";
     ] in
-    List.iter (fun addr ->
-      assert_equal ~msg:(String.escaped addr) V4.(of_bytes addr) None) addrs
+    List.iter (fun (addr,exn) ->
+      assert_raises ~msg:(String.escaped addr) exn
+        (fun () -> V4.of_bytes_exn addr)
+    ) addrs
 
   let test_int32_rt () =
     let addr = 0x0_F0_AB_00_01_l in
@@ -84,28 +93,26 @@ module Test_v4 = struct
 
   let test_prefix_string_rt () =
     let subnets = [
-      "192.168.0.0/24";
-      "0.0.0.0/0";
+      "192.168.0.0/24", "192.168.0.0/24";
+      "0.0.0.0/0",      "0.0.0.0/0";
+      "192.168.0.1/24", "192.168.0.0/24";
+      "192.168.0.0/0",  "0.0.0.0/0";
     ] in
-    List.iter (fun subnet ->
+    List.iter (fun (subnet,rt) ->
       assert_equal ~msg:subnet
-        V4.Prefix.(to_string (of_string_exn subnet)) subnet
+        V4.Prefix.(to_string (of_string_exn subnet)) rt
     ) subnets
 
   let test_prefix_string_rt_bad () =
     let subnets = [
-      "192.168.0/24", None;
-      "192.168.0./24", None;
-      "192.168.0.1/24", V4.Prefix.of_string "192.168.0.0/24";
-      "192.168.0.0/33", None;
-      "192.168.0.0/30/1", None;
-      "192.168.0.0/0", V4.Prefix.of_string "0.0.0.0/0";
-      "192.168.0.0/-1", None;
+      bad_char 9 "192.168.0/24";
+      bad_char 10 "192.168.0./24";
+      error "192.168.0.0/33" "invalid prefix size";
+      bad_char 14 "192.168.0.0/30/1";
+      bad_char 12 "192.168.0.0/-1";
     ] in
-    List.iter (fun (subnet,result) ->
-      let r = V4.Prefix.(of_string subnet) in
-      let s = match r with None -> "None" | Some p -> V4.Prefix.to_string p in
-      assert_equal ~msg:(subnet ^ " <> " ^ s) r result
+    List.iter (fun (subnet,exn) ->
+      assert_raises ~msg:subnet exn (fun () -> V4.Prefix.of_string_exn subnet)
     ) subnets
 
   let test_prefix_broadcast () =
@@ -212,11 +219,12 @@ module Test_v6 = struct
       "0:0:0:1:1::",                      "::1:1:0:0:0";
       "::1:0:0:0:0",                        "0:0:0:1::";
       "FE80::",                                "fe80::";
+      "::192.168.0.1",                       "::c0a8:1";
     ] in
     List.iter (fun (addr,rt) ->
       let os = V6.of_string_exn addr in
       let ts = V6.to_string os in
-      assert_equal ~msg:addr ts rt
+      assert_equal ~msg:(addr^" <> "^rt^" ("^ts^")") ts rt
     ) addrs
 
   let test_string_rt_bad () =
@@ -225,11 +233,11 @@ module Test_v6 = struct
       need_more "[]";
       need_more ":";
       need_more "[::";
-      bad_char "::1:g:f" 'g' 4;
-      bad_char "::1::" ':' 3;
+      bad_char 4 "::1:g:f";
+      bad_char 3 "::1::";
       need_more "1:2:3:4:5:6:7";
       error "12345::12:2" "component 0 out of bounds";
-      bad_char ":1" '1' 1;
+      bad_char 1 ":1";
     ] in
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:addr exn (fun () -> V6.of_string_exn addr)
@@ -281,8 +289,8 @@ module Test_v6 = struct
       need_more "/24";
       need_more "::";
       error "::/130" "invalid prefix size";
-      bad_char "::/30/1" '/' 5;
-      bad_char "2000::/-1" '-' 7;
+      bad_char 5 "::/30/1";
+      bad_char 7 "2000::/-1";
     ] in
     List.iter (fun (subnet,exn) ->
       assert_raises ~msg:subnet exn (fun () -> V6.Prefix.of_string_exn subnet)
