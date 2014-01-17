@@ -19,7 +19,6 @@ open OUnit
 open Ipaddr
 
 (*
-  check generic address fns
   check generic map support
  *)
 
@@ -34,7 +33,7 @@ let assert_raises ~msg exn test_fn =
     try test_fn ()
     with rtexn -> begin
       (if exn <> rtexn then (
-        Printf.eprintf "Stacktrace for '%s':\n%!";
+        Printf.eprintf "Stacktrace for '%s':\n%!" msg;
         Printexc.print_backtrace stderr;
        ));
       raise rtexn
@@ -508,7 +507,42 @@ module Test_v6 = struct
   ]
 end
 
+let test_string_raw_rt () =
+  let addrs = [
+    ("IP: 192.168.0.0!!",4), ("192.168.0.0",15);
+    ("IP: 192:168:0::!!",4), ("192:168::",15);
+    ("IP: [192:168::]!!",4), ("192:168::",15);
+  ] in
+  List.iter (fun ((addr,off),(result,cursor)) ->
+    let c = ref off in
+    let os = of_string_raw addr c in
+    let ts = to_string os in
+    let msg = Printf.sprintf "%s at %d: %s at %d <> %s at %d"
+      addr off result cursor ts !c
+    in assert_equal ~msg (ts,!c) (result,cursor)
+  ) addrs
+
+let test_string_raw_rt_bad () =
+  let error (s,c) msg c' = (s,c), (Parse_error (msg,s),c') in
+  let addrs = [
+    error ("IP: ::192.168 ",4) "not an IPv4 address: invalid character ':' at 4\nnot an IPv6 address: invalid character ' ' at 13" 13;
+    error ("IP: [::192.168] ",4) "not an IPv4 address: invalid character '[' at 4\nnot an IPv6 address: invalid character ']' at 14" 14; (* ? *)
+    error ("IP: 192:168::3.5 ",4) "not an IPv4 address: invalid character ':' at 7\nnot an IPv6 address: invalid character ' ' at 16" 16;
+  ] in
+  List.iter (fun ((addr,off),(exn,cursor)) ->
+    let c = ref off in
+    assert_raises ~msg:addr exn (fun () -> of_string_raw addr c);
+    assert_equal ~msg:(Printf.sprintf "%s cursor <> %d (%d)" addr cursor !c)
+      !c cursor
+  ) addrs
+
+let suite = "Test Generic Addresses" >::: [
+  "string_raw_rt"     >:: test_string_raw_rt;
+  "string_raw_rt_bad" >:: test_string_raw_rt_bad;
+]
+
 ;;
 let _results = run_test_tt_main Test_v4.suite in
 let _results = run_test_tt_main Test_v6.suite in
+let _results = run_test_tt_main suite in
 ()
