@@ -18,10 +18,6 @@
 open OUnit
 open Ipaddr
 
-(*
-  check generic map support
- *)
-
 let error s msg = s, Parse_error (msg,s)
 let need_more s = error s "not enough data"
 let too_much s  = error s "too much data"
@@ -536,9 +532,27 @@ let test_string_raw_rt_bad () =
       !c cursor
   ) addrs
 
+let test_map () =
+  let module M = Map.Make(Ipaddr) in
+  let maxv6 = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" in
+  let maxv4 = "254.254.254.254" in
+  let m = M.add (of_string_exn maxv4) "the greatest host v4" M.empty in
+  let m = M.add (of_string_exn "::0:0") "minv6" m in
+  let m = M.add (of_string_exn maxv6) "the greatest host v6" m in
+  let m = M.add (of_string_exn "::") "the least host v6" m in
+  let m = M.add (of_string_exn "1.0.0.1") "minv4" m in
+  let m = M.add (of_string_exn "1.0.0.1") "the least host v4" m in
+  assert_equal ~msg:"size" (M.cardinal m) 4;
+  let (min_key, min_val) = M.min_binding m in
+  assert_equal ~msg:("min is '" ^ min_val ^"'") (min_key, min_val)
+    (of_string_exn "1.0.0.1", "the least host v4");
+  assert_equal ~msg:"max" (M.max_binding m)
+    (of_string_exn maxv6, "the greatest host v6")
+
 let suite = "Test Generic Addresses" >::: [
   "string_raw_rt"     >:: test_string_raw_rt;
   "string_raw_rt_bad" >:: test_string_raw_rt_bad;
+  "map"               >:: test_map;
 ]
 
 ;;
