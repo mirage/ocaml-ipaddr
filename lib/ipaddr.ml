@@ -84,9 +84,6 @@ let expect_end s i =
   then ()
   else raise (bad_char !i s)
 
-let if_no_exn f k e =
-  match (try Some (f ()) with _ -> None) with Some v -> k v | None -> e
-
 module V4 = struct
   type t = int32
 
@@ -385,37 +382,37 @@ module V6 = struct
       then acc
       else
         let pos = !i in
-        if_no_exn (fun () -> parse_hex_int s i) (fun x ->
-          if nb = 7
-          then x::acc
-          else if !i < len && s.[!i] = ':'
-          then begin
-            incr i;
-            if !i < len
-            then if s.[!i] = ':'
-              then
-                if !compressed then (decr i; x::acc) (* trailing :: *)
-                else begin
-                  compressed:=true;
-                  incr i;
-                  loop (nb + 2) (-1::x::acc)
-                end
+        let x = try parse_hex_int s i with _ -> -1 in
+        if x < 0 then acc
+        else if nb = 7
+        then x::acc
+        else if !i < len && s.[!i] = ':'
+        then begin
+          incr i;
+          if !i < len
+          then if s.[!i] = ':'
+            then
+              if !compressed then (decr i; x::acc) (* trailing :: *)
               else begin
-                if is_number 16 (int_of_char s.[!i])
-                then loop (nb+1) (x::acc)
-                else raise (bad_char !i s)
+                compressed:=true;
+                incr i;
+                loop (nb + 2) (-1::x::acc)
               end
-            else raise (need_more s)
-          end
-          else if !i < len && s.[!i] = '.'
-          then begin
-            i:= pos;
-            let v4 = V4.of_string_raw s i in
-            let (hi,lo) = V4.to_int16 v4 in
-            lo :: hi :: acc
-          end
-          else x::acc
-        ) acc
+            else begin
+              if is_number 16 (int_of_char s.[!i])
+              then loop (nb+1) (x::acc)
+              else raise (bad_char !i s)
+            end
+          else raise (need_more s)
+        end
+        else if !i < len && s.[!i] = '.'
+        then begin
+          i:= pos;
+          let v4 = V4.of_string_raw s i in
+          let (hi,lo) = V4.to_int16 v4 in
+          lo :: hi :: acc
+        end
+        else x::acc
     in
 
     let res = loop (List.length l) l in
