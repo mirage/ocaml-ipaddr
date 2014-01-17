@@ -1,4 +1,18 @@
-1.0.1 (trunk):
+2.0.0 (trunk):
+* Change `Ipaddr.V4.make` to accept `int` rather than `int32` (breaking)
+* Add IPv6 support
+* Add generic IP address support
+* Add type `scope` for classifying address scopes
+* Add `Ipaddr.V4.of_string_raw` for parsing inside of larger strings
+* Add `Ipaddr.V4.to_int16` and `Ipaddr.V4.of_int16`
+* Add `unspecified`, `nodes`, and `routers` constants to `Ipaddr.V4`
+* Add `Ipaddr.V4.Prefix.network_address` to put an address into a subnet
+* Add `of_address_string_exn`, `of_address_string`, `to_address_string`,
+  `to_address_buffer` to `Ipaddr.V4.Prefix` to parse/print combined addr/prefix
+* Add `multicast_org`, `multicast_admin`, `multicast_link` subnet constants to
+  `Ipaddr.V4.Prefix`
+* Add `Ipaddr.V4.scope` to classify IPv4 addresses
+* Add `Ipaddr.V4.is_global` and `Ipaddr.V4.is_multicast` predicates
 * Add optional `sep:char` argument to `Macaddr.to_string`
 * Remove internal use of Scanf.scanf
 
