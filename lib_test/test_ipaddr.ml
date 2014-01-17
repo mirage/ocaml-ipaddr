@@ -19,9 +19,6 @@ open OUnit
 open Ipaddr
 
 (*
-  check network_address
-  check of/to_address_string
-
   check generic address fns
   check generic map support
  *)
@@ -136,6 +133,20 @@ module Test_v4 = struct
       assert_raises ~msg:subnet exn (fun () -> V4.Prefix.of_string_exn subnet)
     ) subnets
 
+  let test_network_address_rt () =
+    let netaddrs = [
+      "192.168.0.1/24", "192.168.0.0/24", "192.168.0.1";
+    ] in
+    List.iter (fun (netaddr,net,addr) ->
+      let netv4 = V4.Prefix.of_string_exn net in
+      let addrv4 = V4.of_string_exn addr in
+      let prefix,v4 = V4.Prefix.of_address_string_exn netaddr in
+      assert_equal ~msg:(net^" <> "^(V4.Prefix.to_string prefix)) netv4 prefix;
+      assert_equal ~msg:(addr^" <> "^(V4.to_string v4)) addrv4 v4;
+      let addrstr = V4.Prefix.to_address_string prefix v4 in
+      assert_equal ~msg:(netaddr^" <> "^addrstr) netaddr addrstr;
+    ) netaddrs
+
   let test_prefix_broadcast () =
     let pairs = [
       "192.168.0.0/16",   "192.168.255.255";
@@ -167,7 +178,7 @@ module Test_v4 = struct
 
   let test_scope () =
     let ip = V4.of_string_exn in
-    let is subnet addr = V4.Prefix.(mem addr subnet) in
+    (*let is subnet addr = V4.Prefix.(mem addr subnet) in*)
     let is_scope scop addr = scop = V4.scope addr in
     let ships = V4.([
       unspecified,         "global",    is_global,          false;
@@ -240,6 +251,7 @@ module Test_v4 = struct
     "int32_rt"             >:: test_int32_rt;
     "prefix_string_rt"     >:: test_prefix_string_rt;
     "prefix_string_rt_bad" >:: test_prefix_string_rt_bad;
+    "network_address_rt"   >:: test_network_address_rt;
     "prefix_broadcast"     >:: test_prefix_broadcast;
     "prefix_bits"          >:: test_prefix_bits;
     "scope"                >:: test_scope;
@@ -384,6 +396,20 @@ module Test_v6 = struct
       assert_raises ~msg:subnet exn (fun () -> V6.Prefix.of_string_exn subnet)
     ) subnets
 
+  let test_network_address_rt () =
+    let netaddrs = [
+      "::1/24", "::/24", "::1";
+    ] in
+    List.iter (fun (netaddr,net,addr) ->
+      let netv4 = V6.Prefix.of_string_exn net in
+      let addrv4 = V6.of_string_exn addr in
+      let prefix,v4 = V6.Prefix.of_address_string_exn netaddr in
+      assert_equal ~msg:(net^" <> "^(V6.Prefix.to_string prefix)) netv4 prefix;
+      assert_equal ~msg:(addr^" <> "^(V6.to_string v4)) addrv4 v4;
+      let addrstr = V6.Prefix.to_address_string prefix v4 in
+      assert_equal ~msg:(netaddr^" <> "^addrstr) netaddr addrstr;
+    ) netaddrs
+
   let test_prefix_bits () =
     let pairs = V6.Prefix.([
       global_unicast_001, 3;
@@ -475,6 +501,7 @@ module Test_v6 = struct
     "int32_rt"             >:: test_int32_rt;
     "prefix_string_rt"     >:: test_prefix_string_rt;
     "prefix_string_rt_bad" >:: test_prefix_string_rt_bad;
+    "network_address_rt"   >:: test_network_address_rt;
     "prefix_bits"          >:: test_prefix_bits;
     "scope"                >:: test_scope;
     "map"                  >:: test_map;
@@ -483,5 +510,6 @@ module Test_v6 = struct
 end
 
 ;;
-run_test_tt_main Test_v4.suite;
-run_test_tt_main Test_v6.suite
+let _results = run_test_tt_main Test_v4.suite in
+let _results = run_test_tt_main Test_v6.suite in
+()
