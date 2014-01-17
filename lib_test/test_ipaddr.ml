@@ -34,9 +34,8 @@ let assert_raises ~msg exn test_fn =
     try test_fn ()
     with rtexn -> begin
       (if exn <> rtexn then (
-        let bt = Printexc.get_raw_backtrace () in
-        Printf.eprintf "Stacktrace for '%s':\n%s"
-          msg (Printexc.raw_backtrace_to_string bt);
+        Printf.eprintf "Stacktrace for '%s':\n%!";
+        Printexc.print_backtrace stderr;
        ));
       raise rtexn
     end)
