@@ -39,9 +39,9 @@ let (<!)  x y = (x &&& 0xFF_l) <|< y
 let need_more x = Parse_error ("not enough data", x)
 let too_much x = Parse_error ("too much data", x)
 
-let char_0 = Pervasives.int_of_char '0'
-let char_a = Pervasives.int_of_char 'a'
-let char_A = Pervasives.int_of_char 'A'
+let char_0 = int_of_char '0'
+let char_a = int_of_char 'a'
+let char_A = int_of_char 'A'
 
 let int_of_char c = match c with
   | '0'..'9' -> Pervasives.int_of_char c - char_0
@@ -57,19 +57,19 @@ let is_number base n = n >=0 && n < base
 
 let parse_int base s i =
   let len = String.length s in
-  let rec dec prev =
+  let rec next prev =
     let j = !i in
     if j >= len then prev
     else let c = s.[j] in
          let k = int_of_char c in
          if is_number base k
-         then (incr i; dec (prev*base + k))
+         then (incr i; next (prev*base + k))
          else prev
   in
   let i = !i in
   if i < len
   then if is_number base (int_of_char s.[i])
-    then dec 0
+    then next 0
     else raise (bad_char i s)
   else raise (need_more s)
 
@@ -83,6 +83,9 @@ let expect_end s i =
   if String.length s <= !i
   then ()
   else raise (bad_char !i s)
+
+let if_no_exn f k e =
+  match (try Some (f ()) with _ -> None) with Some v -> k v | None -> e
 
 module V4 = struct
   type t = int32
@@ -381,23 +384,29 @@ module V6 = struct
       else if !i >= len
       then acc
       else
-        try
-          let pos = !i in
-          let x = parse_hex_int s i in
+        let pos = !i in
+        if_no_exn (fun () -> parse_hex_int s i) (fun x ->
           if nb = 7
           then x::acc
           else if !i < len && s.[!i] = ':'
-          then
-            if !i + 1 < len && s.[!i+1] = ':'
-            then
-              if !compressed
-              then raise (bad_char (!i+1) s) (* thrown away below *)
+          then begin
+            incr i;
+            if !i < len
+            then if s.[!i] = ':'
+              then
+                if !compressed then (decr i; x::acc) (* trailing :: *)
+                else begin
+                  compressed:=true;
+                  incr i;
+                  loop (nb + 2) (-1::x::acc)
+                end
               else begin
-                compressed:=true;
-                i := !i + 2;
-                loop (nb + 2) (-1::x::acc)
+                if is_number 16 (int_of_char s.[!i])
+                then loop (nb+1) (x::acc)
+                else raise (bad_char !i s)
               end
-            else begin incr i; loop (nb+1) (x::acc) end
+            else raise (need_more s)
+          end
           else if !i < len && s.[!i] = '.'
           then begin
             i:= pos;
@@ -406,7 +415,7 @@ module V6 = struct
             lo :: hi :: acc
           end
           else x::acc
-        with Parse_error _ -> acc (* catches non-hex character and extra :: *)
+        ) acc
     in
 
     let res = loop (List.length l) l in

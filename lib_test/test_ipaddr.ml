@@ -19,13 +19,11 @@ open OUnit
 open Ipaddr
 
 (*
-  check offset parse errors
-
   check network_address
   check of/to_address_string
+
   check generic address fns
   check generic map support
-  check multicast scopes
  *)
 
 let error s msg = s, Parse_error (msg,s)
@@ -68,6 +66,30 @@ module Test_v4 = struct
     ] in
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:addr exn (fun () -> V4.of_string_exn addr)
+    ) addrs
+
+  let test_string_raw_rt () =
+    let addrs = [
+      ("IP: 192.168.0.1!!!",4),   ("192.168.0.1",15);
+      ("IP: 192.168.0.1.1!!!",4), ("192.168.0.1",15);
+    ] in
+    List.iter (fun ((addr,off),result) ->
+      let c = ref off in
+      let os = V4.of_string_raw addr c in
+      let ts = V4.to_string os in
+      assert_equal ~msg:addr (ts,!c) result
+    ) addrs
+
+  let test_string_raw_rt_bad () =
+    let addrs = [
+      (let s = "IP: 192.168.0!!!" in
+       (s,4), (Parse_error ("invalid character '!' at 13",s), 13));
+    ] in
+    List.iter (fun ((addr,off),(exn,cursor)) ->
+      let c = ref off in
+      assert_raises ~msg:addr exn (fun () -> V4.of_string_raw addr c);
+      assert_equal ~msg:(Printf.sprintf "%s cursor <> %d (%d)" addr cursor !c)
+        !c cursor
     ) addrs
 
   let test_bytes_rt () =
@@ -211,6 +233,8 @@ module Test_v4 = struct
   let suite = "Test V4" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
+    "string_raw_rt"        >:: test_string_raw_rt;
+    "string_raw_rt_bad"    >:: test_string_raw_rt_bad;
     "bytes_rt"             >:: test_bytes_rt;
     "bytes_rt_bad"         >:: test_bytes_rt_bad;
     "int32_rt"             >:: test_int32_rt;
@@ -230,15 +254,15 @@ module Test_v6 = struct
   let test_string_rt () =
     let addrs = [
       "2001:db8::ff00:42:8329","2001:db8::ff00:42:8329";
-      "::ffff:192.168.1.1",        "::ffff:192.168.1.1";
-      "::",                                        "::";
-      "[::]",                                      "::";
-      "1:1:1:1::1:1:1",               "1:1:1:1:0:1:1:1";
-      "0:0:0:1:1:0:0:0",                  "::1:1:0:0:0";
-      "0:0:0:1:1::",                      "::1:1:0:0:0";
-      "::1:0:0:0:0",                        "0:0:0:1::";
-      "FE80::",                                "fe80::";
-      "::192.168.0.1",                       "::c0a8:1";
+      "::ffff:192.168.1.1",    "::ffff:192.168.1.1";
+      "::",                    "::";
+      "[::]",                  "::";
+      "1:1:1:1::1:1:1",        "1:1:1:1:0:1:1:1";
+      "0:0:0:1:1:0:0:0",       "::1:1:0:0:0";
+      "0:0:0:1:1::",           "::1:1:0:0:0";
+      "::1:0:0:0:0",           "0:0:0:1::";
+      "FE80::",                "fe80::";
+      "::192.168.0.1",         "::c0a8:1";
     ] in
     List.iter (fun (addr,rt) ->
       let os = V6.of_string_exn addr in
@@ -249,17 +273,61 @@ module Test_v6 = struct
   let test_string_rt_bad () =
     let addrs = [
       need_more "[";
-      need_more "[]";
+      need_more "[]"; (* ? *)
       need_more ":";
       need_more "[::";
       bad_char 4 "::1:g:f";
       bad_char 3 "::1::";
+      bad_char 4 "1::2::3";
       need_more "1:2:3:4:5:6:7";
+      bad_char 15 "1:2:3:4:5:6:7:8:9";
+      bad_char 15 "1:2:3:4:5:6:7:8::";
       error "12345::12:2" "component 0 out of bounds";
       bad_char 1 ":1";
     ] in
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:addr exn (fun () -> V6.of_string_exn addr)
+    ) addrs
+
+  let test_string_raw_rt () =
+    let addrs = [
+      ("IP: 2001:db8::ff00:42:8329!",4), ("2001:db8::ff00:42:8329",26);
+      ("IP: ::ffff:192.168.1.1 ",4),     ("::ffff:192.168.1.1",22);
+      ("IP: :::",4),                     ("::",6);
+      ("IP: [::]:",4),                   ("::",8);
+      ("IP: 1:1:1:1::1:1:1:1",4),        ("1:1:1:1:0:1:1:1",18);
+      ("IP: ::1:1:0:0:0::g",4),          ("::1:1:0:0:0",15);
+    ] in
+    List.iter (fun ((addr,off),(result,cursor)) ->
+      let c = ref off in
+      let os = V6.of_string_raw addr c in
+      let ts = V6.to_string os in
+      let msg = Printf.sprintf "%s at %d: %s at %d <> %s at %d"
+        addr off result cursor ts !c
+      in assert_equal ~msg (ts,!c) (result,cursor)
+    ) addrs
+
+  let test_string_raw_rt_bad () =
+    let error (s,c) msg c' = (s,c), (Parse_error (msg,s),c') in
+    let need_more loc = error loc "not enough data" in
+    let bad_char i (s,c) =
+      error (s,c) (Printf.sprintf "invalid character '%c' at %d" s.[i] i) i
+    in
+    let addrs = [
+      need_more   ("IP: [] ",4) 5;
+      bad_char 5  ("IP: : ",4);
+      bad_char 7  ("IP: [:: ",4);
+      bad_char 17 ("IP: 1:2:3:4:5:6:7 ",4);
+      error       ("IP: 12345::12:2 ",4) "component 0 out of bounds" 15;
+      bad_char 5  ("IP: :1 ",4);
+      need_more   ("IP: ::1:1:0:0:0:",4) 16;
+      bad_char 8  ("IP: ::1:g:f ",4);
+    ] in
+    List.iter (fun ((addr,off),(exn,cursor)) ->
+      let c = ref off in
+      assert_raises ~msg:addr exn (fun () -> V6.of_string_raw addr c);
+      assert_equal ~msg:(Printf.sprintf "%s cursor <> %d (%d)" addr cursor !c)
+        !c cursor
     ) addrs
 
   let test_bytes_rt () =
@@ -310,6 +378,7 @@ module Test_v6 = struct
       error "::/130" "invalid prefix size";
       bad_char 5 "::/30/1";
       bad_char 7 "2000::/-1";
+      bad_char 5 "1::3:/4";
     ] in
     List.iter (fun (subnet,exn) ->
       assert_raises ~msg:subnet exn (fun () -> V6.Prefix.of_string_exn subnet)
@@ -399,6 +468,8 @@ module Test_v6 = struct
   let suite = "Test V6" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
+    "string_raw_rt"        >:: test_string_raw_rt;
+    "string_raw_rt_bad"    >:: test_string_raw_rt_bad;
     "bytes_rt"             >:: test_bytes_rt;
     "bytes_rt_bad"         >:: test_bytes_rt_bad;
     "int32_rt"             >:: test_int32_rt;
