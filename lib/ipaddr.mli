@@ -148,6 +148,10 @@ module V4 : sig
         an exception. *)
     val of_string : string -> t option
 
+    (** Same as [of_string_exn] but takes as an extra argument the offset
+        into the string for reading. *)
+    val of_string_raw : string -> int ref -> t
+
     (** [to_string prefix] is the CIDR notation string representation
         of [prefix], i.e. XXX.XX.X.XXX/XX. *)
     val to_string : t -> string
@@ -175,6 +179,9 @@ module V4 : sig
 
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
+
+    (** [of_addr ip] create a subnet composed of only on address [ip]. It is the same as [make 32 ip]. *)
+    val of_addr : addr -> t
 
     (** The default route, all addresses in IPv4-space, 0.0.0.0/0. *)
     val global    : t
@@ -352,6 +359,11 @@ module V6 : sig
         an exception. *)
     val of_string : string -> t option
 
+    (** Same as [of_string_exn] but takes as an extra argument the offset
+        into the string for reading. *)
+    val of_string_raw : string -> int ref -> t
+
+
     (** [to_string prefix] is the CIDR notation string representation
         of [prefix], i.e. XXX:XX:X::XXX/XX. *)
     val to_string : t -> string
@@ -379,6 +391,9 @@ module V6 : sig
 
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
+
+    (** [of_addr ip] create a subnet composed of only on address [ip]. It is the same as [make 128 ip]. *)
+    val of_addr : addr -> t
 
     (** Global Unicast 001, 2000::/3. *)
     val global_unicast_001 : t
@@ -427,8 +442,11 @@ module V6 : sig
   include Map.OrderedType with type t := t
 end
 
+(** Helper type **)
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
+
 (** Type of any IP address *)
-type t = V4 of V4.t | V6 of V6.t
+type t = (V4.t,V6.t) v4v6
 
 val compare : t -> t -> int
 
@@ -480,5 +498,36 @@ val is_multicast : t -> bool
 (** [is_private addr] is a predicate indicating whether [addr] privately
     addresses a node. *)
 val is_private : t -> bool
+
+module Prefix : sig
+  type addr = t
+
+  (** Type of a internet protocol subnet *)
+  type t = (V4.Prefix.t, V6.Prefix.t) v4v6
+
+  (** [of_string_exn cidr] is the subnet prefix represented by the CIDR
+      string, [cidr]. Raises [Parse_error] if [cidr] is not a valid
+      representation of a CIDR notation routing prefix. *)
+  val of_string_exn : string -> t
+
+  (** Same as [of_string_exn] but returns an option type instead of raising
+      an exception. *)
+  val of_string     : string -> t option
+  (** Same as [of_string_exn] but takes as an extra argument the offset
+      into the string for reading. *)
+
+  (** Same as [of_string_exn] but takes as an extra argument the offset
+      into the string for reading. *)
+  val of_string_raw : string -> int ref -> t
+
+  (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
+  val mem : addr -> t -> bool
+
+
+  (** [of_addr ip] create a subnet composed of only on address [ip].*)
+  val of_addr : addr -> t
+
+  include Map.OrderedType with type t := t
+end
 
 include Map.OrderedType with type t := t
