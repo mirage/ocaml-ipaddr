@@ -463,6 +463,10 @@ val of_string_exn : string -> t
     exception. *)
 val of_string : string -> t option
 
+(** Same as [of_string_exn] but takes as an extra argument the offset into
+    the string for reading. *)
+val of_string_raw : string -> int ref -> t
+
 (** [v6_of_v4 ipv4] is the IPv6 representation of the IPv4 address [ipv4]. *)
 val v6_of_v4 : V4.t -> V6.t
 
