@@ -442,8 +442,11 @@ module V6 : sig
   include Map.OrderedType with type t := t
 end
 
+(** Helper type **)
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
+
 (** Type of any IP address *)
-type t = V4 of V4.t | V6 of V6.t
+type t = (V4.t,V6.t) v4v6
 
 val compare : t -> t -> int
 
@@ -500,7 +503,7 @@ module Prefix : sig
   type addr = t
 
   (** Type of a internet protocol subnet *)
-  type t = V4_p of V4.Prefix.t | V6_p of V6.Prefix.t
+  type t = (V4.Prefix.t, V6.Prefix.t) v4v6
 
   (** [of_string_exn cidr] is the subnet prefix represented by the CIDR
       string, [cidr]. Raises [Parse_error] if [cidr] is not a valid

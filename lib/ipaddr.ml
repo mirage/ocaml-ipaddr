@@ -666,7 +666,8 @@ module V6 = struct
   let is_private i = (scope i) <> Global
 end
 
-type t = V4 of V4.t | V6 of V6.t
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
+type t = (V4.t,V6.t) v4v6
 
 let compare a b = match a,b with
   | V4 a, V4 b -> V4.compare a b
@@ -731,25 +732,25 @@ let is_private = function
 
 module Prefix = struct
   type addr = t
-  type t = V4_p of V4.Prefix.t | V6_p of V6.Prefix.t
+  type t = (V4.Prefix.t,V6.Prefix.t) v4v6
 
   let compare a b = match a,b with
-    | V4_p a , V4_p b -> V4.Prefix.compare a b
-    | V6_p a , V6_p b -> V6.Prefix.compare a b
-    | V4_p _ , V6_p _ -> -1
-    | V6_p _ , V4_p _ -> 1
+    | V4 a , V4 b -> V4.Prefix.compare a b
+    | V6 a , V6 b -> V6.Prefix.compare a b
+    | V4 _ , V6 _ -> -1
+    | V6 _ , V4 _ -> 1
 
   let of_string_raw s offset =
     let len = String.length s in
     if len < !offset + 1 then raise (need_more s);
     match s.[0] with
-      | '[' -> V6_p (V6.Prefix.of_string_raw s offset)
+      | '[' -> V6 (V6.Prefix.of_string_raw s offset)
       | _ ->
         let pos = !offset in
-        try V4_p (V4.Prefix.of_string_raw s offset)
+        try V4 (V4.Prefix.of_string_raw s offset)
         with Parse_error (v4_msg,_) ->
           offset := pos;
-          try V6_p (V6.Prefix.of_string_raw s offset)
+          try V6 (V6.Prefix.of_string_raw s offset)
           with Parse_error(v6_msg,s) ->
             let msg = Printf.sprintf
                 "not an IPv4 prefix: %s\nnot an IPv6 prefix: %s"
@@ -759,21 +760,21 @@ module Prefix = struct
   let of_string s = try Some (of_string_exn s) with _ -> None
   let mem ip prefix =
     match prefix,ip with
-      | V4_p p, V4 ip -> V4.Prefix.mem ip p
-      | V6_p p, V6 ip -> V6.Prefix.mem ip p
-      | V6_p p, V4 ip -> V6.Prefix.mem (v6_of_v4 ip) p
+      | V4 p, V4 ip -> V4.Prefix.mem ip p
+      | V6 p, V6 ip -> V6.Prefix.mem ip p
+      | V6 p, V4 ip -> V6.Prefix.mem (v6_of_v4 ip) p
       | _ -> false
 
   let of_addr = function
-    | V4 p -> V4_p (V4.Prefix.of_addr p)
-    | V6 p -> V6_p (V6.Prefix.of_addr p)
+    | V4 p -> V4 (V4.Prefix.of_addr p)
+    | V6 p -> V6 (V6.Prefix.of_addr p)
 
   let to_string = function
-    | V4_p p -> V4.Prefix.to_string p
-    | V6_p p -> V6.Prefix.to_string p
+    | V4 p -> V4.Prefix.to_string p
+    | V6 p -> V6.Prefix.to_string p
 
   let to_buffer buff = function
-    | V4_p p -> V4.Prefix.to_buffer buff p
-    | V6_p p -> V6.Prefix.to_buffer buff p
+    | V4 p -> V4.Prefix.to_buffer buff p
+    | V6 p -> V6.Prefix.to_buffer buff p
 
 end
