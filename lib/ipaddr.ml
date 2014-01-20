@@ -731,6 +731,10 @@ let is_private = function
   | V6 v6 -> V6.is_private v6
 
 module Prefix = struct
+  module Addr = struct
+    let to_v6 = to_v6
+  end
+
   type addr = t
   type t = (V4.Prefix.t,V6.Prefix.t) v4v6
 
@@ -761,12 +765,19 @@ module Prefix = struct
 
   let of_string s = try Some (of_string_exn s) with _ -> None
 
-  let mem ip prefix =
-    match prefix,ip with
-      | V4 p, V4 ip -> V4.Prefix.mem ip p
-      | V6 p, V6 ip -> V6.Prefix.mem ip p
-      | V6 p, V4 ip -> V6.Prefix.mem (v6_of_v4 ip) p
-      | _ -> false
+  let v6_of_v4 v4 = V6.Prefix.make
+    (96 + V4.Prefix.bits v4)
+    (v6_of_v4 (V4.Prefix.network v4))
+
+  let v4_of_v6 v6 = match v4_of_v6 (V6.Prefix.network v6) with
+    | Some v4 -> Some (V4.Prefix.make (V6.Prefix.bits v6 - 96) v4)
+    | None -> None
+
+  let to_v4 = function V4 v4 -> Some v4 | V6 v6 -> v4_of_v6 v6
+
+  let to_v6 = function V4 v4 -> v6_of_v4 v4 | V6 v6 -> v6
+
+  let mem ip prefix = V6.Prefix.mem (Addr.to_v6 ip) (to_v6 prefix)
 
   let of_addr = function
     | V4 p -> V4 (V4.Prefix.of_addr p)

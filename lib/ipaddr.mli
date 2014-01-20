@@ -471,15 +471,15 @@ val of_string : string -> t option
     the string for reading. *)
 val of_string_raw : string -> int ref -> t
 
-(** [v6_of_v4 ipv4] is the IPv6 representation of the IPv4 address [ipv4]. *)
-val v6_of_v4 : V4.t -> V6.t
-
 (** [v4_of_v6 ipv6] is the IPv4 representation of the IPv6 address [ipv6].
     If [ipv6] is not an IPv4-mapped address, None is returned. *)
 val v4_of_v6 : V6.t -> V4.t option
 
 (** [to_v4 addr] is the IPv4 representation of [addr]. *)
 val to_v4 : t -> V4.t option
+
+(** [v6_of_v4 ipv4] is the IPv6 representation of the IPv4 address [ipv4]. *)
+val v6_of_v4 : V4.t -> V6.t
 
 (** [to_v6 addr] is the IPv6 representation of [addr]. *)
 val to_v6 : t -> V6.t
@@ -506,6 +506,8 @@ module Prefix : sig
   (** Type of a internet protocol subnet *)
   type t = (V4.Prefix.t, V6.Prefix.t) v4v6
 
+  val compare : t -> t -> int
+
   (** [of_string_exn cidr] is the subnet prefix represented by the CIDR
       string, [cidr]. Raises [Parse_error] if [cidr] is not a valid
       representation of a CIDR notation routing prefix. *)
@@ -519,11 +521,31 @@ module Prefix : sig
       into the string for reading. *)
   val of_string_raw : string -> int ref -> t
 
+  (** [v4_of_v6 ipv6] is the IPv4 representation of the IPv6 subnet [ipv6].
+      If [ipv6] is not an IPv4-mapped subnet, None is returned. *)
+  val v4_of_v6 : V6.Prefix.t -> V4.Prefix.t option
+
+  (** [to_v4 subnet] is the IPv4 representation of [subnet]. *)
+  val to_v4 : t -> V4.Prefix.t option
+
+  (** [v6_of_v4 ipv4] is the IPv6 representation of the IPv4 subnet [ipv4]. *)
+  val v6_of_v4 : V4.Prefix.t -> V6.Prefix.t
+
+  (** [to_v6 subnet] is the IPv6 representation of [subnet]. *)
+  val to_v6 : t -> V6.Prefix.t
+
   (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
   val mem : addr -> t -> bool
 
   (** [of_addr ip] create a subnet composed of only one address, [ip].*)
   val of_addr : addr -> t
+
+  (** [to_string subnet] is the text string representation of [subnet]. *)
+  val to_string : t -> string
+
+  (** [to_buffer buf subnet] writes the text string representation of [subnet]
+      into [buf]. *)
+  val to_buffer : Buffer.t -> t -> unit
 
   include Map.OrderedType with type t := t
 end
