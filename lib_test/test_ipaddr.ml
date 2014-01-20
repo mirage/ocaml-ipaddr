@@ -549,10 +549,30 @@ let test_map () =
   assert_equal ~msg:"max" (M.max_binding m)
     (of_string_exn maxv6, "the greatest host v6")
 
+let test_prefix_mem () =
+  let ip = of_string_exn in
+  let v4net = Prefix.v4_of_v6 in
+  let ships = [
+    ip "192.168.0.1",     V4 V4.Prefix.private_192,                   true;
+    ip "192.168.0.1",     Prefix.of_string_exn "::ffff:0:0/96",       true;
+    ip "192.168.0.1",     Prefix.of_string_exn "::ffff:0:0/95",       true;
+    ip "192.168.0.1",     Prefix.of_string_exn "::ffff:0:0/97",       false;
+    ip "192.168.0.1",     Prefix.of_string_exn "::ffff:128.0.0.0/97", true;
+    ip "::ffff:10.0.0.1", V4 V4.Prefix.private_10,                    true;
+    ip "::fffe:10.0.0.1", V4 V4.Prefix.private_10,                    false;
+  ] in
+  List.iter (fun (addr,subnet,is_mem) ->
+    let msg = Printf.sprintf "%s is%s in %s"
+      (to_string addr) (if is_mem then "" else " not") (Prefix.to_string subnet)
+    in
+    assert_equal ~msg (Prefix.mem addr subnet) is_mem
+  ) ships
+
 let suite = "Test Generic Addresses" >::: [
   "string_raw_rt"     >:: test_string_raw_rt;
   "string_raw_rt_bad" >:: test_string_raw_rt_bad;
   "map"               >:: test_map;
+  "prefix_mem"        >:: test_prefix_mem;
 ]
 
 ;;

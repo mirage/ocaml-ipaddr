@@ -201,15 +201,23 @@ module V4 = struct
 
     (* string conversion *)
 
-    let _of_string_exn s =
-      let i = ref 0 in
+    let _of_string_raw s i =
       let quad = of_string_raw s i in
       expect_char s i '/';
       let p = parse_dec_int s i in
       if p > 32 || p < 0
       then raise (Parse_error ("invalid prefix size", s));
-      expect_end s i;
       (p,quad)
+
+    let of_string_raw s i =
+      let (p,quad) = _of_string_raw s i in
+      make p quad
+
+    let _of_string_exn s =
+      let i = ref 0 in
+      let res = _of_string_raw s i in
+      expect_end s i;
+      res
 
     let of_string_exn s = let (p,quad) = _of_string_exn s in make p quad
 
@@ -236,6 +244,8 @@ module V4 = struct
       Buffer.contents b
 
     let mem ip (pre,sz) = let host = 32 - sz in (ip >|> host) = (pre >|> host)
+
+    let of_addr ip = make 32 ip
 
     let global          = make  0 (ip   0   0 0 0)
     let relative        = make  8 (ip   0   0 0 0)
@@ -566,15 +576,23 @@ module V6 = struct
     let network_address (pre,sz) addr =
       logor pre (logand addr (lognot (mask sz)))
 
-    let _of_string_exn s =
-      let i = ref 0 in
+    let _of_string_raw s i =
       let v6 = of_string_raw s i in
       expect_char s i '/';
       let p = parse_dec_int s i in
       if p > 128 || p < 0
       then raise (Parse_error ("invalid prefix size", s));
-      expect_end s i;
       (p, v6)
+
+    let of_string_raw s i =
+      let (p,v6) = _of_string_raw s i in
+      make p v6
+
+    let _of_string_exn s =
+      let i = ref 0 in
+      let res = _of_string_raw s i in
+      expect_end s i;
+      res
 
     let of_string_exn s = let (p,v6) = _of_string_exn s in make p v6
 
@@ -604,6 +622,8 @@ module V6 = struct
     let mem ip (pre,sz) =
       let m = mask sz in
       logand ip m = logand pre m
+
+    let of_addr ip = make 128 ip
 
     let global_unicast_001  = make  3 (ip 0x2000 0 0 0 0 0 0 0)
     let link                = make 10 (ip 0xfe80 0 0 0 0 0 0 0)
@@ -646,7 +666,8 @@ module V6 = struct
   let is_private i = (scope i) <> Global
 end
 
-type t = V4 of V4.t | V6 of V6.t
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
+type t = (V4.t,V6.t) v4v6
 
 let compare a b = match a,b with
   | V4 a, V4 b -> V4.compare a b
@@ -708,3 +729,66 @@ let is_multicast = function
 let is_private = function
   | V4 v4 -> V4.is_private v4
   | V6 v6 -> V6.is_private v6
+
+module Prefix = struct
+  module Addr = struct
+    let to_v6 = to_v6
+  end
+
+  type addr = t
+  type t = (V4.Prefix.t,V6.Prefix.t) v4v6
+
+  let compare a b = match a,b with
+    | V4 a , V4 b -> V4.Prefix.compare a b
+    | V6 a , V6 b -> V6.Prefix.compare a b
+    | V4 _ , V6 _ -> -1
+    | V6 _ , V4 _ -> 1
+
+  let of_string_raw s offset =
+    let len = String.length s in
+    if len < !offset + 1 then raise (need_more s);
+    match s.[0] with
+      | '[' -> V6 (V6.Prefix.of_string_raw s offset)
+      | _ ->
+        let pos = !offset in
+        try V4 (V4.Prefix.of_string_raw s offset)
+        with Parse_error (v4_msg,_) ->
+          offset := pos;
+          try V6 (V6.Prefix.of_string_raw s offset)
+          with Parse_error(v6_msg,s) ->
+            let msg = Printf.sprintf
+                "not an IPv4 prefix: %s\nnot an IPv6 prefix: %s"
+                v4_msg v6_msg
+            in raise (Parse_error (msg,s))
+
+  let of_string_exn s = of_string_raw s (ref 0)
+
+  let of_string s = try Some (of_string_exn s) with _ -> None
+
+  let v6_of_v4 v4 = V6.Prefix.make
+    (96 + V4.Prefix.bits v4)
+    (v6_of_v4 (V4.Prefix.network v4))
+
+  let v4_of_v6 v6 = match v4_of_v6 (V6.Prefix.network v6) with
+    | Some v4 -> Some (V4.Prefix.make (V6.Prefix.bits v6 - 96) v4)
+    | None -> None
+
+  let to_v4 = function V4 v4 -> Some v4 | V6 v6 -> v4_of_v6 v6
+
+  let to_v6 = function V4 v4 -> v6_of_v4 v4 | V6 v6 -> v6
+
+  let mem ip prefix = V6.Prefix.mem (Addr.to_v6 ip) (to_v6 prefix)
+
+  let of_addr = function
+    | V4 p -> V4 (V4.Prefix.of_addr p)
+    | V6 p -> V6 (V6.Prefix.of_addr p)
+
+  let to_string = function
+    | V4 p -> V4.Prefix.to_string p
+    | V6 p -> V6.Prefix.to_string p
+
+  let to_buffer buf = function
+    | V4 p -> V4.Prefix.to_buffer buf p
+    | V6 p -> V6.Prefix.to_buffer buf p
+
+end
