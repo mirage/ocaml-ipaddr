@@ -180,7 +180,8 @@ module V4 : sig
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
 
-    (** [of_addr ip] create a subnet composed of only on address [ip]. It is the same as [make 32 ip]. *)
+    (** [of_addr ip] create a subnet composed of only one address, [ip].
+        It is the same as [make 32 ip]. *)
     val of_addr : addr -> t
 
     (** The default route, all addresses in IPv4-space, 0.0.0.0/0. *)
@@ -363,7 +364,6 @@ module V6 : sig
         into the string for reading. *)
     val of_string_raw : string -> int ref -> t
 
-
     (** [to_string prefix] is the CIDR notation string representation
         of [prefix], i.e. XXX:XX:X::XXX/XX. *)
     val to_string : t -> string
@@ -392,7 +392,8 @@ module V6 : sig
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
 
-    (** [of_addr ip] create a subnet composed of only on address [ip]. It is the same as [make 128 ip]. *)
+    (** [of_addr ip] create a subnet composed of only one address, [ip].
+        It is the same as [make 128 ip]. *)
     val of_addr : addr -> t
 
     (** Global Unicast 001, 2000::/3. *)
@@ -442,7 +443,7 @@ module V6 : sig
   include Map.OrderedType with type t := t
 end
 
-(** Helper type **)
+(** Type of either an IPv4 value or an IPv6 value *)
 type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
 
 (** Type of any IP address *)
@@ -513,8 +514,6 @@ module Prefix : sig
   (** Same as [of_string_exn] but returns an option type instead of raising
       an exception. *)
   val of_string     : string -> t option
-  (** Same as [of_string_exn] but takes as an extra argument the offset
-      into the string for reading. *)
 
   (** Same as [of_string_exn] but takes as an extra argument the offset
       into the string for reading. *)
@@ -523,8 +522,7 @@ module Prefix : sig
   (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
   val mem : addr -> t -> bool
 
-
-  (** [of_addr ip] create a subnet composed of only on address [ip].*)
+  (** [of_addr ip] create a subnet composed of only one address, [ip].*)
   val of_addr : addr -> t
 
   include Map.OrderedType with type t := t

@@ -576,7 +576,7 @@ module V6 = struct
     let network_address (pre,sz) addr =
       logor pre (logand addr (lognot (mask sz)))
 
-    let of_string_raw_ s i =
+    let _of_string_raw s i =
       let v6 = of_string_raw s i in
       expect_char s i '/';
       let p = parse_dec_int s i in
@@ -585,12 +585,12 @@ module V6 = struct
       (p, v6)
 
     let of_string_raw s i =
-      let (p,v6) = of_string_raw_ s i in
+      let (p,v6) = _of_string_raw s i in
       make p v6
 
     let _of_string_exn s =
       let i = ref 0 in
-      let res = of_string_raw_ s i in
+      let res = _of_string_raw s i in
       expect_end s i;
       res
 
@@ -756,8 +756,11 @@ module Prefix = struct
                 "not an IPv4 prefix: %s\nnot an IPv6 prefix: %s"
                 v4_msg v6_msg
             in raise (Parse_error (msg,s))
+
   let of_string_exn s = of_string_raw s (ref 0)
+
   let of_string s = try Some (of_string_exn s) with _ -> None
+
   let mem ip prefix =
     match prefix,ip with
       | V4 p, V4 ip -> V4.Prefix.mem ip p
@@ -773,8 +776,8 @@ module Prefix = struct
     | V4 p -> V4.Prefix.to_string p
     | V6 p -> V6.Prefix.to_string p
 
-  let to_buffer buff = function
-    | V4 p -> V4.Prefix.to_buffer buff p
-    | V6 p -> V6.Prefix.to_buffer buff p
+  let to_buffer buf = function
+    | V4 p -> V4.Prefix.to_buffer buf p
+    | V6 p -> V6.Prefix.to_buffer buf p
 
 end
