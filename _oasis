@@ -21,6 +21,15 @@ Library unix
   Modules: Ipaddr_unix
   BuildDepends: unix, ipaddr
 
+Library ipaddr_top
+  Path:               top
+  FindlibName:        top
+  FindlibParent:      ipaddr
+  Modules:            Ipaddr_top
+  BuildDepends:       compiler-libs.toplevel
+  XMETARequires:      ipaddr
+  XMETADescription:   Toplevel printers for IP addresses
+
 Test ipaddr
   Run: true
   Command: make

@@ -1,5 +1,6 @@
 2.2.0 (trunk):
 * Add an [Ipaddr_unix] module to convert to-and-from the standard library.
+* Add a toplevel pretty printer in the `ipaddr.top` package.
 
 2.1.0 (2014-01-20):
 * Add `of_string_raw` to `Ipaddr.V4.Prefix` and `Ipaddr.V6.Prefix`
