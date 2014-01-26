@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        ipaddr
-Version:     2.1.0
+Version:     2.2.0
 Synopsis:    A library for manipulation of IP (and MAC) address representations
 Authors:     David Sheets, Anil Madhavapeddy, Hugo Heuzard
 License:     ISC
@@ -13,6 +13,13 @@ Library ipaddr
   Modules: Ipaddr, Macaddr
   NativeOpt: -w @f@p@u@s@40
   ByteOpt:   -w @f@p@u@s@40
+
+Library unix
+  Path: lib
+  Findlibparent: ipaddr
+  Findlibname: unix
+  Modules: Ipaddr_unix
+  BuildDepends: unix, ipaddr
 
 Test ipaddr
   Run: true
