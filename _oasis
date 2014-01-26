@@ -7,6 +7,10 @@ License:     ISC
 Plugins:     META (0.3), DevFiles (0.3)
 BuildTools:  ocamlbuild
 
+Flag unix
+  Description:        build the unix library
+  Default:            true
+
 Library ipaddr
   Path: lib
   Findlibname: ipaddr
@@ -15,6 +19,7 @@ Library ipaddr
   ByteOpt:   -w @f@p@u@s@40
 
 Library unix
+  Build$:             flag(unix)
   Path: lib
   Findlibparent: ipaddr
   Findlibname: unix
