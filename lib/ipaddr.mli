@@ -64,6 +64,9 @@ module V4 : sig
       buffer [buf]. *)
   val to_buffer : Buffer.t -> t -> unit
 
+  (** [pp_hum] outputs a human-readable representation to the [f] formatter. *)
+  val pp_hum : Format.formatter -> t -> unit
+
   (** Bytestring conversion *)
 
   (** [of_bytes_exn ipv4_octets] is the address represented
@@ -155,6 +158,9 @@ module V4 : sig
     (** [to_string prefix] is the CIDR notation string representation
         of [prefix], i.e. XXX.XX.X.XXX/XX. *)
     val to_string : t -> string
+
+    (** [pp_hum] outputs a human-readable representation to the [f] formatter. *)
+    val pp_hum : Format.formatter -> t -> unit
 
     (** [of_address_string_exn cidr_addr] is the address and prefix
         represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
@@ -277,6 +283,9 @@ module V6 : sig
       buffer [buf]. *)
   val to_buffer : ?v4:bool -> Buffer.t -> t -> unit
 
+  (** [pp_hum] outputs a human-readable representation to the [f] formatter. *)
+  val pp_hum : Format.formatter -> t -> unit
+
   (** Bytestring conversion *)
 
   (** [of_bytes_exn ipv6_octets] is the address represented
@@ -368,6 +377,9 @@ module V6 : sig
         of [prefix], i.e. XXX:XX:X::XXX/XX. *)
     val to_string : t -> string
 
+    (** [pp_hum] outputs a human-readable representation to the [f] formatter. *)
+    val pp_hum : Format.formatter -> t -> unit
+
     (** [of_address_string_exn cidr_addr] is the address and prefix
         represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
         a valid representation of a CIDR-scoped address. *)
@@ -457,6 +469,9 @@ val to_string : t -> string
 (** [to_buffer buf addr] writes the text string representation of [addr] into
     [buf]. *)
 val to_buffer : Buffer.t -> t -> unit
+
+(** [pp_hum] outputs a human-readable representation to the [f] formatter. *)
+val pp_hum : Format.formatter -> t -> unit
 
 (** [of_string_exn s] parses [s] as an IPv4 or IPv6 address.
     Raises [Parse_error] if [s] is not a valid string representation of an IP

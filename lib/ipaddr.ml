@@ -134,6 +134,9 @@ module V4 = struct
     to_buffer b i;
     Buffer.contents b
 
+  let pp_hum ppf i =
+    Format.fprintf ppf "%s" (to_string i)
+
   (* Byte conversion *)
 
   let of_bytes_raw bs o =
@@ -234,6 +237,9 @@ module V4 = struct
       let b = Buffer.create 18 in
       to_buffer b subnet;
       Buffer.contents b
+
+    let pp_hum ppf i =
+      Format.fprintf ppf "%s" (to_string i)
 
     let to_address_buffer buf ((_,sz) as subnet) addr =
       to_buffer buf (network_address subnet addr,sz)
@@ -522,6 +528,9 @@ module V6 = struct
     to_buffer ?v4 buf l;
     Buffer.contents buf
 
+  let pp_hum ppf i =
+    Format.fprintf ppf "%s" (to_string i)
+
   (* byte conversion *)
 
   let of_bytes_raw bs o = (* TODO : from cstruct *)
@@ -611,6 +620,9 @@ module V6 = struct
       to_buffer buf subnet;
       Buffer.contents buf
 
+    let pp_hum ppf i =
+      Format.fprintf ppf "%s" (to_string i)
+
     let to_address_buffer buf ((_,sz) as subnet) addr =
       to_buffer buf (network_address subnet addr,sz)
 
@@ -682,6 +694,9 @@ let to_string = function
 let to_buffer buf = function
   | V4 x -> V4.to_buffer buf x
   | V6 x -> V6.to_buffer buf x
+
+let pp_hum ppf i =
+      Format.fprintf ppf "%s" (to_string i)
 
 let of_string_raw s offset =
   let len = String.length s in
@@ -791,4 +806,6 @@ module Prefix = struct
     | V4 p -> V4.Prefix.to_buffer buf p
     | V6 p -> V6.Prefix.to_buffer buf p
 
+  let pp_hum ppf i =
+    Format.fprintf ppf "%s" (to_string i)
 end
