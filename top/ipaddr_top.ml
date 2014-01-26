@@ -1,4 +1,11 @@
-let printers = [ "Ipaddr.pp_hum"; "Ipaddr.V4.pp_hum"; "Ipaddr.V4.Prefix.pp_hum"; "Ipaddr.V6.pp_hum" ]
+let printers = [
+  "Ipaddr.pp_hum";
+  "Ipaddr.Prefix.pp_hum";
+  "Ipaddr.V4.pp_hum";
+  "Ipaddr.V4.Prefix.pp_hum";
+  "Ipaddr.V6.pp_hum";
+  "Ipaddr.V6.Prefix.pp_hum";
+]
 
 let eval_string
       ?(print_outcome = false) ?(err_formatter = Format.err_formatter) str =
