@@ -1,4 +1,4 @@
-2.2.0 (trunk):
+2.2.0 (2014-01-27):
 * Add an [Ipaddr_unix] module to convert to-and-from the standard library.
 * Add a toplevel pretty printer in the `ipaddr.top` package.
 
