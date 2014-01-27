@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: a1f1555690ba83caaade174974cb5694) *)
+(* DO NOT EDIT (digest: b9f1896c4b44f5c023c34582ffa087bd) *)
 module OASISGettext = struct
 (* # 22 "src/oasis/OASISGettext.ml" *)
 
@@ -555,7 +555,12 @@ end
 open Ocamlbuild_plugin;;
 let package_default =
   {
-     MyOCamlbuildBase.lib_ocaml = [("ipaddr", ["lib"], [])];
+     MyOCamlbuildBase.lib_ocaml =
+       [
+          ("ipaddr", ["lib"], []);
+          ("ipaddr_unix", ["lib"], []);
+          ("ipaddr_top", ["top"], [])
+       ];
      lib_c = [];
      flags =
        [
@@ -578,6 +583,14 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 582 "myocamlbuild.ml"
+# 587 "myocamlbuild.ml"
 (* OASIS_STOP *)
-Ocamlbuild_plugin.dispatch dispatch_default;;
+let () =
+  let additional_rules = function
+    | After_rules ->
+       pflag ["compile"; "ocaml"] "I" (fun x -> S [A "-I"; A x]);
+    | _ -> ()
+  in
+  Ocamlbuild_plugin.dispatch
+    (MyOCamlbuildBase.dispatch_combine
+       [MyOCamlbuildBase.dispatch_default package_default; additional_rules])

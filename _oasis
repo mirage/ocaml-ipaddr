@@ -1,11 +1,19 @@
 OASISFormat: 0.3
 Name:        ipaddr
-Version:     2.1.0
+Version:     2.2.0
 Synopsis:    A library for manipulation of IP (and MAC) address representations
 Authors:     David Sheets, Anil Madhavapeddy, Hugo Heuzard
 License:     ISC
 Plugins:     META (0.3), DevFiles (0.3)
 BuildTools:  ocamlbuild
+
+Flag unix
+  Description:        build the unix library
+  Default:            true
+
+Flag top
+  Description:        build the toplevel printers
+  Default:            true
 
 Library ipaddr
   Path: lib
@@ -13,6 +21,26 @@ Library ipaddr
   Modules: Ipaddr, Macaddr
   NativeOpt: -w @f@p@u@s@40
   ByteOpt:   -w @f@p@u@s@40
+
+Library ipaddr_unix
+  Build$:             flag(unix)
+  Path: lib
+  Findlibparent: ipaddr
+  Findlibname: unix
+  Modules: Ipaddr_unix
+  BuildDepends: unix, ipaddr
+
+Library ipaddr_top
+  Build$:             flag(top)
+  Path:               top
+  FindlibName:        top
+  FindlibParent:      ipaddr
+  Modules:            Ipaddr_top
+  # Compiler libs do not exists for OCaml < 4.0.0 and otherwise always
+  # present.  Use _tags to set them up.
+  # BuildDepends:       compiler-libs.toplevel
+  XMETARequires:      ipaddr
+  XMETADescription:   Toplevel printers for IP addresses
 
 Test ipaddr
   Run: true

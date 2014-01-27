@@ -64,6 +64,10 @@ module V4 : sig
       buffer [buf]. *)
   val to_buffer : Buffer.t -> t -> unit
 
+  (** [pp_hum f ipv4] outputs a human-readable representation of [ipv4] to
+      the formatter [f]. *)
+  val pp_hum : Format.formatter -> t -> unit
+
   (** Bytestring conversion *)
 
   (** [of_bytes_exn ipv4_octets] is the address represented
@@ -155,6 +159,10 @@ module V4 : sig
     (** [to_string prefix] is the CIDR notation string representation
         of [prefix], i.e. XXX.XX.X.XXX/XX. *)
     val to_string : t -> string
+
+    (** [pp_hum f prefix] outputs a human-readable representation of [prefix]
+        to the formatter [f]. *)
+    val pp_hum : Format.formatter -> t -> unit
 
     (** [of_address_string_exn cidr_addr] is the address and prefix
         represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
@@ -277,6 +285,10 @@ module V6 : sig
       buffer [buf]. *)
   val to_buffer : ?v4:bool -> Buffer.t -> t -> unit
 
+  (** [pp_hum f ipv6] outputs a human-readable representation of [ipv6] to
+      the formatter [f]. *)
+  val pp_hum : Format.formatter -> t -> unit
+
   (** Bytestring conversion *)
 
   (** [of_bytes_exn ipv6_octets] is the address represented
@@ -368,6 +380,10 @@ module V6 : sig
         of [prefix], i.e. XXX:XX:X::XXX/XX. *)
     val to_string : t -> string
 
+    (** [pp_hum f prefix] outputs a human-readable representation of [prefix]
+        to the formatter [f]. *)
+    val pp_hum : Format.formatter -> t -> unit
+
     (** [of_address_string_exn cidr_addr] is the address and prefix
         represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
         a valid representation of a CIDR-scoped address. *)
@@ -458,6 +474,10 @@ val to_string : t -> string
     [buf]. *)
 val to_buffer : Buffer.t -> t -> unit
 
+(** [pp_hum f ip] outputs a human-readable representation of [ip] to the
+    formatter [f]. *)
+val pp_hum : Format.formatter -> t -> unit
+
 (** [of_string_exn s] parses [s] as an IPv4 or IPv6 address.
     Raises [Parse_error] if [s] is not a valid string representation of an IP
     address. *)
@@ -508,6 +528,17 @@ module Prefix : sig
 
   val compare : t -> t -> int
 
+  (** [to_string subnet] is the text string representation of [subnet]. *)
+  val to_string : t -> string
+
+  (** [to_buffer buf subnet] writes the text string representation of [subnet]
+      into [buf]. *)
+  val to_buffer : Buffer.t -> t -> unit
+
+  (** [pp_hum f subnet] outputs a human-readable representation of [subnet]
+      to the formatter [f]. *)
+  val pp_hum : Format.formatter -> t -> unit
+
   (** [of_string_exn cidr] is the subnet prefix represented by the CIDR
       string, [cidr]. Raises [Parse_error] if [cidr] is not a valid
       representation of a CIDR notation routing prefix. *)
@@ -539,13 +570,6 @@ module Prefix : sig
 
   (** [of_addr ip] create a subnet composed of only one address, [ip].*)
   val of_addr : addr -> t
-
-  (** [to_string subnet] is the text string representation of [subnet]. *)
-  val to_string : t -> string
-
-  (** [to_buffer buf subnet] writes the text string representation of [subnet]
-      into [buf]. *)
-  val to_buffer : Buffer.t -> t -> unit
 
   include Map.OrderedType with type t := t
 end

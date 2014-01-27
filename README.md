@@ -12,6 +12,8 @@ Features:
  * `Ipaddr.V4` and `Ipaddr.V4.Prefix` modules are `Map.OrderedType`
  * `Ipaddr.V6` and `Ipaddr.V6.Prefix` modules are `Map.OrderedType`
  * `Ipaddr` and `Ipaddr.Prefix` modules are `Map.OrderedType`
+ * `Ipaddr_unix` in findlib subpackage `ipaddr.unix` provides compatibility with the standard library `Unix` module
+ * `Ipaddr_top` in findlib subpackage `ipaddr.top` provides top-level pretty printers (requires compiler-libs default since 4.0)
  * IP address scope classification
  * IPv4-mapped addresses in IPv6 (::ffff:0:0/96) are an embedding of IPv4
  * MAC-48 (Ethernet) address support
