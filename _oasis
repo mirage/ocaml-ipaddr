@@ -11,6 +11,10 @@ Flag unix
   Description:        build the unix library
   Default:            true
 
+Flag top
+  Description:        build the toplevel printers (ocaml 4+ only)
+  Default:            true
+
 Library ipaddr
   Path: lib
   Findlibname: ipaddr
@@ -26,7 +30,8 @@ Library unix
   Modules: Ipaddr_unix
   BuildDepends: unix, ipaddr
 
-Library ipaddr_top
+Library top
+  Build$:             flag(top)
   Path:               top
   FindlibName:        top
   FindlibParent:      ipaddr
