@@ -12,7 +12,7 @@ Flag unix
   Default:            true
 
 Flag top
-  Description:        build the toplevel printers (ocaml 4+ only)
+  Description:        build the toplevel printers
   Default:            true
 
 Library ipaddr
@@ -22,7 +22,7 @@ Library ipaddr
   NativeOpt: -w @f@p@u@s@40
   ByteOpt:   -w @f@p@u@s@40
 
-Library unix
+Library ipaddr_unix
   Build$:             flag(unix)
   Path: lib
   Findlibparent: ipaddr
@@ -30,13 +30,15 @@ Library unix
   Modules: Ipaddr_unix
   BuildDepends: unix, ipaddr
 
-Library top
+Library ipaddr_top
   Build$:             flag(top)
   Path:               top
   FindlibName:        top
   FindlibParent:      ipaddr
   Modules:            Ipaddr_top
-  BuildDepends:       compiler-libs.toplevel
+  # Compiler libs do not exists for OCaml < 4.0.0 and otherwise always
+  # present.  Use _tags to set them up.
+  # BuildDepends:       compiler-libs.toplevel
   XMETARequires:      ipaddr
   XMETADescription:   Toplevel printers for IP addresses
 
