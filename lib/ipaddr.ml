@@ -231,6 +231,16 @@ module V4 = struct
 
     let of_address_string s = try Some (of_address_string_exn s) with _ -> None
 
+    let of_netmask nm addr =
+      let rec find_greatest_one bits i =
+        if bits = 0_l then i-1 else find_greatest_one (bits >|> 1) (i+1)
+      in
+      let one = nm &&& (Int32.neg nm) in
+      let sz = 32 - (find_greatest_one one (if one = 0_l then 33 else 0)) in
+      if nm <> (mask sz)
+      then raise (Parse_error ("invalid netmask",to_string nm))
+      else make sz addr
+
     let to_buffer buf (pre,sz) = Printf.bprintf buf "%a/%d" to_buffer pre sz
 
     let to_string subnet =
@@ -274,6 +284,7 @@ module V4 = struct
     let broadcast (pre,sz) = pre ||| (0x0_FF_FF_FF_FF_l >|> sz)
     let network (pre,sz) = pre
     let bits (pre,sz) = sz
+    let netmask subnet = mask (bits subnet)
   end
 
   (* TODO: this could be optimized with something trie-like *)

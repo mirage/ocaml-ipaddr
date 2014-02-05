@@ -1,3 +1,8 @@
+2.3.0 (2014-02-05):
+* Add `Ipaddr.V4.Prefix.of_netmask` for conversion from an
+  address/netmask to prefix
+* Add `Ipaddr.V4.Prefix.netmask` to generate a netmask address from a prefix
+
 2.2.0 (2014-01-27):
 * Add an [Ipaddr_unix] module to convert to-and-from the standard library.
 * Add a toplevel pretty printer in the `ipaddr.top` package.
