@@ -1,4 +1,4 @@
-2.3.0 (trunk):
+2.3.0 (2014-02-05):
 * Add `Ipaddr.V4.Prefix.of_netmask` for conversion from an
   address/netmask to prefix
 * Add `Ipaddr.V4.Prefix.netmask` to generate a netmask address from a prefix
