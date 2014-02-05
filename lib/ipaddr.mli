@@ -173,6 +173,10 @@ module V4 : sig
         raising an exception. *)
     val of_address_string : string -> (t * addr) option
 
+    (** [of_netmask netmask addr] is the subnet prefix of [addr] with netmask
+        [netmask]. *)
+    val of_netmask : addr -> addr -> t
+
     (** [to_address_string prefix addr] is the network address
         constructed from [prefix] and [addr]. *)
     val to_address_string : t -> addr -> string
@@ -225,6 +229,9 @@ module V4 : sig
 
     (** [network subnet] is the address for [subnet]. *)
     val network : t -> addr
+
+    (** [netmask subnet] is the netmask for [subnet]. *)
+    val netmask : t -> addr
 
     (** [bits subnet] is the bit size of the [subnet] prefix. *)
     val bits : t -> int

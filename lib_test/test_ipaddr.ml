@@ -170,6 +170,36 @@ module Test_v4 = struct
       assert_equal ~msg (V4.Prefix.bits subnet) bits
     ) pairs
 
+  let test_prefix_netmask () =
+    let nets = [
+      "192.168.0.1/32","255.255.255.255";
+      "192.168.0.1/31","255.255.255.254";
+      "192.168.0.1/1", "128.0.0.0";
+      "192.168.0.1/0", "0.0.0.0";
+    ] in
+    List.iter (fun (net_str,nm_str) ->
+      let prefix, v4 = V4.Prefix.of_address_string_exn net_str in
+      let nm = V4.Prefix.netmask prefix in
+      let nnm_str = V4.to_string nm in
+      let msg = Printf.sprintf "netmask %s <> %s" nnm_str nm_str in
+      assert_equal ~msg nnm_str nm_str;
+      let prefix = V4.Prefix.of_netmask nm v4 in
+      let nns = V4.Prefix.to_address_string prefix v4 in
+      let msg = Printf.sprintf "%s is %s under netmask iso" net_str nns in
+      assert_equal ~msg net_str nns
+    ) nets
+
+  let test_prefix_netmask_bad () =
+    let bad_masks = [
+      error "127.255.255.255" "invalid netmask";
+      error "255.255.254.128" "invalid netmask";
+    ] in
+    List.iter (fun (nm_str,exn) ->
+      let nm = V4.of_string_exn nm_str in
+      let addr = V4.of_string_exn "192.168.0.1" in
+      assert_raises ~msg:nm_str exn (fun () -> V4.Prefix.of_netmask nm addr)
+    ) bad_masks
+
   let test_scope () =
     let ip = V4.of_string_exn in
     (*let is subnet addr = V4.Prefix.(mem addr subnet) in*)
@@ -248,6 +278,8 @@ module Test_v4 = struct
     "network_address_rt"   >:: test_network_address_rt;
     "prefix_broadcast"     >:: test_prefix_broadcast;
     "prefix_bits"          >:: test_prefix_bits;
+    "prefix_netmask"       >:: test_prefix_netmask;
+    "prefix_netmask_bad"   >:: test_prefix_netmask_bad;
     "scope"                >:: test_scope;
     "map"                  >:: test_map;
     "prefix_map"           >:: test_prefix_map;
@@ -551,7 +583,6 @@ let test_map () =
 
 let test_prefix_mem () =
   let ip = of_string_exn in
-  let v4net = Prefix.v4_of_v6 in
   let ships = [
     ip "192.168.0.1",     V4 V4.Prefix.private_192,                   true;
     ip "192.168.0.1",     Prefix.of_string_exn "::ffff:0:0/96",       true;
