@@ -173,10 +173,6 @@ module V4 : sig
         raising an exception. *)
     val of_address_string : string -> (t * addr) option
 
-    (** [of_netmask netmask addr] is the subnet prefix of [addr] with netmask
-        [netmask]. *)
-    val of_netmask : addr -> addr -> t
-
     (** [to_address_string prefix addr] is the network address
         constructed from [prefix] and [addr]. *)
     val to_address_string : t -> addr -> string
@@ -188,6 +184,10 @@ module V4 : sig
     (** [to_address_buffer buf prefix addr] writes string representation of the
         network address representing [addr] in [prefix] to the buffer [buf]. *)
     val to_address_buffer : Buffer.t -> t -> addr -> unit
+
+    (** [of_netmask netmask addr] is the subnet prefix of [addr] with netmask
+        [netmask]. *)
+    val of_netmask : addr -> addr -> t
 
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
@@ -412,6 +412,10 @@ module V6 : sig
         network address representing [addr] in [prefix] to the buffer [buf]. *)
     val to_address_buffer : Buffer.t -> t -> addr -> unit
 
+    (** [of_netmask netmask addr] is the subnet prefix of [addr] with netmask
+        [netmask]. *)
+    val of_netmask : addr -> addr -> t
+
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
 
@@ -440,6 +444,9 @@ module V6 : sig
 
     (** [network subnet] is the address for [subnet]. *)
     val network : t -> addr
+
+    (** [netmask subnet] is the netmask for [subnet]. *)
+    val netmask : t -> addr
 
     (** [bits subnet] is the bit size of the [subnet] prefix. *)
     val bits : t -> int
@@ -577,6 +584,12 @@ module Prefix : sig
 
   (** [of_addr ip] create a subnet composed of only one address, [ip].*)
   val of_addr : addr -> t
+
+  (** [network subnet] is the address for [subnet]. *)
+  val network : t -> addr
+
+  (** [netmask subnet] is the netmask for [subnet]. *)
+  val netmask : t -> addr
 
   include Map.OrderedType with type t := t
 end
