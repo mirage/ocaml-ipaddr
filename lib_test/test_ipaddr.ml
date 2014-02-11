@@ -451,6 +451,41 @@ module Test_v6 = struct
       assert_equal ~msg (V6.Prefix.bits subnet) bits
     ) pairs
 
+  let test_prefix_netmask () =
+    let nets = [
+      "8::1/128","ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff";
+      "8::1/127","ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffe";
+      "8::1/96", "ffff:ffff:ffff:ffff:ffff:ffff::";
+      "8::1/64", "ffff:ffff:ffff:ffff::";
+      "8::1/32", "ffff:ffff::";
+      "8::1/1",  "8000::";
+      "8::1/0",  "::";
+    ] in
+    List.iter (fun (net_str,nm_str) ->
+      let prefix, v6 = V6.Prefix.of_address_string_exn net_str in
+      let nm = V6.Prefix.netmask prefix in
+      let nnm_str = V6.to_string nm in
+      let msg = Printf.sprintf "netmask %s <> %s" nnm_str nm_str in
+      assert_equal ~msg nnm_str nm_str;
+      let prefix = V6.Prefix.of_netmask nm v6 in
+      let nns = V6.Prefix.to_address_string prefix v6 in
+      let msg = Printf.sprintf "%s is %s under netmask iso" net_str nns in
+      assert_equal ~msg net_str nns
+    ) nets
+
+  let test_prefix_netmask_bad () =
+    let bad_masks = [
+      error "7fff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" "invalid netmask";
+      error "ffff:ffff:ffff:ffff:ffff:fffe:8000:0" "invalid netmask";
+      error "ffff:ffff:ffff:fffe:8000::" "invalid netmask";
+      error "ffff:fffe:8000::" "invalid netmask";
+    ] in
+    List.iter (fun (nm_str,exn) ->
+      let nm = V6.of_string_exn nm_str in
+      let addr = V6.of_string_exn "::" in
+      assert_raises ~msg:nm_str exn (fun () -> V6.Prefix.of_netmask nm addr)
+    ) bad_masks
+
   let test_scope () =
     let localhost_v4 = V6.of_string_exn "::ffff:127.0.0.1" in
     let is subnet addr = V6.Prefix.(mem addr subnet) in
@@ -529,6 +564,8 @@ module Test_v6 = struct
     "prefix_string_rt_bad" >:: test_prefix_string_rt_bad;
     "network_address_rt"   >:: test_network_address_rt;
     "prefix_bits"          >:: test_prefix_bits;
+    "prefix_netmask"       >:: test_prefix_netmask;
+    "prefix_netmask_bad"   >:: test_prefix_netmask_bad;
     "scope"                >:: test_scope;
     "map"                  >:: test_map;
     "prefix_map"           >:: test_prefix_map;

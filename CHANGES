@@ -1,3 +1,11 @@
+2.4.0 (trunk):
+* Add `Ipaddr.V6.Prefix.of_netmask` for conversion from an IPv6
+  address/netmask to prefix (useful for some binary interfaces). See #27.
+* Add `Ipaddr.V6.Prefix.netmask` to generate a netmask address from a
+  prefix (useful for some binary interfaces). See #27.
+* Add `Ipaddr.Prefix.network` for generic prefix -> address conversion
+* Add `Ipaddr.Prefix.netmask` for generic prefix -> netmask conversion
+
 2.3.0 (2014-02-05):
 * Add `Ipaddr.V4.Prefix.of_netmask` for conversion from an
   address/netmask to prefix

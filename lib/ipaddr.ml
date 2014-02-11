@@ -623,6 +623,16 @@ module V6 = struct
 
     let of_address_string s = try Some (of_address_string_exn s) with _ -> None
 
+    let of_netmask nm addr =
+      make (match nm with
+      | (0_l,0_l,0_l,0_l) -> 0
+      | (lsw ,0_l ,0_l ,0_l) -> V4.Prefix.(bits (of_netmask lsw V4.any))
+      | (-1_l,lsw ,0_l ,0_l) -> V4.Prefix.(bits (of_netmask lsw V4.any)) + 32
+      | (-1_l,-1_l,lsw ,0_l) -> V4.Prefix.(bits (of_netmask lsw V4.any)) + 64
+      | (-1_l,-1_l,-1_l,lsw) -> V4.Prefix.(bits (of_netmask lsw V4.any)) + 96
+      | _ -> raise (Parse_error ("invalid netmask", to_string nm))
+      ) addr
+
     let to_buffer buf (pre,sz) =
       Printf.bprintf buf "%a/%d" (to_buffer ~v4:false) pre sz
 
@@ -656,8 +666,8 @@ module V6 = struct
     let noneui64_interface  = make  3 (ip 0x0000 0 0 0 0 0 0 0)
 
     let network (pre,sz) = pre
-
     let bits (pre,sz) = sz
+    let netmask subnet = mask (bits subnet)
   end
 
   (* TODO: This could be optimized with something trie-like *)
@@ -816,6 +826,14 @@ module Prefix = struct
   let to_buffer buf = function
     | V4 p -> V4.Prefix.to_buffer buf p
     | V6 p -> V6.Prefix.to_buffer buf p
+
+  let network = function
+    | V4 p -> V4 (V4.Prefix.network p)
+    | V6 p -> V6 (V6.Prefix.network p)
+
+  let netmask = function
+    | V4 p -> V4 (V4.Prefix.netmask p)
+    | V6 p -> V6 (V6.Prefix.netmask p)
 
   let pp_hum ppf i =
     Format.fprintf ppf "%s" (to_string i)
