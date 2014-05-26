@@ -305,7 +305,10 @@ module Test_v6 = struct
     List.iter (fun (addr,rt) ->
       let os = V6.of_string_exn addr in
       let ts = V6.to_string os in
-      assert_equal ~msg:(addr^" <> "^rt^" ("^ts^")") ts rt
+      assert_equal ~msg:(addr^" <> "^rt^" ("^ts^")") ts rt;
+      let os = V6.t_of_sexp (V6.sexp_of_t (V6.of_string_exn addr)) in
+      let ts = V6.to_string os in
+      assert_equal ~msg:(addr^" <> "^rt^" ("^ts^")") ts rt;
     ) addrs
 
   let test_string_rt_bad () =
