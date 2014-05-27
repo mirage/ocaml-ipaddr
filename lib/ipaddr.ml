@@ -27,7 +27,8 @@ type scope =
 | Admin
 | Site
 | Organization
-| Global with sexp
+| Global
+with sexp
 
 let (~|) = Int32.of_int
 let (|~) = Int32.to_int
@@ -145,7 +146,7 @@ module V4 = struct
   let t_of_sexp i =
     match i with
     | Sexplib.Sexp.Atom i -> of_string_exn i
-    | _ -> raise (Failure "Ipaddr: Unexpected non-atom in sexp conversion")
+    | _ -> raise (Failure "Ipaddr.V4.t: Unexpected non-atom in sexp")
 
   (* Byte conversion *)
 
@@ -558,7 +559,7 @@ module V6 = struct
   let t_of_sexp i =
     match i with
     | Sexplib.Sexp.Atom i -> of_string_exn i
-    | _ -> raise (Failure "Ipaddr: Unexpected non-atom in sexp conversion")
+    | _ -> raise (Failure "Ipaddr.V6.t: Unexpected non-atom in sexp")
 
   (* byte conversion *)
 
