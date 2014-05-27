@@ -30,7 +30,8 @@ type scope =
 | Admin
 | Site
 | Organization
-| Global with sexp
+| Global
+with sexp
 
 (** A collection of functions for IPv4 addresses. *)
 module V4 : sig
@@ -129,7 +130,8 @@ module V4 : sig
     type addr = t with sexp
 
     (** Type of a internet protocol subnet *)
-    type t
+    type t with sexp
+
     val compare : t -> t -> int
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
