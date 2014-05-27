@@ -4,7 +4,7 @@ A library for manipulation of IP (and MAC) address representations.
 
 Features:
 
- * No dependencies
+ * Depends only on sexplib (conditionalization under consideration)
  * oUnit-based tests
  * IPv4 and IPv6 support
  * IPv4 and IPv6 CIDR prefix support
@@ -18,3 +18,4 @@ Features:
  * IPv4-mapped addresses in IPv6 (::ffff:0:0/96) are an embedding of IPv4
  * MAC-48 (Ethernet) address support
  * `Macaddr` is a `Map.OrderedType`
+ * All types have sexplib serializers/deserializers

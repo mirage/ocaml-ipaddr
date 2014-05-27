@@ -1,5 +1,5 @@
-2.5.0 (trunk):
-* Add `with sexp` serializers to all the Ipaddr types.
+2.5.0 (2014-05-27):
+* Add `with sexp` (de)serializers to all of the Ipaddr and Macaddr types. (#31)
 
 2.4.0 (2014-02-11):
 * Add `Ipaddr.V6.Prefix.of_netmask` for conversion from an IPv6
