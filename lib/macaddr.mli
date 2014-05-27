@@ -17,10 +17,10 @@
 (** A library for manipulation of MAC address representations. *)
 
 (** Raised when parsing of MAC address syntax fails. *)
-exception Parse_error of string * string
+exception Parse_error of string * string with sexp
 
 (** Type of the hardware address (MAC) of an ethernet interface. *)
-type t
+type t with sexp
 
 val compare : t -> t -> int
 
