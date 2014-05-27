@@ -43,7 +43,10 @@ module Test_v4 = struct
     List.iter (fun (addr,rt) ->
       let os = V4.of_string_exn addr in
       let ts = V4.to_string os in
-      assert_equal ~msg:addr ts rt
+      assert_equal ~msg:addr ts rt;
+      let os = V4.t_of_sexp (V4.sexp_of_t os) in
+      let ts = V4.to_string os in
+      assert_equal ~msg:addr ts rt;
     ) addrs
 
   let test_string_rt_bad () =
@@ -111,8 +114,12 @@ module Test_v4 = struct
       "192.168.0.0/0",  "0.0.0.0/0";
     ] in
     List.iter (fun (subnet,rt) ->
-      assert_equal ~msg:subnet
-        V4.Prefix.(to_string (of_string_exn subnet)) rt
+      let os = V4.Prefix.of_string_exn subnet in
+      let ts = V4.Prefix.to_string os in
+      assert_equal ~msg:subnet ts rt;
+      let os = V4.Prefix.(t_of_sexp (sexp_of_t os)) in
+      let ts = V4.Prefix.to_string os in
+      assert_equal ~msg:subnet ts rt;
     ) subnets
 
   let test_prefix_string_rt_bad () =
@@ -408,8 +415,12 @@ module Test_v6 = struct
       "[::]/64",                  "::/64";
     ] in
     List.iter (fun (subnet,rt) ->
-      assert_equal ~msg:subnet
-        V6.Prefix.(to_string (of_string_exn subnet)) rt
+      let os = V6.Prefix.of_string_exn subnet in
+      let ts = V6.Prefix.to_string os in
+      assert_equal ~msg:subnet ts rt;
+      let os = V6.Prefix.(t_of_sexp (sexp_of_t os)) in
+      let ts = V6.Prefix.to_string os in
+      assert_equal ~msg:subnet ts rt;
     ) subnets
 
   let test_prefix_string_rt_bad () =
