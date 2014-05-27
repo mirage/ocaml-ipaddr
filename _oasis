@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        ipaddr
-Version:     2.4.0
+Version:     2.5.0
 Synopsis:    A library for manipulation of IP (and MAC) address representations
 Authors:     David Sheets, Anil Madhavapeddy, Hugo Heuzard
 License:     ISC
@@ -8,7 +8,7 @@ Plugins:     META (0.3), DevFiles (0.3)
 BuildTools:  ocamlbuild
 
 Flag unix
-  Description:        build the unix library
+  Description:        build the Unix library
   Default:            true
 
 Flag top
@@ -18,6 +18,8 @@ Flag top
 Library ipaddr
   Path: lib
   Findlibname: ipaddr
+  BuildDepends: sexplib, sexplib.syntax
+  XMETARequires: sexplib
   Modules: Ipaddr, Macaddr
   NativeOpt: -w @f@p@u@s@40
   ByteOpt:   -w @f@p@u@s@40

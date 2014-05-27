@@ -15,7 +15,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-exception Parse_error of string * string
+open Sexplib.Std
+
+exception Parse_error of string * string with sexp
 
 let need_more x = Parse_error ("not enough data", x)
 
@@ -106,6 +108,13 @@ let to_string ?(sep=':') x =
     (chri x 5)
 
 let to_bytes x = x
+
+let sexp_of_t m = Sexplib.Sexp.Atom (to_string m)
+
+let t_of_sexp m =
+  match m with
+  | Sexplib.Sexp.Atom m -> of_string_exn m
+  | _ -> raise (Failure "Macaddr.t: Unexpected non-atom in sexp")
 
 let broadcast = String.make 6 '\255'
 

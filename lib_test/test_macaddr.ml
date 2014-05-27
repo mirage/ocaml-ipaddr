@@ -24,7 +24,13 @@ let test_string_rt () =
     "ca-fe-ba-be-ee-ee", '-';
   ] in
   List.iter (fun (addr,sep) ->
-    assert_equal ~msg:addr (to_string ~sep (of_string_exn addr)) addr) addrs
+    let os = of_string_exn addr in
+    let ts = to_string ~sep os in
+    assert_equal ~msg:(addr ^ " <> " ^ ts) ts addr;
+    let os = t_of_sexp (sexp_of_t os) in
+    let ts = to_string ~sep os in
+    assert_equal ~msg:(addr ^ " <> " ^ ts) ts addr;
+  ) addrs
 
 let test_string_rt_bad () =
   let addrs = [

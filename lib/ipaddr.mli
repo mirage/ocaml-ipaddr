@@ -18,7 +18,7 @@
 (** A library for manipulation of IP address representations. *)
 
 (** Raised when parsing of IP address syntax fails. *)
-exception Parse_error of string * string
+exception Parse_error of string * string with sexp
 
 type bytes = string
 
@@ -31,11 +31,12 @@ type scope =
 | Site
 | Organization
 | Global
+with sexp
 
 (** A collection of functions for IPv4 addresses. *)
 module V4 : sig
   (** Type of the internet protocol v4 address of a host *)
-  type t
+  type t with sexp
   val compare : t -> t -> int
 
   (** Converts the low bytes of four int values into an abstract {! V4.t }. *)
@@ -126,10 +127,11 @@ module V4 : sig
 
   (** A module for manipulating IPv4 network prefixes. *)
   module Prefix : sig
-    type addr = t
+    type addr = t with sexp
 
     (** Type of a internet protocol subnet *)
-    type t
+    type t with sexp
+
     val compare : t -> t -> int
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
@@ -262,7 +264,7 @@ end
 (** A collection of functions for IPv6 addresses. *)
 module V6 : sig
   (** Type of the internet protocol v6 address of a host *)
-  type t
+  type t with sexp
   val compare : t -> t -> int
 
   (** Converts the low bytes of eight int values into an abstract
@@ -353,10 +355,11 @@ module V6 : sig
 
   (** A module for manipulating IPv6 network prefixes. *)
   module Prefix : sig
-    type addr = t
+    type addr = t with sexp
 
     (** Type of a internet protocol subnet *)
-    type t
+    type t with sexp
+
     val compare : t -> t -> int
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
@@ -474,10 +477,10 @@ module V6 : sig
 end
 
 (** Type of either an IPv4 value or an IPv6 value *)
-type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 with sexp
 
 (** Type of any IP address *)
-type t = (V4.t,V6.t) v4v6
+type t = (V4.t,V6.t) v4v6 with sexp
 
 val compare : t -> t -> int
 
@@ -535,10 +538,10 @@ val is_multicast : t -> bool
 val is_private : t -> bool
 
 module Prefix : sig
-  type addr = t
+  type addr = t with sexp
 
   (** Type of a internet protocol subnet *)
-  type t = (V4.Prefix.t, V6.Prefix.t) v4v6
+  type t = (V4.Prefix.t, V6.Prefix.t) v4v6 with sexp
 
   val compare : t -> t -> int
 
