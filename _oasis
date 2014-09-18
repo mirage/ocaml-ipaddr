@@ -19,8 +19,8 @@ Flag top
 Library ipaddr
   Path: lib
   Findlibname: ipaddr
-  BuildDepends: sexplib, sexplib.syntax
-  XMETARequires: sexplib
+  BuildDepends: bytes, sexplib, sexplib.syntax
+  XMETARequires: bytes, sexplib
   Modules: Ipaddr, Macaddr
   NativeOpt: -w @f@p@u@s@40
   ByteOpt:   -w @f@p@u@s@40

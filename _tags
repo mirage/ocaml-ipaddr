@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: f9f16d223cb17e92bb389adad5387e15)
+# DO NOT EDIT (digest: ca6d0ca33b49d735e479caedbeb4ec59)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -21,6 +21,7 @@
 <lib/*.ml{,i}>: oasis_library_ipaddr_native
 # Library ipaddr_unix
 "lib/ipaddr_unix.cmxs": use_ipaddr_unix
+<lib/*.ml{,i}>: pkg_bytes
 <lib/*.ml{,i}>: pkg_sexplib
 <lib/*.ml{,i}>: pkg_sexplib.syntax
 <lib/*.ml{,i}>: pkg_unix
