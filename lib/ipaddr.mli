@@ -20,8 +20,6 @@
 (** Raised when parsing of IP address syntax fails. *)
 exception Parse_error of string * string with sexp
 
-type bytes = string
-
 (** Type of ordered address scope classifications *)
 type scope =
 | Point

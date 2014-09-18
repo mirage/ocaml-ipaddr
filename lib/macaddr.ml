@@ -68,10 +68,10 @@ let parse_hex_int term s i =
   else raise (need_more s)
 
 let parse_sextuple s i =
-  let m = String.create 6 in
+  let m = Bytes.create 6 in
   try
     let p = !i in
-    m.[0] <- Char.chr (parse_hex_int [':';'-'] s i);
+    Bytes.set m 0 @@ Char.chr (parse_hex_int [':';'-'] s i);
     if !i >= String.length s
     then raise (need_more s)
     else
@@ -80,12 +80,12 @@ let parse_sextuple s i =
       incr i;
       for k=1 to 4 do
         let p = !i in
-        m.[k] <- Char.chr (parse_hex_int sep s i);
+        Bytes.set m k @@ Char.chr (parse_hex_int sep s i);
         (if !i - p <> 2 then raise (Parse_error ("hex pairs required",s)));
         incr i;
       done;
       let p = !i in
-      m.[5] <- Char.chr (parse_hex_int [] s i);
+      Bytes.set m 5 @@ Char.chr (parse_hex_int [] s i);
       (if !i - p <> 2 then raise (Parse_error ("hex pairs required",s)));
       m
   with Invalid_argument "Char.chr" ->
@@ -119,10 +119,10 @@ let t_of_sexp m =
 let broadcast = String.make 6 '\255'
 
 let make_local bytegenf =
-  let x = String.create 6 in
+  let x = Bytes.create 6 in
   (* set locally administered and unicast bits *)
-  x.[0] <- Char.chr ((((bytegenf 0) lor 2) lsr 1) lsl 1);
-  for i = 1 to 5 do x.[i] <- Char.chr (bytegenf i) done;
+  Bytes.set x 0 @@  Char.chr ((((bytegenf 0) lor 2) lsr 1) lsl 1);
+  for i = 1 to 5 do Bytes.set x i @@ Char.chr (bytegenf i) done;
   x
 
 let get_oui x =
