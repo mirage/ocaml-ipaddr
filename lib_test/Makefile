@@ -1,6 +1,6 @@
 .PHONY: all
 
-FLAGS=-package oUnit -package sexplib -g
+FLAGS=-package oUnit -package sexplib -package cstruct -g
 
 all: test_ipaddr.ml test_macaddr.ml
 	ocamlfind ocamlc -o test_ipaddr $(FLAGS) -I ../_build/lib \

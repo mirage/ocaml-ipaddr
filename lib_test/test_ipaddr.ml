@@ -91,6 +91,11 @@ module Test_v4 = struct
     assert_equal ~msg:(String.escaped addr)
       V4.(to_bytes (of_bytes_exn addr)) addr
 
+  let test_cstruct_rt () =
+    let addr = "\254\099\003\128" in
+    assert_equal ~msg:(String.escaped addr)
+      (Cstruct.to_string V4.(to_cstruct (of_cstruct_exn (Cstruct.of_string addr)))) addr
+
   let test_bytes_rt_bad () =
     let addrs = [
       need_more "\254\099\003";
@@ -99,6 +104,16 @@ module Test_v4 = struct
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:(String.escaped addr) exn
         (fun () -> V4.of_bytes_exn addr)
+    ) addrs
+
+  let test_cstruct_rt_bad () =
+    let addrs = [
+      need_more "\254\099\003";
+      too_much "\254\099\003\128\001";
+    ] in
+    List.iter (fun (addr,exn) ->
+      assert_raises ~msg:(String.escaped addr) exn
+        (fun () -> V4.of_cstruct_exn (Cstruct.of_string addr))
     ) addrs
 
   let test_int32_rt () =
@@ -385,6 +400,13 @@ module Test_v6 = struct
     let v6 = V6.of_bytes_exn addr in
     assert_equal ~msg:(String.escaped addr) V6.(to_bytes v6) addr
 
+  let test_cstruct_rt () =
+    let addr =
+      "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\000\001"
+    in
+    let v6 = V6.of_cstruct_exn (Cstruct.of_string addr) in
+    assert_equal ~msg:(String.escaped addr) (Cstruct.to_string V6.(to_cstruct v6)) addr
+
   let test_bytes_rt_bad () =
     let addrs = [
       need_more "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\001";
@@ -394,6 +416,17 @@ module Test_v6 = struct
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:(String.escaped addr) exn
         (fun () -> V6.of_bytes_exn addr)
+    ) addrs
+
+  let test_cstruct_rt_bad () =
+    let addrs = [
+      need_more "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\001";
+      too_much
+        "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\000\000\001";
+    ] in
+    List.iter (fun (addr,exn) ->
+      assert_raises ~msg:(String.escaped addr) exn
+        (fun () -> V6.of_cstruct_exn (Cstruct.of_string addr))
     ) addrs
 
   let test_int32_rt () =

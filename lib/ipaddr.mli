@@ -91,6 +91,30 @@ module V4 : sig
       into [bytes] at offset [offset]. *)
   val to_bytes_raw : t -> bytes -> int -> unit
 
+  (** Cstruct conversion *)
+
+  (** [of_cstruct_exn ipv4_octets] is the address represented
+      by [ipv4_octets]. Raises [Parse_error] if [ipv4_octets] is not a
+      valid representation of an IPv4 address. *)
+  val of_cstruct_exn : Cstruct.t -> t
+
+  (** Same as [of_cstruct_exn] but returns an option type instead of raising
+      an exception. *)
+  val of_cstruct : Cstruct.t -> t option
+
+  (** Same as [of_cstruct_exn] but take an extra paramenter, the offset into
+      the cstruct for reading. *)
+  val of_cstruct_raw : Cstruct.t -> int -> t
+
+  (** [to_cstruct ipv4] is a cstruct of length 4 encoding [ipv4].  The cstruct
+      is allocated using [allocator]. If [allocator] is not provided,
+      [Cstruct.create] is used. *)
+  val to_cstruct : ?allocator:(int -> Cstruct.t) -> t -> Cstruct.t
+
+  (** [to_cstruct_raw ipv4 cs offset] writes the 4 byte encoding of [ipv4]
+      into [cs] at offset [offset]. *)
+  val to_cstruct_raw : t -> Cstruct.t -> int -> unit
+
   (** Int conversion *)
 
   (** [of_int32 ipv4_packed] is the address represented by
@@ -319,6 +343,30 @@ module V6 : sig
   (** [to_bytes_raw ipv6 bytes offset] writes the 16 bytes encoding of [ipv6]
       into [bytes] at offset [offset]. *)
   val to_bytes_raw : t -> bytes -> int -> unit
+
+  (** Cstruct conversion *)
+
+  (** [of_cstruct_exn ipv6_octets] is the address represented
+      by [ipv6_octets]. Raises [Parse_error] if [ipv6_octets] is not a
+      valid representation of an IPv6 address. *)
+  val of_cstruct_exn : Cstruct.t -> t
+
+  (** Same as [of_cstruct_exn] but returns an option type instead of raising
+      an exception. *)
+  val of_cstruct : Cstruct.t -> t option
+
+  (** Same as [of_cstruct_exn] but takes an extra paramenter, the offset into
+      the cstruct for reading. *)
+  val of_cstruct_raw : Cstruct.t -> int -> t
+
+  (** [to_cstruct ipv6] is a cstruct of length 16 encoding [ipv6]. The cstruct
+      is allocated with [allocator]. If [allocator] is not provided,
+      [Cstruct.create] is used. *)
+  val to_cstruct : ?allocator:(int -> Cstruct.t) -> t -> Cstruct.t
+
+  (** [to_cstruct_raw ipv6 cs offset] writes the 16 bytes encoding of [ipv6]
+      into [cs] at offset [offset]. *)
+  val to_cstruct_raw : t -> Cstruct.t -> int -> unit
 
   (** Int conversion *)
 

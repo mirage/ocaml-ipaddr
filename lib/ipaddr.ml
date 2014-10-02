@@ -176,6 +176,28 @@ module V4 = struct
     to_bytes_raw i b 0;
     b
 
+  (* Cstruct *)
+
+  let of_cstruct_raw cs off =
+    Cstruct.BE.get_uint32 cs off
+
+  let of_cstruct_exn cs =
+    let len = Cstruct.len cs in
+    if len > 4 then raise (too_much (Cstruct.to_string cs));
+    if len < 4 then raise (need_more (Cstruct.to_string cs));
+    of_cstruct_raw cs 0
+
+  let of_cstruct cs =
+    try Some (of_cstruct_exn cs) with _ -> None
+
+  let to_cstruct_raw i cs off =
+    Cstruct.BE.set_uint32 cs off i
+
+  let to_cstruct ?(allocator = Cstruct.create) i =
+    let cs = allocator 4 in
+    to_cstruct_raw i cs 0;
+    cs
+
   (* Int32*)
   let of_int32 i = i
   let to_int32 i = i
@@ -356,7 +378,7 @@ module B128 = struct
     V4.to_bytes_raw c byte (o+8);
     V4.to_bytes_raw d byte (o+12)
 
-  let of_bytes_exn bs = (* TODO : from cstruct *)
+  let of_bytes_exn bs =
     let len = String.length bs in
     if len > 16 then raise (too_much bs);
     if len < 16 then raise (need_more bs);
@@ -563,14 +585,14 @@ module V6 = struct
 
   (* byte conversion *)
 
-  let of_bytes_raw bs o = (* TODO : from cstruct *)
+  let of_bytes_raw bs o =
     let hihi = V4.of_bytes_raw bs (o + 0) in
     let hilo = V4.of_bytes_raw bs (o + 4) in
     let lohi = V4.of_bytes_raw bs (o + 8) in
     let lolo = V4.of_bytes_raw bs (o + 12) in
     of_int32 (hihi, hilo, lohi, lolo)
 
-  let of_bytes_exn bs = (* TODO : from cstruct *)
+  let of_bytes_exn bs =
     let len = String.length bs in
     if len > 16 then raise (too_much bs);
     if len < 16 then raise (need_more bs);
@@ -581,6 +603,36 @@ module V6 = struct
     let bs = String.create 16 in
     to_bytes_raw i bs 0;
     bs
+
+  (* Cstruct *)
+
+  let of_cstruct_raw cs off =
+    let hihi = Cstruct.BE.get_uint32 cs (off + 0) in
+    let hilo = Cstruct.BE.get_uint32 cs (off + 4) in
+    let lohi = Cstruct.BE.get_uint32 cs (off + 8) in
+    let lolo = Cstruct.BE.get_uint32 cs (off + 12) in
+    of_int32 (hihi, hilo, lohi, lolo)
+
+  let of_cstruct_exn cs =
+    let len = Cstruct.len cs in
+    if len > 16 then raise (too_much (Cstruct.to_string cs));
+    if len < 16 then raise (need_more (Cstruct.to_string cs));
+    of_cstruct_raw cs 0
+
+  let of_cstruct cs =
+    try Some (of_cstruct_exn cs) with _ -> None
+
+  let to_cstruct_raw i cs off =
+    let a, b, c, d = to_int32 i in
+    Cstruct.BE.set_uint32 cs (0 + off) a;
+    Cstruct.BE.set_uint32 cs (4 + off) b;
+    Cstruct.BE.set_uint32 cs (8 + off) c;
+    Cstruct.BE.set_uint32 cs (12 + off) d
+
+  let to_cstruct ?(allocator = Cstruct.create) i =
+    let cs = allocator 16 in
+    to_cstruct_raw i cs 0;
+    cs
 
  (* constant *)
 
