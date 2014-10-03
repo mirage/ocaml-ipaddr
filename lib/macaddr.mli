@@ -44,12 +44,25 @@ val of_string_exn : string -> t
     exception. *)
 val of_string : string -> t option
 
+(** [of_cstruct cs] is the hardware address extracted from
+    [cs]. Raises [Parse_error] if [cs] does not have length 6. *)
+val of_cstruct : Cstruct.t -> t
+
 (** [to_bytes mac_addr] is a string of size 6 encoding [mac_addr]. *)
 val to_bytes : t -> string
 
 (** [to_string ?(sep=':') mac_addr] is the [sep]-separated string representation
     of [mac_addr], i.e. xx:xx:xx:xx:xx:xx. *)
 val to_string : ?sep:char -> t -> string
+
+(** [to_cstruct_raw cs off mac_addr] writes the 6 bytes encoding [mac_addr] in
+    [cs] at offset [off]. *)
+val to_cstruct_raw : Cstruct.t -> int -> t -> unit
+
+(** [to_cstruct mac_addr] is a cstruct of length 6 encoding [mac_addr].  The
+    cstruct is allocated using [allocator]. If [allocator] is not provided,
+    [Cstruct.create] is used. *)
+val to_cstruct : ?allocator:(int -> Cstruct.t) -> t -> Cstruct.t
 
 (** [broadcast] is ff:ff:ff:ff:ff:ff. *)
 val broadcast : t

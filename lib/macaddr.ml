@@ -96,6 +96,11 @@ let of_string_exn x = parse_sextuple x (ref 0)
 
 let of_string x = try Some (of_string_exn x) with _ -> None
 
+let of_cstruct cs =
+  if Cstruct.len cs <> 6
+  then raise (Parse_error ("MAC is exactly 6 bytes", Cstruct.to_string cs))
+  else Cstruct.to_string cs
+
 let chri x i = Char.code x.[i]
 
 let to_string ?(sep=':') x =
@@ -108,6 +113,14 @@ let to_string ?(sep=':') x =
     (chri x 5)
 
 let to_bytes x = x
+
+let to_cstruct_raw cs off x =
+  Cstruct.blit_from_string x 0 cs off 6
+
+let to_cstruct ?(allocator = Cstruct.create) x =
+  let cs = allocator 6 in
+  to_cstruct_raw cs 0 x;
+  cs
 
 let sexp_of_t m = Sexplib.Sexp.Atom (to_string m)
 
