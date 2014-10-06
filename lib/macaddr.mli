@@ -57,7 +57,7 @@ val to_string : ?sep:char -> t -> string
 
 (** [to_cstruct_raw cs off mac_addr] writes the 6 bytes encoding [mac_addr] in
     [cs] at offset [off]. *)
-val to_cstruct_raw : Cstruct.t -> int -> t -> unit
+val to_cstruct_raw : t -> Cstruct.t -> int -> unit
 
 (** [to_cstruct mac_addr] is a cstruct of length 6 encoding [mac_addr].  The
     cstruct is allocated using [allocator]. If [allocator] is not provided,

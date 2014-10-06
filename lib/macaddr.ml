@@ -114,12 +114,12 @@ let to_string ?(sep=':') x =
 
 let to_bytes x = x
 
-let to_cstruct_raw cs off x =
+let to_cstruct_raw x cs off =
   Cstruct.blit_from_string x 0 cs off 6
 
 let to_cstruct ?(allocator = Cstruct.create) x =
   let cs = allocator 6 in
-  to_cstruct_raw cs 0 x;
+  to_cstruct_raw x cs 0;
   cs
 
 let sexp_of_t m = Sexplib.Sexp.Atom (to_string m)
