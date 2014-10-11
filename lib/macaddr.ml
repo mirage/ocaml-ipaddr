@@ -96,7 +96,7 @@ let of_string_exn x = parse_sextuple x (ref 0)
 
 let of_string x = try Some (of_string_exn x) with _ -> None
 
-let of_cstruct cs =
+let of_cstruct_exn cs =
   if Cstruct.len cs <> 6
   then raise (Parse_error ("MAC is exactly 6 bytes", Cstruct.to_string cs))
   else Cstruct.to_string cs

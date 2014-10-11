@@ -44,9 +44,9 @@ val of_string_exn : string -> t
     exception. *)
 val of_string : string -> t option
 
-(** [of_cstruct cs] is the hardware address extracted from
+(** [of_cstruct_exn cs] is the hardware address extracted from
     [cs]. Raises [Parse_error] if [cs] does not have length 6. *)
-val of_cstruct : Cstruct.t -> t
+val of_cstruct_exn : Cstruct.t -> t
 
 (** [to_bytes mac_addr] is a string of size 6 encoding [mac_addr]. *)
 val to_bytes : t -> string
