@@ -678,7 +678,7 @@ module V6 = struct
     let of_addr ip = make 128 ip
 
     let global_unicast_001  = make  3 (ip 0x2000 0 0 0 0 0 0 0)
-    let link                = make 10 (ip 0xfe80 0 0 0 0 0 0 0)
+    let link                = make 64 (ip 0xfe80 0 0 0 0 0 0 0)
     let unique_local        = make  7 (ip 0xfc00 0 0 0 0 0 0 0)
     let multicast           = make  8 (ip 0xff00 0 0 0 0 0 0 0)
     let ipv4_mapped         = make 96 (ip 0 0 0 0 0 0xffff 0 0)

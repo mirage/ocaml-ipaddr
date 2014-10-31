@@ -432,7 +432,7 @@ module V6 : sig
     (** The Unique Local Unicast (ULA), fc00::/7. *)
     val unique_local       : t
 
-    (** Link-Local Unicast, fe80::/10. *)
+    (** Link-Local Unicast, fe80::/64. *)
     val link               : t
 
     (** The multicast network, ff00::/8. *)
