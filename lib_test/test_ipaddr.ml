@@ -453,7 +453,7 @@ module Test_v6 = struct
   let test_prefix_bits () =
     let pairs = V6.Prefix.([
       global_unicast_001, 3;
-      link,              10;
+      link,              64;
       unique_local,       7;
       multicast,          8;
       ipv4_mapped,       96;
