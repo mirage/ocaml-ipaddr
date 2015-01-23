@@ -1,8 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: f9f16d223cb17e92bb389adad5387e15)
+# DO NOT EDIT (digest: 8095379487a23e9cb96126c423aa7022)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
+true: annot, bin_annot
 <**/.svn>: -traverse
 <**/.svn>: not_hygienic
 ".bzr": -traverse
@@ -16,15 +17,16 @@
 # Library ipaddr
 "lib/ipaddr.cmxs": use_ipaddr
 <lib/ipaddr.{cma,cmxa}>: oasis_library_ipaddr_byte
-<lib/*.ml{,i}>: oasis_library_ipaddr_byte
+<lib/*.ml{,i,y}>: oasis_library_ipaddr_byte
 <lib/ipaddr.{cma,cmxa}>: oasis_library_ipaddr_native
-<lib/*.ml{,i}>: oasis_library_ipaddr_native
+<lib/*.ml{,i,y}>: oasis_library_ipaddr_native
 # Library ipaddr_unix
 "lib/ipaddr_unix.cmxs": use_ipaddr_unix
-<lib/*.ml{,i}>: pkg_sexplib
-<lib/*.ml{,i}>: pkg_sexplib.syntax
-<lib/*.ml{,i}>: pkg_unix
-<lib/*.ml{,i}>: use_ipaddr
+<lib/*.ml{,i,y}>: pkg_cstruct
+<lib/*.ml{,i,y}>: pkg_sexplib
+<lib/*.ml{,i,y}>: pkg_sexplib.syntax
+<lib/*.ml{,i,y}>: pkg_unix
+<lib/*.ml{,i,y}>: use_ipaddr
 # Library ipaddr_top
 "top/ipaddr_top.cmxs": use_ipaddr_top
 # OASIS_STOP

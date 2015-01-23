@@ -91,6 +91,25 @@ module V4 : sig
       into [bytes] at offset [offset]. *)
   val to_bytes_raw : t -> bytes -> int -> unit
 
+  (** Cstruct conversion *)
+
+  (** [of_cstruct_exn ipv4_octets] is the address represented by [ipv4_octets]. 
+      Raises [Parse_error] if [ipv4_octets] is not a valid representation of an 
+      IPv4 address. *)
+  val of_cstruct_exn : Cstruct.t -> t
+
+  (** Same as [of_cstruct_exn] but take an extra paramenter, the offset into
+      the bytes for reading. *)
+  val of_cstruct_raw : Cstruct.t -> int -> t
+
+  (** [to_cstruct ipv4] allocates a new Cstruct and writes the 4 byte encoding 
+      of [ipv4] into it. *)
+  val to_cstruct : t -> Cstruct.t
+
+  (** [to_cstruct_raw ipv4 cstruct offset] writes the 4 bytes encoding of 
+      [ipv4] into [cstruct] at offset [offset]. *)
+  val to_cstruct_raw : t -> Cstruct.t -> int -> unit
+
   (** Int conversion *)
 
   (** [of_int32 ipv4_packed] is the address represented by
@@ -319,6 +338,25 @@ module V6 : sig
   (** [to_bytes_raw ipv6 bytes offset] writes the 16 bytes encoding of [ipv6]
       into [bytes] at offset [offset]. *)
   val to_bytes_raw : t -> bytes -> int -> unit
+
+  (** Cstruct conversion *)
+
+  (** [of_cstruct_exn ipv6_octets] is the address represented by [ipv6_octets]. 
+      Raises [Parse_error] if [ipv6_octets] is not a valid representation of an 
+      IPv6 address. *)
+  val of_cstruct_exn : Cstruct.t -> t
+
+  (** Same as [of_cstruct_exn] but take an extra paramenter, the offset into
+      the bytes for reading. *)
+  val of_cstruct_raw : Cstruct.t -> int -> t
+
+  (** [to_cstruct ipv6] allocates a new Cstruct and writes the 16 byte encoding 
+      of [ipv6] into it. *)
+  val to_cstruct : t -> Cstruct.t
+
+  (** [to_cstruct_raw ipv6 cstruct offset] writes the 16 byte encoding of 
+      [ipv6] into [cstruct] at offset [offset]. *)
+  val to_cstruct_raw : t -> Cstruct.t -> int -> unit
 
   (** Int conversion *)
 

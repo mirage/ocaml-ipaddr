@@ -176,6 +176,31 @@ module V4 = struct
     to_bytes_raw i b 0;
     b
 
+  (* Cstruct conversion *)
+  let of_cstruct_raw cs o =
+    make 
+      (Char.code (Cstruct.get_char cs (0 + o)))
+      (Char.code (Cstruct.get_char cs (1 + o)))
+      (Char.code (Cstruct.get_char cs (2 + o)))
+      (Char.code (Cstruct.get_char cs (3 + o)))
+
+  let of_cstruct_exn cs =
+    let len = Cstruct.len cs in
+    if len < 4 then raise (need_more (Cstruct.to_string cs));
+    if len > 4 then raise (too_much (Cstruct.to_string cs));
+    of_cstruct_raw cs 0
+
+  let to_cstruct_raw i cs o =
+    Cstruct.set_char cs (0 + o) (Char.chr ((|~) (i >! 24)));
+    Cstruct.set_char cs (1 + o) (Char.chr ((|~) (i >! 16)));
+    Cstruct.set_char cs (2 + o) (Char.chr ((|~) (i >!  8)));
+    Cstruct.set_char cs (3 + o) (Char.chr ((|~) (i >!  0)))
+
+  let to_cstruct i =
+    let cs = Cstruct.create 4 in
+    to_cstruct_raw i cs 0;
+    cs
+
   (* Int32*)
   let of_int32 i = i
   let to_int32 i = i
@@ -356,7 +381,7 @@ module B128 = struct
     V4.to_bytes_raw c byte (o+8);
     V4.to_bytes_raw d byte (o+12)
 
-  let of_bytes_exn bs = (* TODO : from cstruct *)
+  let of_bytes_exn bs = 
     let len = String.length bs in
     if len > 16 then raise (too_much bs);
     if len < 16 then raise (need_more bs);
@@ -563,14 +588,14 @@ module V6 = struct
 
   (* byte conversion *)
 
-  let of_bytes_raw bs o = (* TODO : from cstruct *)
+  let of_bytes_raw bs o = 
     let hihi = V4.of_bytes_raw bs (o + 0) in
     let hilo = V4.of_bytes_raw bs (o + 4) in
     let lohi = V4.of_bytes_raw bs (o + 8) in
     let lolo = V4.of_bytes_raw bs (o + 12) in
     of_int32 (hihi, hilo, lohi, lolo)
 
-  let of_bytes_exn bs = (* TODO : from cstruct *)
+  let of_bytes_exn bs = 
     let len = String.length bs in
     if len > 16 then raise (too_much bs);
     if len < 16 then raise (need_more bs);
@@ -581,6 +606,32 @@ module V6 = struct
     let bs = String.create 16 in
     to_bytes_raw i bs 0;
     bs
+
+  (* cstruct conversion *)
+
+  let of_cstruct_raw cs o =
+    let hihi = V4.of_cstruct_raw cs (o + 0) in
+    let hilo = V4.of_cstruct_raw cs (o + 4) in
+    let lohi = V4.of_cstruct_raw cs (o + 8) in
+    let lolo = V4.of_cstruct_raw cs (o + 12) in
+    of_int32 (hihi, hilo, lohi, lolo)
+
+  let of_cstruct_exn cs =
+    let len = Cstruct.len cs in
+    if len > 16 then raise (too_much (Cstruct.to_string cs));
+    if len < 16 then raise (need_more (Cstruct.to_string cs));
+    of_cstruct_raw cs 0
+
+  let to_cstruct_raw (a,b,c,d) cs o =
+    V4.to_cstruct_raw a cs (0+0);
+    V4.to_cstruct_raw b cs (0+4);
+    V4.to_cstruct_raw c cs (0+8);
+    V4.to_cstruct_raw d cs (0+12)
+
+  let to_cstruct i =
+    let cs = Cstruct.create 16 in
+    to_cstruct_raw i cs 0;
+    cs
 
  (* constant *)
 
