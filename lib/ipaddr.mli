@@ -20,8 +20,6 @@
 (** Raised when parsing of IP address syntax fails. *)
 exception Parse_error of string * string with sexp
 
-type bytes = string
-
 (** Type of ordered address scope classifications *)
 type scope =
 | Point
@@ -74,22 +72,22 @@ module V4 : sig
   (** [of_bytes_exn ipv4_octets] is the address represented
       by [ipv4_octets]. Raises [Parse_error] if [ipv4_octets] is not a
       valid representation of an IPv4 address. *)
-  val of_bytes_exn : bytes -> t
+  val of_bytes_exn : string -> t
 
   (** Same as [of_bytes_exn] but returns an option type instead of raising
       an exception. *)
-  val of_bytes : bytes -> t option
+  val of_bytes : string -> t option
 
   (** Same as [of_bytes_exn] but take an extra paramenter, the offset into
       the bytes for reading. *)
-  val of_bytes_raw : bytes -> int -> t
+  val of_bytes_raw : string -> int -> t
 
   (** [to_bytes ipv4] is a string of length 4 encoding [ipv4]. *)
-  val to_bytes : t -> bytes
+  val to_bytes : t -> string
 
   (** [to_bytes_raw ipv4 bytes offset] writes the 4 byte encoding of [ipv4]
       into [bytes] at offset [offset]. *)
-  val to_bytes_raw : t -> bytes -> int -> unit
+  val to_bytes_raw : t -> Bytes.t -> int -> unit
 
   (** Int conversion *)
 
@@ -303,22 +301,22 @@ module V6 : sig
   (** [of_bytes_exn ipv6_octets] is the address represented
       by [ipv6_octets]. Raises [Parse_error] if [ipv6_octets] is not a
       valid representation of an IPv6 address. *)
-  val of_bytes_exn : bytes -> t
+  val of_bytes_exn : string -> t
 
   (** Same as [of_bytes_exn] but returns an option type instead of raising
       an exception. *)
-  val of_bytes : bytes -> t option
+  val of_bytes : string -> t option
 
   (** Same as [of_bytes_exn] but takes an extra paramenter, the offset into
       the bytes for reading. *)
-  val of_bytes_raw : bytes -> int -> t
+  val of_bytes_raw : string -> int -> t
 
   (** [to_bytes ipv6] is a string of length 16 encoding [ipv6]. *)
-  val to_bytes : t -> bytes
+  val to_bytes : t -> string
 
   (** [to_bytes_raw ipv6 bytes offset] writes the 16 bytes encoding of [ipv6]
       into [bytes] at offset [offset]. *)
-  val to_bytes_raw : t -> bytes -> int -> unit
+  val to_bytes_raw : t -> Bytes.t -> int -> unit
 
   (** Int conversion *)
 
