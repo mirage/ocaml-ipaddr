@@ -1,8 +1,21 @@
 .PHONY: all clean
 
-FLAGS=-package oUnit -package sexplib -g -safe-string -principal
+OCAML_VERSION=$(shell ocaml -version | sed -n "s/.*version \(.*\)$$/\1/p")
+
+ifneq      (,$(findstring 3.12.,$(OCAML_VERSION)))
+SAFE_STRING=
+else ifneq (,$(findstring 4.00.,$(OCAML_VERSION)))
+SAFE_STRING=
+else ifneq (,$(findstring 4.01.,$(OCAML_VERSION)))
+SAFE_STRING=
+else
+SAFE_STRING=-safe-string
+endif
+
+FLAGS=-package oUnit,sexplib,bytes -g $(SAFE_STRING) -principal
 
 all: test_ipaddr.ml test_macaddr.ml
+	@echo Detected OCaml $(OCAML_VERSION)
 	ocamlfind ocamlc -o test_ipaddr $(FLAGS) -I ../_build/lib \
 		../_build/lib/macaddr.cmo ../_build/lib/ipaddr.cmo \
 		-linkpkg test_ipaddr.ml
