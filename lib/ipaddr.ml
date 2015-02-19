@@ -19,7 +19,6 @@ open Sexplib.Std
 
 exception Parse_error of string * string with sexp
 
-type bytes = string
 type scope =
 | Point
 | Interface
@@ -166,15 +165,15 @@ module V4 = struct
   let of_bytes bs = try Some (of_bytes_exn bs) with _ -> None
 
   let to_bytes_raw i b o =
-    b.[0 + o] <- Char.chr ((|~) (i >! 24));
-    b.[1 + o] <- Char.chr ((|~) (i >! 16));
-    b.[2 + o] <- Char.chr ((|~) (i >!  8));
-    b.[3 + o] <- Char.chr ((|~) (i >!  0))
+    Bytes.set b (0 + o) (Char.chr ((|~) (i >! 24)));
+    Bytes.set b (1 + o) (Char.chr ((|~) (i >! 16)));
+    Bytes.set b (2 + o) (Char.chr ((|~) (i >!  8)));
+    Bytes.set b (3 + o) (Char.chr ((|~) (i >!  0)))
 
   let to_bytes i =
-    let b = String.create 4 in
+    let b = Bytes.create 4 in
     to_bytes_raw i b 0;
-    b
+    Bytes.to_string b
 
   (* Int32*)
   let of_int32 i = i
@@ -460,7 +459,7 @@ module V6 = struct
     else if res_len = 0
     then raise (need_more s)
     else
-      let a = Array.create 8 0 in
+      let a = Array.make 8 0 in
       let missing =
         if !compressed
         then 8 - (res_len - 1)
@@ -578,9 +577,9 @@ module V6 = struct
 
   let of_bytes bs = try Some (of_bytes_exn bs) with _ -> None
   let to_bytes i =
-    let bs = String.create 16 in
+    let bs = Bytes.create 16 in
     to_bytes_raw i bs 0;
-    bs
+    Bytes.to_string bs
 
  (* constant *)
 

@@ -21,15 +21,15 @@ exception Parse_error of string * string with sexp
 
 let need_more x = Parse_error ("not enough data", x)
 
-type t = string (* length 6 only *)
+type t = bytes (* length 6 only *)
 
-let compare = String.compare
+let compare = Bytes.compare
 
 (* Raw MAC address off the wire (network endian) *)
 let of_bytes_exn x =
   if String.length x <> 6
   then raise (Parse_error ("MAC is exactly 6 bytes", x))
-  else x
+  else Bytes.of_string x
 
 let of_bytes x = try Some (of_bytes_exn x) with _ -> None
 
@@ -68,10 +68,10 @@ let parse_hex_int term s i =
   else raise (need_more s)
 
 let parse_sextuple s i =
-  let m = String.create 6 in
+  let m = Bytes.create 6 in
   try
     let p = !i in
-    m.[0] <- Char.chr (parse_hex_int [':';'-'] s i);
+    Bytes.set m 0 (Char.chr (parse_hex_int [':';'-'] s i));
     if !i >= String.length s
     then raise (need_more s)
     else
@@ -80,12 +80,12 @@ let parse_sextuple s i =
       incr i;
       for k=1 to 4 do
         let p = !i in
-        m.[k] <- Char.chr (parse_hex_int sep s i);
+        Bytes.set m k (Char.chr (parse_hex_int sep s i));
         (if !i - p <> 2 then raise (Parse_error ("hex pairs required",s)));
         incr i;
       done;
       let p = !i in
-      m.[5] <- Char.chr (parse_hex_int [] s i);
+      Bytes.set m 5 (Char.chr (parse_hex_int [] s i));
       (if !i - p <> 2 then raise (Parse_error ("hex pairs required",s)));
       m
   with Invalid_argument "Char.chr" ->
@@ -96,7 +96,7 @@ let of_string_exn x = parse_sextuple x (ref 0)
 
 let of_string x = try Some (of_string_exn x) with _ -> None
 
-let chri x i = Char.code x.[i]
+let chri x i = Char.code (Bytes.get x i)
 
 let to_string ?(sep=':') x =
   Printf.sprintf "%02x%c%02x%c%02x%c%02x%c%02x%c%02x"
@@ -107,7 +107,7 @@ let to_string ?(sep=':') x =
     (chri x 4) sep
     (chri x 5)
 
-let to_bytes x = x
+let to_bytes x = Bytes.to_string x
 
 let sexp_of_t m = Sexplib.Sexp.Atom (to_string m)
 
@@ -116,13 +116,13 @@ let t_of_sexp m =
   | Sexplib.Sexp.Atom m -> of_string_exn m
   | _ -> raise (Failure "Macaddr.t: Unexpected non-atom in sexp")
 
-let broadcast = String.make 6 '\255'
+let broadcast = Bytes.make 6 '\255'
 
 let make_local bytegenf =
-  let x = String.create 6 in
+  let x = Bytes.create 6 in
   (* set locally administered and unicast bits *)
-  x.[0] <- Char.chr ((((bytegenf 0) lor 2) lsr 1) lsl 1);
-  for i = 1 to 5 do x.[i] <- Char.chr (bytegenf i) done;
+  Bytes.set x 0 (Char.chr ((((bytegenf 0) lor 2) lsr 1) lsl 1));
+  for i = 1 to 5 do Bytes.set x i (Char.chr (bytegenf i)) done;
   x
 
 let get_oui x =

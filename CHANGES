@@ -1,5 +1,8 @@
-2.5.1 (trunk):
+2.6.0 (trunk):
 * Change IPv6 link-local address prefix from fe80::/10 to fe80::/64. (#39)
+* Remove type bytes = string alias (potentially breaking)
+* Turn on -safe-string (#41)
+* {V4,V6}.to_bytes_raw now uses Bytes.t rather than string (potentially breaking)
 
 2.5.0 (2014-05-27):
 * Add `with sexp` (de)serializers to all of the Ipaddr and Macaddr types. (#31)
