@@ -498,6 +498,13 @@ module V6 : sig
       hierarchy. *)
   val scope : t -> scope
 
+  (** [link_address_of_mac mac] is the link-local address for an
+      Ethernet interface derived by the IEEE MAC -> EUI-64 map with
+      the Universal/Local bit complemented for IPv6.
+      @see <https://tools.ietf.org/html/rfc2464#section-4> RFC 2464
+  *)
+  val link_address_of_mac : Macaddr.t -> t
+
   (** [is_global ipv6] is a predicate indicating whether [ipv6] globally
       addresses a node. *)
   val is_global : t -> bool

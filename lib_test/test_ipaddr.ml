@@ -606,6 +606,13 @@ module Test_v6 = struct
     assert_equal ~msg:"domain_name"
       (String.concat "." (V6.to_domain_name ip)) name
 
+  let test_link_address_of_mac () =
+    let mac = Macaddr.of_string_exn "34-56-78-9A-BC-DE" in
+    let ip_str = V6.(to_string (link_address_of_mac mac)) in
+    let expected = "fe80::3656:78ff:fe9a:bcde" in
+    assert_equal ~msg:("link_address_of_mac "^ip_str^" <> "^expected)
+      ip_str expected
+
   let suite = "Test V6" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -625,6 +632,7 @@ module Test_v6 = struct
     "prefix_map"           >:: test_prefix_map;
     "multicast_mac"        >:: test_multicast_mac;
     "domain_name"          >:: test_domain_name;
+    "link_address_of_mac"  >:: test_link_address_of_mac;
   ]
 end
 

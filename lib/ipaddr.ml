@@ -811,6 +811,19 @@ module V6 = struct
     else if i = unspecified then Point
     else Global
 
+  let link_address_of_mac =
+    let c b i = Char.code (String.get b i) in
+    fun mac ->
+      let bmac = Macaddr.to_bytes mac in
+      let c_0 = c bmac 0 lxor 2 in
+      let addr = make 0 0 0 0
+        (c_0      lsl 8 + c bmac 1)
+        (c bmac 2 lsl 8 + 0xff    )
+        (0xfe00         + c bmac 3)
+        (c bmac 4 lsl 8 + c bmac 5)
+      in
+      Prefix.(network_address link addr)
+
   let is_global i = (scope i) = Global
   let is_multicast i = Prefix.(mem i multicast)
   let is_private i = (scope i) <> Global
