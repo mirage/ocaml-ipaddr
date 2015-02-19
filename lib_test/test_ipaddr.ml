@@ -283,6 +283,12 @@ module Test_v4 = struct
     assert_equal ~msg:("multicast_mac "^multicast_mac_str^" <> "^mac_str)
       multicast_mac_str mac_str
 
+  let test_domain_name () =
+    let ip = V4.of_string_exn "128.64.32.16" in
+    let name = "16.32.64.128.in-addr.arpa." in
+    assert_equal ~msg:"domain_name"
+      (String.concat "." (V4.to_domain_name ip)) name
+
   let suite = "Test V4" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -303,6 +309,7 @@ module Test_v4 = struct
     "prefix_map"           >:: test_prefix_map;
     "special_addr"         >:: test_special_addr;
     "multicast_mac"        >:: test_multicast_mac;
+    "domain_name"          >:: test_domain_name;
   ]
 end
 
@@ -591,6 +598,14 @@ module Test_v6 = struct
     assert_equal ~msg:("multicast_mac "^multicast_mac_str^" <> "^mac_str)
       multicast_mac_str mac_str
 
+  let test_domain_name () =
+    let ip = V6.of_string_exn "2a00:1450:4009:800::200e" in
+    let name =
+      "e.0.0.2.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.0.9.0.0.4.0.5.4.1.0.0.a.2.ip6.arpa."
+    in
+    assert_equal ~msg:"domain_name"
+      (String.concat "." (V6.to_domain_name ip)) name
+
   let suite = "Test V6" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -609,6 +624,7 @@ module Test_v6 = struct
     "map"                  >:: test_map;
     "prefix_map"           >:: test_prefix_map;
     "multicast_mac"        >:: test_multicast_mac;
+    "domain_name"          >:: test_domain_name;
   ]
 end
 

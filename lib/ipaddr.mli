@@ -40,7 +40,7 @@ module V4 : sig
   (** Converts the low bytes of four int values into an abstract {! V4.t }. *)
   val make : int -> int -> int -> int -> t
 
-  (** Text string conversion *)
+  (** {3 Text string conversion} *)
 
   (** [of_string_exn ipv4_string] is the address represented
       by [ipv4_string]. Raises [Parse_error] if [ipv4_string] is not a
@@ -67,7 +67,7 @@ module V4 : sig
       the formatter [f]. *)
   val pp_hum : Format.formatter -> t -> unit
 
-  (** Bytestring conversion *)
+  (** {3 Bytestring conversion} *)
 
   (** [of_bytes_exn ipv4_octets] is the address represented
       by [ipv4_octets]. Raises [Parse_error] if [ipv4_octets] is not a
@@ -89,7 +89,7 @@ module V4 : sig
       into [bytes] at offset [offset]. *)
   val to_bytes_raw : t -> Bytes.t -> int -> unit
 
-  (** Int conversion *)
+  (** {3 Int conversion} *)
 
   (** [of_int32 ipv4_packed] is the address represented by
       [ipv4_packed]. *)
@@ -105,10 +105,20 @@ module V4 : sig
   (** [to_int16 ipv4] is the 16-bit packed encoding of [ipv4]. *)
   val to_int16 : t -> int * int
 
+  (** {3 MAC conversion} *)
+
   (** [multicast_to_mac ipv4] is the MAC address corresponding to the
       multicast address [ipv4]. Described by
       {{:http://tools.ietf.org/html/rfc1112#section-6.2}RFC 1112}. *)
   val multicast_to_mac : t -> Macaddr.t
+
+  (** {3 Host conversion} *)
+
+  (** [to_domain_name ipv4] is the domain name label list for reverse
+      lookups of [ipv4]. This includes the [.in-addr.arpa.] suffix. *)
+  val to_domain_name : t -> string list
+
+  (** {3 Common addresses} *)
 
   (** [any] is 0.0.0.0. *)
   val any : t
@@ -274,7 +284,7 @@ module V6 : sig
       {! V6.t }. *)
   val make : int -> int -> int -> int -> int -> int -> int -> int -> t
 
-  (** Text string conversion *)
+  (** {3 Text string conversion} *)
 
   (** [of_string_exn ipv6_string] is the address represented
       by [ipv6_string]. Raises [Parse_error] if [ipv6_string] is not a
@@ -301,7 +311,7 @@ module V6 : sig
       the formatter [f]. *)
   val pp_hum : Format.formatter -> t -> unit
 
-  (** Bytestring conversion *)
+  (** {3 Bytestring conversion} *)
 
   (** [of_bytes_exn ipv6_octets] is the address represented
       by [ipv6_octets]. Raises [Parse_error] if [ipv6_octets] is not a
@@ -323,7 +333,7 @@ module V6 : sig
       into [bytes] at offset [offset]. *)
   val to_bytes_raw : t -> Bytes.t -> int -> unit
 
-  (** Int conversion *)
+  (** {3 Int conversion} *)
 
   (** [of_int64 (ho, lo)] is the IPv6 address represented by two int64. *)
   val of_int64 : int64 * int64 -> t
@@ -341,10 +351,20 @@ module V6 : sig
   (** [to_int16 ipv6] is the 128-bit packed encoding of [ipv6]. *)
   val to_int16 : t -> int * int * int * int * int * int * int * int
 
+  (** {3 MAC conversion} *)
+
   (** [multicast_to_mac ipv6] is the MAC address corresponding to the
       multicast address [ipv6]. Described by
       {{:https://tools.ietf.org/html/rfc2464#section-7}RFC 2464}. *)
   val multicast_to_mac : t -> Macaddr.t
+
+  (** {3 Host conversion} *)
+
+  (** [to_domain_name ipv6] is the domain name label list for reverse
+      lookups of [ipv6]. This includes the [.ip6.arpa.] suffix. *)
+  val to_domain_name : t -> string list
+
+  (** {3 Common addresses} *)
 
   (** [unspecified] is ::. *)
   val unspecified : t
@@ -549,6 +569,10 @@ val is_private : t -> bool
     multicast address [addr]. See {!V4.multicast_to_mac} and
     {!V6.multicast_to_mac}.*)
 val multicast_to_mac : t -> Macaddr.t
+
+(** [to_domain_name addr] is the domain name label list for reverse
+    lookups of [addr]. This includes the [.arpa.] suffix. *)
+val to_domain_name : t -> string list
 
 module Prefix : sig
   type addr = t with sexp
