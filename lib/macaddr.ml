@@ -21,7 +21,7 @@ exception Parse_error of string * string with sexp
 
 let need_more x = Parse_error ("not enough data", x)
 
-type t = bytes (* length 6 only *)
+type t = Bytes.t (* length 6 only *)
 
 let compare = Bytes.compare
 
