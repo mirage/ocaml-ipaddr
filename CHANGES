@@ -6,6 +6,7 @@
 * Add multicast MAC conversions from RFC 1112 and RFC 2464
 * Add to_domain_name conversions to DNS label lists (in-addr.arpa and ip6.arpa)
 * Add V6.interface_routers, V6.site_routers, and V6.Prefix.solicited_node
+* Add V6.link_address_of_mac to convert a MAC into a link local IP address
 
 2.5.0 (2014-05-27):
 * Add `with sexp` (de)serializers to all of the Ipaddr and Macaddr types. (#31)
