@@ -378,8 +378,14 @@ module V6 : sig
   (** [link_nodes] is ff02::01. *)
   val link_nodes : t
 
+  (** [interface_routers] is ff01::02. *)
+  val interface_routers : t
+
   (** [link_routers] is ff02::02. *)
   val link_routers : t
+
+  (** [site_routers] is ff05::02. *)
+  val site_routers : t
 
   (** A module for manipulating IPv6 network prefixes. *)
   module Prefix : sig
@@ -472,6 +478,9 @@ module V6 : sig
     (** Global Unicast addresses that don't use Modified EUI64 interface
         identifiers, ::/3. *)
     val noneui64_interface : t
+
+    (** Solicited-Node multicast addresses *)
+    val solicited_node : t
 
     (** [network subnet] is the address for [subnet]. *)
     val network : t -> addr

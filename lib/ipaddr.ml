@@ -679,11 +679,13 @@ module V6 = struct
 
   (* constant *)
 
-  let unspecified     = make      0 0 0 0 0 0 0 0
-  let localhost       = make      0 0 0 0 0 0 0 1
-  let interface_nodes = make 0xff01 0 0 0 0 0 0 1
-  let link_nodes      = make 0xff02 0 0 0 0 0 0 1
-  let link_routers    = make 0xff02 0 0 0 0 0 0 2
+  let unspecified       = make      0 0 0 0 0 0 0 0
+  let localhost         = make      0 0 0 0 0 0 0 1
+  let interface_nodes   = make 0xff01 0 0 0 0 0 0 1
+  let link_nodes        = make 0xff02 0 0 0 0 0 0 1
+  let interface_routers = make 0xff01 0 0 0 0 0 0 2
+  let link_routers      = make 0xff02 0 0 0 0 0 0 2
+  let site_routers      = make 0xff05 0 0 0 0 0 0 2
 
   module Prefix = struct
     type addr = t with sexp
@@ -772,12 +774,13 @@ module V6 = struct
 
     let of_addr ip = make 128 ip
 
-    let global_unicast_001  = make  3 (ip 0x2000 0 0 0 0 0 0 0)
-    let link                = make 64 (ip 0xfe80 0 0 0 0 0 0 0)
-    let unique_local        = make  7 (ip 0xfc00 0 0 0 0 0 0 0)
-    let multicast           = make  8 (ip 0xff00 0 0 0 0 0 0 0)
-    let ipv4_mapped         = make 96 (ip 0 0 0 0 0 0xffff 0 0)
-    let noneui64_interface  = make  3 (ip 0x0000 0 0 0 0 0 0 0)
+    let global_unicast_001  = make   3 (ip 0x2000 0 0 0 0 0 0 0)
+    let link                = make  64 (ip 0xfe80 0 0 0 0 0 0 0)
+    let unique_local        = make   7 (ip 0xfc00 0 0 0 0 0 0 0)
+    let multicast           = make   8 (ip 0xff00 0 0 0 0 0 0 0)
+    let ipv4_mapped         = make  96 (ip 0 0 0 0 0 0xffff 0 0)
+    let noneui64_interface  = make   3 (ip 0x0000 0 0 0 0 0 0 0)
+    let solicited_node      = make 104 (ip 0xff02 0 0 0 0 1 0xff00 0)
 
     let network (pre,sz) = pre
     let bits (pre,sz) = sz
