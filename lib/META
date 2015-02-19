@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 4d54b77b02bee6839206a4b1e1a2a4ad)
-version = "2.5.0"
+# DO NOT EDIT (digest: d5c519d8529acf059fe6af7cb646920b)
+version = "2.6.0"
 description =
 "A library for manipulation of IP (and MAC) address representations"
 requires = "sexplib"
@@ -10,7 +10,7 @@ archive(native) = "ipaddr.cmxa"
 archive(native, plugin) = "ipaddr.cmxs"
 exists_if = "ipaddr.cma"
 package "unix" (
- version = "2.5.0"
+ version = "2.6.0"
  description =
  "A library for manipulation of IP (and MAC) address representations"
  requires = "unix ipaddr"
@@ -22,7 +22,7 @@ package "unix" (
 )
 
 package "top" (
- version = "2.5.0"
+ version = "2.6.0"
  description = "Toplevel printers for IP addresses"
  requires = "ipaddr"
  archive(byte) = "ipaddr_top.cma"

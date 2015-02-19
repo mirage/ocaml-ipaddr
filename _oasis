@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        ipaddr
-Version:     2.5.0
+Version:     2.6.0
 Synopsis:    A library for manipulation of IP (and MAC) address representations
 Authors:     David Sheets, Anil Madhavapeddy, Hugo Heuzard
 License:     ISC

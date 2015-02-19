@@ -1,4 +1,4 @@
-2.6.0 (trunk):
+2.6.0 (2015-02-19):
 * Change IPv6 link-local address prefix from fe80::/10 to fe80::/64. (#39)
 * Remove type bytes = string alias (potentially breaking)
 * Turn on -safe-string (#41)
