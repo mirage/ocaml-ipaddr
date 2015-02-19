@@ -86,6 +86,27 @@ let expect_end s i =
   then ()
   else raise (bad_char !i s)
 
+let hex_char_of_int = function
+  |  0 -> '0'
+  |  1 -> '1'
+  |  2 -> '2'
+  |  3 -> '3'
+  |  4 -> '4'
+  |  5 -> '5'
+  |  6 -> '6'
+  |  7 -> '7'
+  |  8 -> '8'
+  |  9 -> '9'
+  | 10 -> 'a'
+  | 11 -> 'b'
+  | 12 -> 'c'
+  | 13 -> 'd'
+  | 14 -> 'e'
+  | 15 -> 'f'
+  |  _ -> raise (Invalid_argument "not a hex int")
+
+let hex_string_of_int32 i = String.make 1 (hex_char_of_int (Int32.to_int i))
+
 module V4 = struct
   type t = int32
 
@@ -183,6 +204,7 @@ module V4 = struct
   let of_int16 (a,b) = (~| a <|< 16) ||| (~| b)
   let to_int16 a = ((|~) (a >|> 16), (|~) (a &&& 0xFF_FF_l))
 
+  (** MAC *)
   (** {{:http://tools.ietf.org/html/rfc1112#section-6.2}RFC 1112}. *)
   let multicast_to_mac i =
     let macb = Bytes.create 6 in
@@ -193,6 +215,17 @@ module V4 = struct
     Bytes.set macb 4 (Char.chr ((|~) (i >! 8)));
     Bytes.set macb 5 (Char.chr ((|~) (i >! 0)));
     Macaddr.of_bytes_exn (Bytes.to_string macb)
+
+  (* Host *)
+  let to_domain_name i = [
+    Int32.to_string (i >!  0);
+    Int32.to_string (i >!  8);
+    Int32.to_string (i >! 16);
+    Int32.to_string (i >! 24);
+    "in-addr";
+    "arpa";
+    "";
+  ]
 
   (* constant *)
 
@@ -592,6 +625,7 @@ module V6 = struct
     to_bytes_raw i bs 0;
     Bytes.to_string bs
 
+  (** MAC *)
   (** {{:https://tools.ietf.org/html/rfc2464#section-7}RFC 2464}. *)
   let multicast_to_mac i =
     let (_,_,_,i) = to_int32 i in
@@ -603,6 +637,45 @@ module V6 = struct
     Bytes.set macb 4 (Char.chr ((|~) (i >! 8)));
     Bytes.set macb 5 (Char.chr ((|~) (i >! 0)));
     Macaddr.of_bytes_exn (Bytes.to_string macb)
+
+  (* Host *)
+  let to_domain_name (a,b,c,d) = Printf.([
+    hex_string_of_int32 ((d >|>  0) &&& 0xF_l);
+    hex_string_of_int32 ((d >|>  4) &&& 0xF_l);
+    hex_string_of_int32 ((d >|>  8) &&& 0xF_l);
+    hex_string_of_int32 ((d >|> 12) &&& 0xF_l);
+    hex_string_of_int32 ((d >|> 16) &&& 0xF_l);
+    hex_string_of_int32 ((d >|> 20) &&& 0xF_l);
+    hex_string_of_int32 ((d >|> 24) &&& 0xF_l);
+    hex_string_of_int32 ((d >|> 28) &&& 0xF_l);
+    hex_string_of_int32 ((c >|>  0) &&& 0xF_l);
+    hex_string_of_int32 ((c >|>  4) &&& 0xF_l);
+    hex_string_of_int32 ((c >|>  8) &&& 0xF_l);
+    hex_string_of_int32 ((c >|> 12) &&& 0xF_l);
+    hex_string_of_int32 ((c >|> 16) &&& 0xF_l);
+    hex_string_of_int32 ((c >|> 20) &&& 0xF_l);
+    hex_string_of_int32 ((c >|> 24) &&& 0xF_l);
+    hex_string_of_int32 ((c >|> 28) &&& 0xF_l);
+    hex_string_of_int32 ((b >|>  0) &&& 0xF_l);
+    hex_string_of_int32 ((b >|>  4) &&& 0xF_l);
+    hex_string_of_int32 ((b >|>  8) &&& 0xF_l);
+    hex_string_of_int32 ((b >|> 12) &&& 0xF_l);
+    hex_string_of_int32 ((b >|> 16) &&& 0xF_l);
+    hex_string_of_int32 ((b >|> 20) &&& 0xF_l);
+    hex_string_of_int32 ((b >|> 24) &&& 0xF_l);
+    hex_string_of_int32 ((b >|> 28) &&& 0xF_l);
+    hex_string_of_int32 ((a >|>  0) &&& 0xF_l);
+    hex_string_of_int32 ((a >|>  4) &&& 0xF_l);
+    hex_string_of_int32 ((a >|>  8) &&& 0xF_l);
+    hex_string_of_int32 ((a >|> 12) &&& 0xF_l);
+    hex_string_of_int32 ((a >|> 16) &&& 0xF_l);
+    hex_string_of_int32 ((a >|> 20) &&& 0xF_l);
+    hex_string_of_int32 ((a >|> 24) &&& 0xF_l);
+    hex_string_of_int32 ((a >|> 28) &&& 0xF_l);
+    "ip6";
+    "arpa";
+    "";
+  ])
 
   (* constant *)
 
@@ -810,6 +883,10 @@ let is_private = function
 let multicast_to_mac = function
   | V4 v4 -> V4.multicast_to_mac v4
   | V6 v6 -> V6.multicast_to_mac v6
+
+let to_domain_name = function
+  | V4 v4 -> V4.to_domain_name v4
+  | V6 v6 -> V6.to_domain_name v6
 
 module Prefix = struct
   module Addr = struct
