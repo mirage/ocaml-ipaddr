@@ -183,6 +183,17 @@ module V4 = struct
   let of_int16 (a,b) = (~| a <|< 16) ||| (~| b)
   let to_int16 a = ((|~) (a >|> 16), (|~) (a &&& 0xFF_FF_l))
 
+  (** {{:http://tools.ietf.org/html/rfc1112#section-6.2}RFC 1112}. *)
+  let multicast_to_mac i =
+    let macb = Bytes.create 6 in
+    Bytes.set macb 0 (Char.chr 0x01);
+    Bytes.set macb 1 (Char.chr 0x00);
+    Bytes.set macb 2 (Char.chr 0x5E);
+    Bytes.set macb 3 (Char.chr ((|~) (i >|> 16 &&& 0x7F_l)));
+    Bytes.set macb 4 (Char.chr ((|~) (i >! 8)));
+    Bytes.set macb 5 (Char.chr ((|~) (i >! 0)));
+    Macaddr.of_bytes_exn (Bytes.to_string macb)
+
   (* constant *)
 
   let any         = make   0   0   0   0
@@ -581,7 +592,19 @@ module V6 = struct
     to_bytes_raw i bs 0;
     Bytes.to_string bs
 
- (* constant *)
+  (** {{:https://tools.ietf.org/html/rfc2464#section-7}RFC 2464}. *)
+  let multicast_to_mac i =
+    let (_,_,_,i) = to_int32 i in
+    let macb = Bytes.create 6 in
+    Bytes.set macb 0 (Char.chr 0x33);
+    Bytes.set macb 1 (Char.chr 0x33);
+    Bytes.set macb 2 (Char.chr ((|~) (i >! 24)));
+    Bytes.set macb 3 (Char.chr ((|~) (i >! 16)));
+    Bytes.set macb 4 (Char.chr ((|~) (i >! 8)));
+    Bytes.set macb 5 (Char.chr ((|~) (i >! 0)));
+    Macaddr.of_bytes_exn (Bytes.to_string macb)
+
+  (* constant *)
 
   let unspecified     = make      0 0 0 0 0 0 0 0
   let localhost       = make      0 0 0 0 0 0 0 1
@@ -783,6 +806,10 @@ let is_multicast = function
 let is_private = function
   | V4 v4 -> V4.is_private v4
   | V6 v6 -> V6.is_private v6
+
+let multicast_to_mac = function
+  | V4 v4 -> V4.multicast_to_mac v4
+  | V6 v6 -> V6.multicast_to_mac v6
 
 module Prefix = struct
   module Addr = struct
