@@ -3,6 +3,7 @@
 * Remove type bytes = string alias (potentially breaking)
 * Turn on -safe-string (#41)
 * {V4,V6}.to_bytes_raw now uses Bytes.t rather than string (potentially breaking)
+* Add multicast MAC conversions from RFC 1112 and RFC 2464
 
 2.5.0 (2014-05-27):
 * Add `with sexp` (de)serializers to all of the Ipaddr and Macaddr types. (#31)

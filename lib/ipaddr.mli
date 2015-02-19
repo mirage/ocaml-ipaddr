@@ -105,6 +105,11 @@ module V4 : sig
   (** [to_int16 ipv4] is the 16-bit packed encoding of [ipv4]. *)
   val to_int16 : t -> int * int
 
+  (** [multicast_to_mac ipv4] is the MAC address corresponding to the
+      multicast address [ipv4]. Described by
+      {{:http://tools.ietf.org/html/rfc1112#section-6.2}RFC 1112}. *)
+  val multicast_to_mac : t -> Macaddr.t
+
   (** [any] is 0.0.0.0. *)
   val any : t
 
@@ -336,6 +341,11 @@ module V6 : sig
   (** [to_int16 ipv6] is the 128-bit packed encoding of [ipv6]. *)
   val to_int16 : t -> int * int * int * int * int * int * int * int
 
+  (** [multicast_to_mac ipv6] is the MAC address corresponding to the
+      multicast address [ipv6]. Described by
+      {{:https://tools.ietf.org/html/rfc2464#section-7}RFC 2464}. *)
+  val multicast_to_mac : t -> Macaddr.t
+
   (** [unspecified] is ::. *)
   val unspecified : t
 
@@ -534,6 +544,11 @@ val is_multicast : t -> bool
 (** [is_private addr] is a predicate indicating whether [addr] privately
     addresses a node. *)
 val is_private : t -> bool
+
+(** [multicast_to_mac addr] is the MAC address corresponding to the
+    multicast address [addr]. See {!V4.multicast_to_mac} and
+    {!V6.multicast_to_mac}.*)
+val multicast_to_mac : t -> Macaddr.t
 
 module Prefix : sig
   type addr = t with sexp

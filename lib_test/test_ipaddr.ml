@@ -272,6 +272,17 @@ module Test_v4 = struct
     assert_equal ~msg:"any"       V4.any       V4.Prefix.(network global);
     assert_equal ~msg:"localhost" true V4.(Prefix.(mem localhost loopback))
 
+  let test_multicast_mac () =
+    let ip = V4.of_bytes_exn "\xff\xbf\x9f\x8f" in
+    let multicast = V4.Prefix.(network_address multicast ip) in
+    let unicast_mac_str   = Macaddr.to_string (V4.multicast_to_mac ip) in
+    let multicast_mac_str = Macaddr.to_string (V4.multicast_to_mac multicast) in
+    let mac_str = "01:00:5e:3f:9f:8f" in
+    assert_equal ~msg:("unicast_mac "^unicast_mac_str^" <> "^mac_str)
+      unicast_mac_str   mac_str;
+    assert_equal ~msg:("multicast_mac "^multicast_mac_str^" <> "^mac_str)
+      multicast_mac_str mac_str
+
   let suite = "Test V4" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -291,6 +302,7 @@ module Test_v4 = struct
     "map"                  >:: test_map;
     "prefix_map"           >:: test_prefix_map;
     "special_addr"         >:: test_special_addr;
+    "multicast_mac"        >:: test_multicast_mac;
   ]
 end
 
@@ -566,6 +578,19 @@ module Test_v6 = struct
     assert_equal ~msg:"third"
       (M.find (V6.Prefix.of_string_exn "::ffff:128.0.0.0/1") m) "high-bitters"
 
+  let test_multicast_mac () =
+    let on = 0xFFFF in
+    let ip = V6.make on on on on on 0xFFFF 0xFEFE 0xFDFD in
+    let unicast   = V6.Prefix.(network_address global_unicast_001 ip) in
+    let multicast = V6.Prefix.(network_address multicast ip) in
+    let unicast_mac_str   = Macaddr.to_string (V6.multicast_to_mac unicast) in
+    let multicast_mac_str = Macaddr.to_string (V6.multicast_to_mac multicast) in
+    let mac_str = "33:33:fe:fe:fd:fd" in
+    assert_equal ~msg:("unicast_mac "^unicast_mac_str^" <> "^mac_str)
+      unicast_mac_str   mac_str;
+    assert_equal ~msg:("multicast_mac "^multicast_mac_str^" <> "^mac_str)
+      multicast_mac_str mac_str
+
   let suite = "Test V6" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -583,6 +608,7 @@ module Test_v6 = struct
     "scope"                >:: test_scope;
     "map"                  >:: test_map;
     "prefix_map"           >:: test_prefix_map;
+    "multicast_mac"        >:: test_multicast_mac;
   ]
 end
 
