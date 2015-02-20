@@ -1,9 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: d5c519d8529acf059fe6af7cb646920b)
+# DO NOT EDIT (digest: 41ee21d4146b5d6f59aa1b873b633a48)
 version = "2.6.0"
 description =
 "A library for manipulation of IP (and MAC) address representations"
-requires = "sexplib"
+requires = "bytes sexplib"
 archive(byte) = "ipaddr.cma"
 archive(byte, plugin) = "ipaddr.cma"
 archive(native) = "ipaddr.cmxa"

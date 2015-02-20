@@ -1,3 +1,6 @@
+2.6.1 (2015-02-20):
+* Fix findlib requires in oasis to restore pre-4.02.1 compatibility
+
 2.6.0 (2015-02-19):
 * Change IPv6 link-local address prefix from fe80::/10 to fe80::/64. (#39)
 * Remove type bytes = string alias (potentially breaking)
