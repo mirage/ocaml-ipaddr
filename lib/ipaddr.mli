@@ -207,9 +207,9 @@ module V4 : sig
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
 
-    (** [subset_eq subnet1 subnet2] checks whether [subnet1] is contained
+    (** [subset subnet1 subnet2] checks whether [subnet1] is contained
         within [subnet2]. *)
-    val subset_eq : t -> t -> bool
+    val subset : t -> t -> bool
 
     (** [of_addr ip] create a subnet composed of only one address, [ip].
         It is the same as [make 32 ip]. *)
@@ -460,9 +460,9 @@ module V6 : sig
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
 
-    (** [subset_eq subnet1 subnet2] checks whether [subnet1] is contained
+    (** [subset subnet1 subnet2] checks whether [subnet1] is contained
         within [subnet2]. *)
-    val subset_eq : t -> t -> bool
+    val subset : t -> t -> bool
 
     (** [of_addr ip] create a subnet composed of only one address, [ip].
         It is the same as [make 128 ip]. *)
@@ -646,9 +646,9 @@ module Prefix : sig
   (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
   val mem : addr -> t -> bool
 
-  (** [subset_eq subnet1 subnet2] checks whether [subnet1] is contained
+  (** [subset subnet1 subnet2] checks whether [subnet1] is contained
       within [subnet2]. *)
-  val subset_eq : t -> t -> bool
+  val subset : t -> t -> bool
 
   (** [of_addr ip] create a subnet composed of only one address, [ip].*)
   val of_addr : addr -> t

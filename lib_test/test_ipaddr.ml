@@ -700,7 +700,7 @@ let test_prefix_mem () =
     assert_equal ~msg (Prefix.mem addr subnet) is_mem
   ) ships
 
-let test_prefix_subset_eq () =
+let test_prefix_subset () =
   let pre = Prefix.of_string_exn in
   let ships = [
     pre "10.0.0.1/32",       pre "10.0.0.1/32",       true;
@@ -714,7 +714,7 @@ let test_prefix_subset_eq () =
     let msg = Printf.sprintf "%s is%s subset of %s"
       (Prefix.to_string subnet1) (if is_subset then "" else " not") (Prefix.to_string subnet2)
     in
-    assert_equal ~msg (Prefix.subset_eq subnet1 subnet2) is_subset
+    assert_equal ~msg (Prefix.subset subnet1 subnet2) is_subset
   ) ships
 
 let suite = "Test Generic Addresses" >::: [
@@ -722,7 +722,7 @@ let suite = "Test Generic Addresses" >::: [
   "string_raw_rt_bad" >:: test_string_raw_rt_bad;
   "map"               >:: test_map;
   "prefix_mem"        >:: test_prefix_mem;
-  "prefix_subset_eq"  >:: test_prefix_subset_eq;
+  "prefix_subset"     >:: test_prefix_subset;
 ]
 
 ;;
