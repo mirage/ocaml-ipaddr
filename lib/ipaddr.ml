@@ -224,7 +224,6 @@ module V4 = struct
     Int32.to_string (i >! 24);
     "in-addr";
     "arpa";
-    "";
   ]
 
   (* constant *)
@@ -674,7 +673,6 @@ module V6 = struct
     hex_string_of_int32 ((a >|> 28) &&& 0xF_l);
     "ip6";
     "arpa";
-    "";
   ])
 
   (* constant *)
