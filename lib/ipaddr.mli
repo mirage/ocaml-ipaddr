@@ -18,7 +18,7 @@
 (** A library for manipulation of IP address representations. *)
 
 (** Raised when parsing of IP address syntax fails. *)
-exception Parse_error of string * string with sexp
+exception Parse_error of string * string [@@deriving sexp]
 
 (** Type of ordered address scope classifications *)
 type scope =
@@ -29,12 +29,12 @@ type scope =
 | Site
 | Organization
 | Global
-with sexp
+[@@deriving sexp]
 
 (** A collection of functions for IPv4 addresses. *)
 module V4 : sig
   (** Type of the internet protocol v4 address of a host *)
-  type t with sexp
+  type t [@@deriving sexp]
   val compare : t -> t -> int
 
   (** Converts the low bytes of four int values into an abstract {! V4.t }. *)
@@ -140,10 +140,10 @@ module V4 : sig
 
   (** A module for manipulating IPv4 network prefixes. *)
   module Prefix : sig
-    type addr = t with sexp
+    type addr = t [@@deriving sexp]
 
     (** Type of a internet protocol subnet *)
-    type t with sexp
+    type t [@@deriving sexp]
 
     val compare : t -> t -> int
 
@@ -277,7 +277,7 @@ end
 (** A collection of functions for IPv6 addresses. *)
 module V6 : sig
   (** Type of the internet protocol v6 address of a host *)
-  type t with sexp
+  type t [@@deriving sexp]
   val compare : t -> t -> int
 
   (** Converts the low bytes of eight int values into an abstract
@@ -389,10 +389,10 @@ module V6 : sig
 
   (** A module for manipulating IPv6 network prefixes. *)
   module Prefix : sig
-    type addr = t with sexp
+    type addr = t [@@deriving sexp]
 
     (** Type of a internet protocol subnet *)
-    type t with sexp
+    type t [@@deriving sexp]
 
     val compare : t -> t -> int
 
@@ -521,10 +521,10 @@ module V6 : sig
 end
 
 (** Type of either an IPv4 value or an IPv6 value *)
-type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 with sexp
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 [@@deriving sexp]
 
 (** Type of any IP address *)
-type t = (V4.t,V6.t) v4v6 with sexp
+type t = (V4.t,V6.t) v4v6 [@@deriving sexp]
 
 val compare : t -> t -> int
 
@@ -591,10 +591,10 @@ val multicast_to_mac : t -> Macaddr.t
 val to_domain_name : t -> string list
 
 module Prefix : sig
-  type addr = t with sexp
+  type addr = t [@@deriving sexp]
 
   (** Type of a internet protocol subnet *)
-  type t = (V4.Prefix.t, V6.Prefix.t) v4v6 with sexp
+  type t = (V4.Prefix.t, V6.Prefix.t) v4v6 [@@deriving sexp]
 
   val compare : t -> t -> int
 

@@ -17,7 +17,7 @@
 
 open Sexplib.Std
 
-exception Parse_error of string * string with sexp
+exception Parse_error of string * string [@@deriving sexp]
 
 type scope =
 | Point
@@ -27,7 +27,7 @@ type scope =
 | Site
 | Organization
 | Global
-with sexp
+[@@deriving sexp]
 
 let (~|) = Int32.of_int
 let (|~) = Int32.to_int
@@ -237,8 +237,8 @@ module V4 = struct
   let routers     = make 224   0   0   2
 
   module Prefix = struct
-    type addr = t with sexp
-    type t = addr * int with sexp
+    type addr = t [@@deriving sexp]
+    type t = addr * int [@@deriving sexp]
 
     let compare (pre,sz) (pre',sz') =
       let c = compare pre pre' in
@@ -688,8 +688,8 @@ module V6 = struct
   let site_routers      = make 0xff05 0 0 0 0 0 0 2
 
   module Prefix = struct
-    type addr = t with sexp
-    type t = addr * int with sexp
+    type addr = t [@@deriving sexp]
+    type t = addr * int [@@deriving sexp]
 
     let compare (pre,sz) (pre',sz') =
       let c = compare pre pre' in
@@ -829,8 +829,8 @@ module V6 = struct
   let is_private i = (scope i) <> Global
 end
 
-type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 with sexp
-type t = (V4.t,V6.t) v4v6 with sexp
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 [@@deriving sexp]
+type t = (V4.t,V6.t) v4v6 [@@deriving sexp]
 
 let compare a b = match a,b with
   | V4 a, V4 b -> V4.compare a b
@@ -909,8 +909,8 @@ module Prefix = struct
     let to_v6 = to_v6
   end
 
-  type addr = t with sexp
-  type t = (V4.Prefix.t,V6.Prefix.t) v4v6 with sexp
+  type addr = t [@@deriving sexp]
+  type t = (V4.Prefix.t,V6.Prefix.t) v4v6 [@@deriving sexp]
 
   let compare a b = match a,b with
     | V4 a , V4 b -> V4.Prefix.compare a b

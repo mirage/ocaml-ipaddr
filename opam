@@ -32,7 +32,8 @@ depends: [
   "ocamlfind" {build}
   "ocamlbuild" {build}
   "base-bytes"
-  "sexplib" {< "113.01.00"}
-  "type_conv"
+  "sexplib"
+  "ppx_sexp_conv"
   "ounit" {test}
 ]
+available: [ ocaml-version >= "4.02.2" ]

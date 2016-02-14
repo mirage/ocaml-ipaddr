@@ -1,3 +1,8 @@
+2.7.0 (trunk):
+* Remove sexplib.syntax, type_conv deps and camlp4 transitive dependency
+* Add ppx_sexp_conv dependency
+* Require OCaml 4.02.3+
+
 2.6.1 (2015-02-20):
 * Fix findlib requires in oasis to restore pre-4.02.1 compatibility
 
