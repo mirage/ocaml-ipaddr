@@ -712,9 +712,12 @@ let test_prefix_subset () =
   ] in
   List.iter (fun (subnet1,subnet2,is_subset) ->
     let msg = Printf.sprintf "%s is%s subset of %s"
-      (Prefix.to_string subnet1) (if is_subset then "" else " not") (Prefix.to_string subnet2)
+        (Prefix.to_string subnet1)
+        (if is_subset then "" else " not")
+        (Prefix.to_string subnet2)
     in
-    assert_equal ~msg (Prefix.subset subnet1 subnet2) is_subset
+    assert_equal ~msg
+      (Prefix.subset ~subnet:subnet1 ~network:subnet2) is_subset
   ) ships
 
 let suite = "Test Generic Addresses" >::: [

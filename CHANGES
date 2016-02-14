@@ -1,7 +1,9 @@
-2.7.0 (trunk):
+2.7.0 (2016-02-14):
 * Remove sexplib.syntax, type_conv deps and camlp4 transitive dependency
 * Add ppx_sexp_conv dependency
-* Require OCaml 4.02.3+
+* Require OCaml 4.02.2+
+* Add `Ipaddr.Prefix.subset`, `Ipaddr.V4.Prefix.subset` and `Ipaddr.V6.subset`
+  predicates to test containment of subnets (#52 from @seliopou)
 
 2.6.1 (2015-02-20):
 * Fix findlib requires in oasis to restore pre-4.02.1 compatibility
