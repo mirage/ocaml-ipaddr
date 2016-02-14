@@ -30,8 +30,9 @@ remove: [
 ]
 depends: [
   "ocamlfind" {build}
+  "ocamlbuild" {build}
   "base-bytes"
-  "sexplib"
+  "sexplib" {< "113.01.00"}
   "type_conv"
   "ounit" {test}
 ]
