@@ -315,6 +315,9 @@ module V4 = struct
 
     let mem ip (pre,sz) = let host = 32 - sz in (ip >|> host) = (pre >|> host)
 
+    let subset (pre1,sz1) (pre2,sz2) =
+      sz1 >= sz2 && mem pre1 (pre2,sz2)
+
     let of_addr ip = make 32 ip
 
     let global          = make  0 (ip   0   0 0 0)
@@ -772,6 +775,9 @@ module V6 = struct
       let m = mask sz in
       logand ip m = logand pre m
 
+    let subset (pre1,sz1) (pre2,sz2) =
+      sz1 >= sz2 && mem pre1 (pre2,sz2)
+
     let of_addr ip = make 128 ip
 
     let global_unicast_001  = make   3 (ip 0x2000 0 0 0 0 0 0 0)
@@ -952,6 +958,8 @@ module Prefix = struct
   let to_v6 = function V4 v4 -> v6_of_v4 v4 | V6 v6 -> v6
 
   let mem ip prefix = V6.Prefix.mem (Addr.to_v6 ip) (to_v6 prefix)
+
+  let subset pre1 pre2 = V6.Prefix.subset (to_v6 pre1) (to_v6 pre2)
 
   let of_addr = function
     | V4 p -> V4 (V4.Prefix.of_addr p)
