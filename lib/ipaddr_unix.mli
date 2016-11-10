@@ -15,7 +15,9 @@
  *
  *)
 
-(** Convert to and from [Unix] to [Ipaddr] representations *)
+(** Convert to and from [Unix] to [Ipaddr] representations
+
+    {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** [to_inet_addr ip] is the {! Unix.inet_addr} equivalent of the
     IPv4 or IPv6 address [ip]. *)

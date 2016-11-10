@@ -15,7 +15,9 @@
  *
  *)
 
-(** A library for manipulation of IP address representations. *)
+(** A library for manipulation of IP address representations.
+
+    {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** Raised when parsing of IP address syntax fails. *)
 exception Parse_error of string * string [@@deriving sexp]

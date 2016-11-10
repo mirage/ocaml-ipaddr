@@ -16,24 +16,21 @@ tags: [
 ]
 
 build: [
-  ["ocaml" "setup.ml" "-configure" "--prefix" prefix "--%{ounit:enable}%-tests"]
-  [make "build"]
+  [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"
+    "--with-base-unix" "%{base-unix:installed}%" ]
 ]
 build-test: [
-  [make "test"]
-]
-install: [
-  [make "install"]
-]
-remove: [
-  ["ocamlfind" "remove" "ipaddr"]
+  [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" "--tests" "true" ]
+  [ "ocaml" "pkg/pkg.ml" "test" ]
 ]
 depends: [
   "ocamlfind" {build}
   "ocamlbuild" {build}
+  "topkg" {build}
   "base-bytes"
   "sexplib"
   "ppx_sexp_conv"
   "ounit" {test}
 ]
+depopts: [ "base-unix" ]
 available: [ ocaml-version >= "4.02.2" ]
