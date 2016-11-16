@@ -14,7 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** A library for manipulation of MAC address representations. *)
+(** A library for manipulation of MAC address representations.
+
+    {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** Raised when parsing of MAC address syntax fails. *)
 exception Parse_error of string * string [@@deriving sexp]

@@ -1,35 +1,32 @@
-# OASIS_START
-# DO NOT EDIT (digest: 8c04de6f0f6daada35021ac6a5a08e4a)
-version = "2.7.0"
+version = "%%VERSION_NUM%%"
 description =
 "A library for manipulation of IP (and MAC) address representations"
 requires = "bytes sexplib"
 archive(byte) = "ipaddr.cma"
-archive(byte, plugin) = "ipaddr.cma"
 archive(native) = "ipaddr.cmxa"
-archive(native, plugin) = "ipaddr.cmxs"
+plugin(byte) = "ipaddr.cma"
+plugin(native) = "ipaddr.cmxs"
 exists_if = "ipaddr.cma"
+
 package "unix" (
- version = "2.7.0"
+ version = "%%VERSION_NUM%%"
  description =
  "A library for manipulation of IP (and MAC) address representations"
  requires = "unix ipaddr"
  archive(byte) = "ipaddr_unix.cma"
- archive(byte, plugin) = "ipaddr_unix.cma"
  archive(native) = "ipaddr_unix.cmxa"
- archive(native, plugin) = "ipaddr_unix.cmxs"
+ plugin(byte) = "ipaddr_unix.cma"
+ plugin(native) = "ipaddr_unix.cmxs"
  exists_if = "ipaddr_unix.cma"
 )
 
 package "top" (
- version = "2.7.0"
+ version = "%%VERSION_NUM%%"
  description = "Toplevel printers for IP addresses"
  requires = "ipaddr"
  archive(byte) = "ipaddr_top.cma"
- archive(byte, plugin) = "ipaddr_top.cma"
  archive(native) = "ipaddr_top.cmxa"
- archive(native, plugin) = "ipaddr_top.cmxs"
+ plugin(byte) = "ipaddr_top.cma"
+ plugin(native) = "ipaddr_top.cmxs"
  exists_if = "ipaddr_top.cma"
 )
-# OASIS_STOP
-
