@@ -1,3 +1,7 @@
+## 2.7.1 (2016-11-16)
+
+* Use topkg for build (#60 from Jochen Bartl)
+
 ## 2.7.0 (2016-02-14)
 
 * Remove sexplib.syntax, type_conv deps and camlp4 transitive dependency
