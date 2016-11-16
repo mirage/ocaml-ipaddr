@@ -1,4 +1,4 @@
-# ocaml-ipaddr
+# ipaddr: IP (and MAC) address manipulation
 
 A library for manipulation of IP (and MAC) address representations.
 
