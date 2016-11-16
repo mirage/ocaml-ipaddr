@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Ipaddr_unix.V4.html">
+<link rel="Up" href="Ipaddr_unix.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Ipaddr" rel="Chapter" href="Ipaddr.html">
+<link title="Ipaddr_unix" rel="Chapter" href="Ipaddr_unix.html">
+<link title="Macaddr" rel="Chapter" href="Macaddr.html"><title>Ipaddr_unix.V6</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Ipaddr_unix.V4.html" title="Ipaddr_unix.V4">Previous</a>
+&nbsp;<a class="up" href="Ipaddr_unix.html" title="Ipaddr_unix">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Ipaddr_unix.V6.html">Ipaddr_unix.V6</a></h1>
+
+<pre><span class="keyword">module</span> V6: <code class="code"><span class="keyword">sig</span></code> <a href="Ipaddr_unix.V6.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><hr width="100%">
+
+<pre><span id="VALto_inet_addr"><span class="keyword">val</span> to_inet_addr</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">Ipaddr.V6.t</a> -> Unix.inet_addr</code></pre><div class="info ">
+<code class="code">to_inet_addr ip</code> is the <code class="code"><span class="constructor">Unix</span>.inet_addr</code> equivalent of the
+      IPv6 address <code class="code">ip</code>.<br>
+</div>
+
+<pre><span id="VALof_inet_addr_exn"><span class="keyword">val</span> of_inet_addr_exn</span> : <code class="type">Unix.inet_addr -> <a href="Ipaddr.V6.html#TYPEt">Ipaddr.V6.t</a></code></pre><div class="info ">
+<code class="code">of_inet_addr_exn ip</code> is the <a href="Ipaddr.html#TYPEt"><code class="code"><span class="constructor">Ipaddr</span>.t</code></a> equivalent of the
+      <code class="code"><span class="constructor">Unix</span>.inet_addr</code> <code class="code">ip</code> IPv6 address. Raises <a href="Ipaddr.html#EXCEPTIONParse_error"><code class="code"><span class="constructor">Ipaddr</span>.<span class="constructor">Parse_error</span></code></a> if
+      <code class="code">ip</code> is not a valid representation of an IPv6 address.<br>
+</div>
+
+<pre><span id="VALof_inet_addr"><span class="keyword">val</span> of_inet_addr</span> : <code class="type">Unix.inet_addr -> <a href="Ipaddr.V6.html#TYPEt">Ipaddr.V6.t</a> option</code></pre><div class="info ">
+Same as <code class="code">of_inet_addr_exn</code> but returns an option type instead of raising
+      an exception.<br>
+</div>
+</body></html>

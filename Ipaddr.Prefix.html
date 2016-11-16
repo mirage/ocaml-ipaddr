@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Ipaddr.V6.html">
+<link rel="Up" href="Ipaddr.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Ipaddr" rel="Chapter" href="Ipaddr.html">
+<link title="Ipaddr_unix" rel="Chapter" href="Ipaddr_unix.html">
+<link title="Macaddr" rel="Chapter" href="Macaddr.html"><title>Ipaddr.Prefix</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Ipaddr.V6.html" title="Ipaddr.V6">Previous</a>
+&nbsp;<a class="up" href="Ipaddr.html" title="Ipaddr">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Ipaddr.Prefix.html">Ipaddr.Prefix</a></h1>
+
+<pre><span class="keyword">module</span> Prefix: <code class="code"><span class="keyword">sig</span></code> <a href="Ipaddr.Prefix.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><hr width="100%">
+
+<pre><span id="TYPEaddr"><span class="keyword">type</span> <code class="type"></code>addr</span> = <code class="type"><a href="Ipaddr.html#TYPEt">Ipaddr.t</a></code> </pre>
+
+
+<pre><span id="VALaddr_of_sexp"><span class="keyword">val</span> addr_of_sexp</span> : <code class="type">Sexplib.Sexp.t -> <a href="Ipaddr.Prefix.html#TYPEaddr">addr</a></code></pre>
+<pre><span id="VALsexp_of_addr"><span class="keyword">val</span> sexp_of_addr</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEaddr">addr</a> -> Sexplib.Sexp.t</code></pre>
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = <code class="type">(<a href="Ipaddr.V4.Prefix.html#TYPEt">Ipaddr.V4.Prefix.t</a>, <a href="Ipaddr.V6.Prefix.html#TYPEt">Ipaddr.V6.Prefix.t</a>) <a href="Ipaddr.html#TYPEv4v6">Ipaddr.v4v6</a></code> </pre>
+<div class="info ">
+Type of a internet protocol subnet<br>
+</div>
+
+
+<pre><span id="VALt_of_sexp"><span class="keyword">val</span> t_of_sexp</span> : <code class="type">Sexplib.Sexp.t -> <a href="Ipaddr.Prefix.html#TYPEt">t</a></code></pre>
+<pre><span id="VALsexp_of_t"><span class="keyword">val</span> sexp_of_t</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEt">t</a> -> Sexplib.Sexp.t</code></pre>
+<pre><span id="VALcompare"><span class="keyword">val</span> compare</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEt">t</a> -> <a href="Ipaddr.Prefix.html#TYPEt">t</a> -> int</code></pre>
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEt">t</a> -> string</code></pre><div class="info ">
+<code class="code">to_string subnet</code> is the text string representation of <code class="code">subnet</code>.<br>
+</div>
+
+<pre><span id="VALto_buffer"><span class="keyword">val</span> to_buffer</span> : <code class="type">Buffer.t -> <a href="Ipaddr.Prefix.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+<code class="code">to_buffer buf subnet</code> writes the text string representation of <code class="code">subnet</code>
+      into <code class="code">buf</code>.<br>
+</div>
+
+<pre><span id="VALpp_hum"><span class="keyword">val</span> pp_hum</span> : <code class="type">Format.formatter -> <a href="Ipaddr.Prefix.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+<code class="code">pp_hum f subnet</code> outputs a human-readable representation of <code class="code">subnet</code>
+      to the formatter <code class="code">f</code>.<br>
+</div>
+
+<pre><span id="VALof_string_exn"><span class="keyword">val</span> of_string_exn</span> : <code class="type">string -> <a href="Ipaddr.Prefix.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_string_exn cidr</code> is the subnet prefix represented by the CIDR
+      string, <code class="code">cidr</code>. Raises <code class="code"><span class="constructor">Parse_error</span></code> if <code class="code">cidr</code> is not a valid
+      representation of a CIDR notation routing prefix.<br>
+</div>
+
+<pre><span id="VALof_string"><span class="keyword">val</span> of_string</span> : <code class="type">string -> <a href="Ipaddr.Prefix.html#TYPEt">t</a> option</code></pre><div class="info ">
+Same as <code class="code">of_string_exn</code> but returns an option type instead of raising
+      an exception.<br>
+</div>
+
+<pre><span id="VALof_string_raw"><span class="keyword">val</span> of_string_raw</span> : <code class="type">string -> int Pervasives.ref -> <a href="Ipaddr.Prefix.html#TYPEt">t</a></code></pre><div class="info ">
+Same as <code class="code">of_string_exn</code> but takes as an extra argument the offset
+      into the string for reading.<br>
+</div>
+
+<pre><span id="VALv4_of_v6"><span class="keyword">val</span> v4_of_v6</span> : <code class="type"><a href="Ipaddr.V6.Prefix.html#TYPEt">Ipaddr.V6.Prefix.t</a> -> <a href="Ipaddr.V4.Prefix.html#TYPEt">Ipaddr.V4.Prefix.t</a> option</code></pre><div class="info ">
+<code class="code">v4_of_v6 ipv6</code> is the IPv4 representation of the IPv6 subnet <code class="code">ipv6</code>.
+      If <code class="code">ipv6</code> is not an IPv4-mapped subnet, None is returned.<br>
+</div>
+
+<pre><span id="VALto_v4"><span class="keyword">val</span> to_v4</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEt">t</a> -> <a href="Ipaddr.V4.Prefix.html#TYPEt">Ipaddr.V4.Prefix.t</a> option</code></pre><div class="info ">
+<code class="code">to_v4 subnet</code> is the IPv4 representation of <code class="code">subnet</code>.<br>
+</div>
+
+<pre><span id="VALv6_of_v4"><span class="keyword">val</span> v6_of_v4</span> : <code class="type"><a href="Ipaddr.V4.Prefix.html#TYPEt">Ipaddr.V4.Prefix.t</a> -> <a href="Ipaddr.V6.Prefix.html#TYPEt">Ipaddr.V6.Prefix.t</a></code></pre><div class="info ">
+<code class="code">v6_of_v4 ipv4</code> is the IPv6 representation of the IPv4 subnet <code class="code">ipv4</code>.<br>
+</div>
+
+<pre><span id="VALto_v6"><span class="keyword">val</span> to_v6</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEt">t</a> -> <a href="Ipaddr.V6.Prefix.html#TYPEt">Ipaddr.V6.Prefix.t</a></code></pre><div class="info ">
+<code class="code">to_v6 subnet</code> is the IPv6 representation of <code class="code">subnet</code>.<br>
+</div>
+
+<pre><span id="VALmem"><span class="keyword">val</span> mem</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEaddr">addr</a> -> <a href="Ipaddr.Prefix.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">mem ip subnet</code> checks whether <code class="code">ip</code> is found within <code class="code">subnet</code>.<br>
+</div>
+
+<pre><span id="VALsubset"><span class="keyword">val</span> subset</span> : <code class="type">subnet:<a href="Ipaddr.Prefix.html#TYPEt">t</a> -> network:<a href="Ipaddr.Prefix.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">subset ~subnet ~network</code> checks whether <code class="code">subnet</code> is contained
+      within <code class="code">network</code>.<br>
+</div>
+
+<pre><span id="VALof_addr"><span class="keyword">val</span> of_addr</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEaddr">addr</a> -> <a href="Ipaddr.Prefix.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_addr ip</code> create a subnet composed of only one address, <code class="code">ip</code>.<br>
+</div>
+
+<pre><span id="VALnetwork"><span class="keyword">val</span> network</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEt">t</a> -> <a href="Ipaddr.Prefix.html#TYPEaddr">addr</a></code></pre><div class="info ">
+<code class="code">network subnet</code> is the address for <code class="code">subnet</code>.<br>
+</div>
+
+<pre><span id="VALnetmask"><span class="keyword">val</span> netmask</span> : <code class="type"><a href="Ipaddr.Prefix.html#TYPEt">t</a> -> <a href="Ipaddr.Prefix.html#TYPEaddr">addr</a></code></pre><div class="info ">
+<code class="code">netmask subnet</code> is the netmask for <code class="code">subnet</code>.<br>
+</div>
+
+<pre><span class="keyword">include</span> Map.OrderedType</pre>
+</body></html>

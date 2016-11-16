@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="next" href="Ipaddr_unix.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Ipaddr" rel="Chapter" href="Ipaddr.html">
+<link title="Ipaddr_unix" rel="Chapter" href="Ipaddr_unix.html">
+<link title="Macaddr" rel="Chapter" href="Macaddr.html"><title>Ipaddr</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Ipaddr_unix.html" title="Ipaddr_unix">Next</a>
+</div>
+<h1>Module <a href="type_Ipaddr.html">Ipaddr</a></h1>
+
+<pre><span class="keyword">module</span> Ipaddr: <code class="code"><span class="keyword">sig</span></code> <a href="Ipaddr.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+A library for manipulation of IP address representations.
+<p>
+
+    <em>86c1b6d - <a href="https://github.com/mirage/ocaml-ipaddr ">homepage</a></em><br>
+</div>
+<hr width="100%">
+
+<pre><span id="EXCEPTIONParse_error"><span class="keyword">exception</span> Parse_error</span> <span class="keyword">of</span> <code class="type">string * string</code></pre>
+<div class="info ">
+Raised when parsing of IP address syntax fails.<br>
+</div>
+
+<pre><code><span id="TYPEscope"><span class="keyword">type</span> <code class="type"></code>scope</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTscope.Point"><span class="constructor">Point</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTscope.Interface"><span class="constructor">Interface</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTscope.Link"><span class="constructor">Link</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTscope.Admin"><span class="constructor">Admin</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTscope.Site"><span class="constructor">Site</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTscope.Organization"><span class="constructor">Organization</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTscope.Global"><span class="constructor">Global</span></span></code></td>
+
+</tr></table>
+
+<div class="info ">
+Type of ordered address scope classifications<br>
+</div>
+
+
+<pre><span id="VALscope_of_sexp"><span class="keyword">val</span> scope_of_sexp</span> : <code class="type">Sexplib.Sexp.t -> <a href="Ipaddr.html#TYPEscope">scope</a></code></pre>
+<pre><span id="VALsexp_of_scope"><span class="keyword">val</span> sexp_of_scope</span> : <code class="type"><a href="Ipaddr.html#TYPEscope">scope</a> -> Sexplib.Sexp.t</code></pre>
+<pre><span class="keyword">module</span> <a href="Ipaddr.V4.html">V4</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Ipaddr.V4.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info">
+A collection of functions for IPv4 addresses.
+</div>
+
+<pre><span class="keyword">module</span> <a href="Ipaddr.V6.html">V6</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Ipaddr.V6.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info">
+A collection of functions for IPv6 addresses.
+</div>
+
+<pre><code><span id="TYPEv4v6"><span class="keyword">type</span> <code class="type">('v4, 'v6)</code> v4v6</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTv4v6.V4"><span class="constructor">V4</span></span> <span class="keyword">of</span> <code class="type">'v4</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTv4v6.V6"><span class="constructor">V6</span></span> <span class="keyword">of</span> <code class="type">'v6</code></code></td>
+
+</tr></table>
+
+<div class="info ">
+Type of either an IPv4 value or an IPv6 value<br>
+</div>
+
+
+<pre><span id="VALv4v6_of_sexp"><span class="keyword">val</span> v4v6_of_sexp</span> : <code class="type">(Sexplib.Sexp.t -> 'v4) -><br>       (Sexplib.Sexp.t -> 'v6) -> Sexplib.Sexp.t -> ('v4, 'v6) <a href="Ipaddr.html#TYPEv4v6">v4v6</a></code></pre>
+<pre><span id="VALsexp_of_v4v6"><span class="keyword">val</span> sexp_of_v4v6</span> : <code class="type">('v4 -> Sexplib.Sexp.t) -><br>       ('v6 -> Sexplib.Sexp.t) -> ('v4, 'v6) <a href="Ipaddr.html#TYPEv4v6">v4v6</a> -> Sexplib.Sexp.t</code></pre>
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = <code class="type">(<a href="Ipaddr.V4.html#TYPEt">V4.t</a>, <a href="Ipaddr.V6.html#TYPEt">V6.t</a>) <a href="Ipaddr.html#TYPEv4v6">v4v6</a></code> </pre>
+<div class="info ">
+Type of any IP address<br>
+</div>
+
+
+<pre><span id="VALt_of_sexp"><span class="keyword">val</span> t_of_sexp</span> : <code class="type">Sexplib.Sexp.t -> <a href="Ipaddr.html#TYPEt">t</a></code></pre>
+<pre><span id="VALsexp_of_t"><span class="keyword">val</span> sexp_of_t</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> Sexplib.Sexp.t</code></pre>
+<pre><span id="VALcompare"><span class="keyword">val</span> compare</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> <a href="Ipaddr.html#TYPEt">t</a> -> int</code></pre>
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> string</code></pre><div class="info ">
+<code class="code">to_string addr</code> is the text string representation of <code class="code">addr</code>.<br>
+</div>
+
+<pre><span id="VALto_buffer"><span class="keyword">val</span> to_buffer</span> : <code class="type">Buffer.t -> <a href="Ipaddr.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+<code class="code">to_buffer buf addr</code> writes the text string representation of <code class="code">addr</code> into
+    <code class="code">buf</code>.<br>
+</div>
+
+<pre><span id="VALpp_hum"><span class="keyword">val</span> pp_hum</span> : <code class="type">Format.formatter -> <a href="Ipaddr.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+<code class="code">pp_hum f ip</code> outputs a human-readable representation of <code class="code">ip</code> to the
+    formatter <code class="code">f</code>.<br>
+</div>
+
+<pre><span id="VALof_string_exn"><span class="keyword">val</span> of_string_exn</span> : <code class="type">string -> <a href="Ipaddr.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_string_exn s</code> parses <code class="code">s</code> as an IPv4 or IPv6 address.
+    Raises <code class="code"><span class="constructor">Parse_error</span></code> if <code class="code">s</code> is not a valid string representation of an IP
+    address.<br>
+</div>
+
+<pre><span id="VALof_string"><span class="keyword">val</span> of_string</span> : <code class="type">string -> <a href="Ipaddr.html#TYPEt">t</a> option</code></pre><div class="info ">
+Same as <code class="code">of_string_exn</code> but returns an option type instead of raising an
+    exception.<br>
+</div>
+
+<pre><span id="VALof_string_raw"><span class="keyword">val</span> of_string_raw</span> : <code class="type">string -> int Pervasives.ref -> <a href="Ipaddr.html#TYPEt">t</a></code></pre><div class="info ">
+Same as <code class="code">of_string_exn</code> but takes as an extra argument the offset into
+    the string for reading.<br>
+</div>
+
+<pre><span id="VALv4_of_v6"><span class="keyword">val</span> v4_of_v6</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">V6.t</a> -> <a href="Ipaddr.V4.html#TYPEt">V4.t</a> option</code></pre><div class="info ">
+<code class="code">v4_of_v6 ipv6</code> is the IPv4 representation of the IPv6 address <code class="code">ipv6</code>.
+    If <code class="code">ipv6</code> is not an IPv4-mapped address, None is returned.<br>
+</div>
+
+<pre><span id="VALto_v4"><span class="keyword">val</span> to_v4</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> <a href="Ipaddr.V4.html#TYPEt">V4.t</a> option</code></pre><div class="info ">
+<code class="code">to_v4 addr</code> is the IPv4 representation of <code class="code">addr</code>.<br>
+</div>
+
+<pre><span id="VALv6_of_v4"><span class="keyword">val</span> v6_of_v4</span> : <code class="type"><a href="Ipaddr.V4.html#TYPEt">V4.t</a> -> <a href="Ipaddr.V6.html#TYPEt">V6.t</a></code></pre><div class="info ">
+<code class="code">v6_of_v4 ipv4</code> is the IPv6 representation of the IPv4 address <code class="code">ipv4</code>.<br>
+</div>
+
+<pre><span id="VALto_v6"><span class="keyword">val</span> to_v6</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> <a href="Ipaddr.V6.html#TYPEt">V6.t</a></code></pre><div class="info ">
+<code class="code">to_v6 addr</code> is the IPv6 representation of <code class="code">addr</code>.<br>
+</div>
+
+<pre><span id="VALscope"><span class="keyword">val</span> scope</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> <a href="Ipaddr.html#TYPEscope">scope</a></code></pre><div class="info ">
+<code class="code">scope addr</code> is the classification of <code class="code">addr</code> by the <a href="Ipaddr.html#VALscope"><code class="code"><span class="constructor">Ipaddr</span>.scope</code></a>
+    hierarchy.<br>
+</div>
+
+<pre><span id="VALis_global"><span class="keyword">val</span> is_global</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">is_global addr</code> is a predicate indicating whether <code class="code">addr</code> globally
+    addresses a node.<br>
+</div>
+
+<pre><span id="VALis_multicast"><span class="keyword">val</span> is_multicast</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">is_multicast addr</code> is a predicate indicating whether <code class="code">addr</code> is a
+    multicast address.<br>
+</div>
+
+<pre><span id="VALis_private"><span class="keyword">val</span> is_private</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">is_private addr</code> is a predicate indicating whether <code class="code">addr</code> privately
+    addresses a node.<br>
+</div>
+
+<pre><span id="VALmulticast_to_mac"><span class="keyword">val</span> multicast_to_mac</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> <a href="Macaddr.html#TYPEt">Macaddr.t</a></code></pre><div class="info ">
+<code class="code">multicast_to_mac addr</code> is the MAC address corresponding to the
+    multicast address <code class="code">addr</code>. See <a href="Ipaddr.V4.html#VALmulticast_to_mac"><code class="code"><span class="constructor">Ipaddr</span>.<span class="constructor">V4</span>.multicast_to_mac</code></a> and
+    <a href="Ipaddr.V6.html#VALmulticast_to_mac"><code class="code"><span class="constructor">Ipaddr</span>.<span class="constructor">V6</span>.multicast_to_mac</code></a>.<br>
+</div>
+
+<pre><span id="VALto_domain_name"><span class="keyword">val</span> to_domain_name</span> : <code class="type"><a href="Ipaddr.html#TYPEt">t</a> -> string list</code></pre><div class="info ">
+<code class="code">to_domain_name addr</code> is the domain name label list for reverse
+    lookups of <code class="code">addr</code>. This includes the <code class="code">.arpa.</code> suffix.<br>
+</div>
+
+<pre><span class="keyword">module</span> <a href="Ipaddr.Prefix.html">Prefix</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Ipaddr.Prefix.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>
+<pre><span class="keyword">include</span> Map.OrderedType</pre>
+</body></html>

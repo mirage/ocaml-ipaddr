@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Ipaddr.V4.html">
+<link rel="next" href="Ipaddr.Prefix.html">
+<link rel="Up" href="Ipaddr.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Ipaddr" rel="Chapter" href="Ipaddr.html">
+<link title="Ipaddr_unix" rel="Chapter" href="Ipaddr_unix.html">
+<link title="Macaddr" rel="Chapter" href="Macaddr.html"><link title="Text string conversion" rel="Section" href="#3_Textstringconversion">
+<link title="Bytestring conversion" rel="Section" href="#3_Bytestringconversion">
+<link title="Int conversion" rel="Section" href="#3_Intconversion">
+<link title="MAC conversion" rel="Section" href="#3_MACconversion">
+<link title="Host conversion" rel="Section" href="#3_Hostconversion">
+<link title="Common addresses" rel="Section" href="#3_Commonaddresses">
+<title>Ipaddr.V6</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Ipaddr.V4.html" title="Ipaddr.V4">Previous</a>
+&nbsp;<a class="up" href="Ipaddr.html" title="Ipaddr">Up</a>
+&nbsp;<a class="post" href="Ipaddr.Prefix.html" title="Ipaddr.Prefix">Next</a>
+</div>
+<h1>Module <a href="type_Ipaddr.V6.html">Ipaddr.V6</a></h1>
+
+<pre><span class="keyword">module</span> V6: <code class="code"><span class="keyword">sig</span></code> <a href="Ipaddr.V6.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+A collection of functions for IPv6 addresses.<br>
+</div>
+<hr width="100%">
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> </pre>
+<div class="info ">
+Type of the internet protocol v6 address of a host<br>
+</div>
+
+
+<pre><span id="VALt_of_sexp"><span class="keyword">val</span> t_of_sexp</span> : <code class="type">Sexplib.Sexp.t -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre>
+<pre><span id="VALsexp_of_t"><span class="keyword">val</span> sexp_of_t</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> Sexplib.Sexp.t</code></pre>
+<pre><span id="VALcompare"><span class="keyword">val</span> compare</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> <a href="Ipaddr.V6.html#TYPEt">t</a> -> int</code></pre>
+<pre><span id="VALmake"><span class="keyword">val</span> make</span> : <code class="type">int -> int -> int -> int -> int -> int -> int -> int -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+Converts the low bytes of eight int values into an abstract
+      <a href="Ipaddr.V6.html#TYPEt"><code class="code"><span class="constructor">Ipaddr</span>.<span class="constructor">V6</span>.t</code></a>.<br>
+</div>
+<br>
+<h3 id="3_Textstringconversion">Text string conversion</h3><br>
+
+<pre><span id="VALof_string_exn"><span class="keyword">val</span> of_string_exn</span> : <code class="type">string -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_string_exn ipv6_string</code> is the address represented
+      by <code class="code">ipv6_string</code>. Raises <code class="code"><span class="constructor">Parse_error</span></code> if <code class="code">ipv6_string</code> is not a
+      valid representation of an IPv6 address.<br>
+</div>
+
+<pre><span id="VALof_string"><span class="keyword">val</span> of_string</span> : <code class="type">string -> <a href="Ipaddr.V6.html#TYPEt">t</a> option</code></pre><div class="info ">
+Same as <code class="code">of_string_exn</code> but returns an option type instead of raising
+      an exception.<br>
+</div>
+
+<pre><span id="VALof_string_raw"><span class="keyword">val</span> of_string_raw</span> : <code class="type">string -> int Pervasives.ref -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+Same as <code class="code">of_string_exn</code> but takes as an extra argument the offset into
+      the string for reading.<br>
+</div>
+
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type">?v4:bool -> <a href="Ipaddr.V6.html#TYPEt">t</a> -> string</code></pre><div class="info ">
+<code class="code">to_string ipv6</code> is the string representation of <code class="code">ipv6</code>,
+      i.e. XXX:XX:X::XXX:XX.<br>
+</div>
+
+<pre><span id="VALto_buffer"><span class="keyword">val</span> to_buffer</span> : <code class="type">?v4:bool -> Buffer.t -> <a href="Ipaddr.V6.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+<code class="code">to_buffer buf ipv6</code> writes the string representation of <code class="code">ipv6</code> into the
+      buffer <code class="code">buf</code>.<br>
+</div>
+
+<pre><span id="VALpp_hum"><span class="keyword">val</span> pp_hum</span> : <code class="type">Format.formatter -> <a href="Ipaddr.V6.html#TYPEt">t</a> -> unit</code></pre><div class="info ">
+<code class="code">pp_hum f ipv6</code> outputs a human-readable representation of <code class="code">ipv6</code> to
+      the formatter <code class="code">f</code>.<br>
+</div>
+<br>
+<h3 id="3_Bytestringconversion">Bytestring conversion</h3><br>
+
+<pre><span id="VALof_bytes_exn"><span class="keyword">val</span> of_bytes_exn</span> : <code class="type">string -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_bytes_exn ipv6_octets</code> is the address represented
+      by <code class="code">ipv6_octets</code>. Raises <code class="code"><span class="constructor">Parse_error</span></code> if <code class="code">ipv6_octets</code> is not a
+      valid representation of an IPv6 address.<br>
+</div>
+
+<pre><span id="VALof_bytes"><span class="keyword">val</span> of_bytes</span> : <code class="type">string -> <a href="Ipaddr.V6.html#TYPEt">t</a> option</code></pre><div class="info ">
+Same as <code class="code">of_bytes_exn</code> but returns an option type instead of raising
+      an exception.<br>
+</div>
+
+<pre><span id="VALof_bytes_raw"><span class="keyword">val</span> of_bytes_raw</span> : <code class="type">string -> int -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+Same as <code class="code">of_bytes_exn</code> but takes an extra paramenter, the offset into
+      the bytes for reading.<br>
+</div>
+
+<pre><span id="VALto_bytes"><span class="keyword">val</span> to_bytes</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> string</code></pre><div class="info ">
+<code class="code">to_bytes ipv6</code> is a string of length 16 encoding <code class="code">ipv6</code>.<br>
+</div>
+
+<pre><span id="VALto_bytes_raw"><span class="keyword">val</span> to_bytes_raw</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> Bytes.t -> int -> unit</code></pre><div class="info ">
+<code class="code">to_bytes_raw ipv6 bytes offset</code> writes the 16 bytes encoding of <code class="code">ipv6</code>
+      into <code class="code">bytes</code> at offset <code class="code">offset</code>.<br>
+</div>
+<br>
+<h3 id="3_Intconversion">Int conversion</h3><br>
+
+<pre><span id="VALof_int64"><span class="keyword">val</span> of_int64</span> : <code class="type">int64 * int64 -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_int64 (ho, lo)</code> is the IPv6 address represented by two int64.
+<p>
+<code class="code">to_int64 ipv6</code> is the 128-bit packed encoding of <code class="code">ipv6</code>.<br>
+</div>
+
+<pre><span id="VALto_int64"><span class="keyword">val</span> to_int64</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> int64 * int64</code></pre>
+<pre><span id="VALof_int32"><span class="keyword">val</span> of_int32</span> : <code class="type">int32 * int32 * int32 * int32 -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_int32 (a, b, c, d)</code> is the IPv6 address represented by four int32.
+<p>
+<code class="code">to_int32 ipv6</code> is the 128-bit packed encoding of <code class="code">ipv6</code>.<br>
+</div>
+
+<pre><span id="VALto_int32"><span class="keyword">val</span> to_int32</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> int32 * int32 * int32 * int32</code></pre>
+<pre><span id="VALof_int16"><span class="keyword">val</span> of_int16</span> : <code class="type">int * int * int * int * int * int * int * int -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">of_int16 (a, b, c, d, e, f, g, h)</code> is the IPv6 address represented by
+      eight 16-bit int.
+<p>
+<code class="code">to_int16 ipv6</code> is the 128-bit packed encoding of <code class="code">ipv6</code>.<br>
+</div>
+
+<pre><span id="VALto_int16"><span class="keyword">val</span> to_int16</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> int * int * int * int * int * int * int * int</code></pre><br>
+<h3 id="3_MACconversion">MAC conversion</h3><br>
+
+<pre><span id="VALmulticast_to_mac"><span class="keyword">val</span> multicast_to_mac</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> <a href="Macaddr.html#TYPEt">Macaddr.t</a></code></pre><div class="info ">
+<code class="code">multicast_to_mac ipv6</code> is the MAC address corresponding to the
+      multicast address <code class="code">ipv6</code>. Described by
+      <a href="https://tools.ietf.org/html/rfc2464#section-7">RFC 2464</a>.<br>
+</div>
+<br>
+<h3 id="3_Hostconversion">Host conversion</h3><br>
+
+<pre><span id="VALto_domain_name"><span class="keyword">val</span> to_domain_name</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> string list</code></pre><div class="info ">
+<code class="code">to_domain_name ipv6</code> is the domain name label list for reverse
+      lookups of <code class="code">ipv6</code>. This includes the <code class="code">.ip6.arpa.</code> suffix.<br>
+</div>
+<br>
+<h3 id="3_Commonaddresses">Common addresses</h3><br>
+
+<pre><span id="VALunspecified"><span class="keyword">val</span> unspecified</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">unspecified</code> is ::.<br>
+</div>
+
+<pre><span id="VALlocalhost"><span class="keyword">val</span> localhost</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">localhost</code> is ::1.<br>
+</div>
+
+<pre><span id="VALinterface_nodes"><span class="keyword">val</span> interface_nodes</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">interface_nodes</code> is ff01::01.<br>
+</div>
+
+<pre><span id="VALlink_nodes"><span class="keyword">val</span> link_nodes</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">link_nodes</code> is ff02::01.<br>
+</div>
+
+<pre><span id="VALinterface_routers"><span class="keyword">val</span> interface_routers</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">interface_routers</code> is ff01::02.<br>
+</div>
+
+<pre><span id="VALlink_routers"><span class="keyword">val</span> link_routers</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">link_routers</code> is ff02::02.<br>
+</div>
+
+<pre><span id="VALsite_routers"><span class="keyword">val</span> site_routers</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">site_routers</code> is ff05::02.<br>
+</div>
+
+<pre><span class="keyword">module</span> <a href="Ipaddr.V6.Prefix.html">Prefix</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Ipaddr.V6.Prefix.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info">
+A module for manipulating IPv6 network prefixes.
+</div>
+
+<pre><span id="VALscope"><span class="keyword">val</span> scope</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> <a href="Ipaddr.html#TYPEscope">Ipaddr.scope</a></code></pre><div class="info ">
+<code class="code">scope ipv6</code> is the classification of <code class="code">ipv6</code> by the <a href="Ipaddr.V6.html#VALscope"><code class="code"><span class="constructor">Ipaddr</span>.<span class="constructor">V6</span>.scope</code></a>
+      hierarchy.<br>
+</div>
+
+<pre><span id="VALlink_address_of_mac"><span class="keyword">val</span> link_address_of_mac</span> : <code class="type"><a href="Macaddr.html#TYPEt">Macaddr.t</a> -> <a href="Ipaddr.V6.html#TYPEt">t</a></code></pre><div class="info ">
+<code class="code">link_address_of_mac mac</code> is the link-local address for an
+      Ethernet interface derived by the IEEE MAC -&gt; EUI-64 map with
+      the Universal/Local bit complemented for IPv6.<br>
+<b>See also</b> <a href="https://tools.ietf.org/html/rfc2464#section-4">RFC 2464</a><br>
+</div>
+
+<pre><span id="VALis_global"><span class="keyword">val</span> is_global</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">is_global ipv6</code> is a predicate indicating whether <code class="code">ipv6</code> globally
+      addresses a node.<br>
+</div>
+
+<pre><span id="VALis_multicast"><span class="keyword">val</span> is_multicast</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">is_multicast ipv6</code> is a predicate indicating whether <code class="code">ipv6</code> is a
+      multicast address.<br>
+</div>
+
+<pre><span id="VALis_private"><span class="keyword">val</span> is_private</span> : <code class="type"><a href="Ipaddr.V6.html#TYPEt">t</a> -> bool</code></pre><div class="info ">
+<code class="code">is_private ipv6</code> is a predicate indicating whether <code class="code">ipv6</code> privately
+      addresses a node.<br>
+</div>
+
+<pre><span class="keyword">include</span> Map.OrderedType</pre>
+</body></html>
