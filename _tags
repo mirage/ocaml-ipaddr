@@ -4,3 +4,4 @@ true: package(bytes sexplib ppx_sexp_conv)
 "lib" : include
 
 <lib_test/test_*.*> : package(oUnit)
+<top/ipaddr_top.*> : package(compiler-libs.toplevel)
