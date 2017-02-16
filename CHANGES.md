@@ -1,3 +1,7 @@
+## 2.7.2 (2017-02-16)
+
+* Fix a missing findlib toploop package (#61 from Vincent Bernardoff)
+
 ## 2.7.1 (2016-11-16)
 
 * Use topkg for build (#60 from Jochen Bartl)
