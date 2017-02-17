@@ -11,19 +11,19 @@
 <link title="Macaddr" rel="Chapter" href="Macaddr.html"><title>Ipaddr_unix</title>
 </head>
 <body>
-<code class="code"><span class="keyword">sig</span><br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_inet_addr&nbsp;:&nbsp;<span class="constructor">Ipaddr</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Unix</span>.inet_addr<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.t<br>
-&nbsp;&nbsp;<span class="keyword">module</span>&nbsp;<span class="constructor">V4</span>&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">sig</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_inet_addr&nbsp;:&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V4</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Unix</span>.inet_addr<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr_exn&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V4</span>.t<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V4</span>.t&nbsp;option<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br>
-&nbsp;&nbsp;<span class="keyword">module</span>&nbsp;<span class="constructor">V6</span>&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">sig</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_inet_addr&nbsp;:&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V6</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Unix</span>.inet_addr<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr_exn&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V6</span>.t<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V6</span>.t&nbsp;option<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br>
+<code class="code"><span class="keyword">sig</span>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_inet_addr&nbsp;:&nbsp;<span class="constructor">Ipaddr</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Unix</span>.inet_addr
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.t
+&nbsp;&nbsp;<span class="keyword">module</span>&nbsp;<span class="constructor">V4</span>&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">sig</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_inet_addr&nbsp;:&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V4</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Unix</span>.inet_addr
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr_exn&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V4</span>.t
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V4</span>.t&nbsp;option
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>
+&nbsp;&nbsp;<span class="keyword">module</span>&nbsp;<span class="constructor">V6</span>&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">sig</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_inet_addr&nbsp;:&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V6</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Unix</span>.inet_addr
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr_exn&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V6</span>.t
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;of_inet_addr&nbsp;:&nbsp;<span class="constructor">Unix</span>.inet_addr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Ipaddr</span>.<span class="constructor">V6</span>.t&nbsp;option
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>
 <span class="keyword">end</span></code></body></html>
