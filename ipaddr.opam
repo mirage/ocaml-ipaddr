@@ -16,21 +16,12 @@ tags: [
   "org:xapi-project"
 ]
 
-build: [
-  [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"
-    "--with-base-unix" "%{base-unix:installed}%" ]
-]
-build-test: [
-  [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" "--tests" "true" ]
-  [ "ocaml" "pkg/pkg.ml" "test" ]
-]
+build: [ "jbuilder" "build" "@install" ]
+build-test: [ "jbuilder" "build" "@runtest" ]
+
 depends: [
-  "ocamlfind" {build}
-  "ocamlbuild" {build}
-  "topkg" {build}
+  "jbuilder" {build}
   "base-bytes"
-  "sexplib"
-  "ppx_deriving"
   "ppx_sexp_conv"
   "ounit" {test}
 ]
