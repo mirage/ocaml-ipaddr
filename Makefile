@@ -1,7 +1,10 @@
 .PHONY: all clean
 
 all:
-	jbuilder build @install @runtest
+	jbuilder build
+
+test:
+	jbuilder runtest
 
 clean:
-	rm -rf _build
+	rm -rf _build *.install

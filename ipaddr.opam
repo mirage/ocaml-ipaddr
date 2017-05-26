@@ -16,14 +16,17 @@ tags: [
   "org:xapi-project"
 ]
 
-build: [ "jbuilder" "build" "@install" ]
-build-test: [ "jbuilder" "build" "@runtest" ]
+build: [
+  ["jbuilder" "subst"] {pinned}
+  ["jbuilder" "build" "-p" name "-j" jobs]
+]
+build-test: [ "jbuilder" "runtest" "-p" name "-j" jobs ]
 
 depends: [
-  "jbuilder" {build}
+  "jbuilder" {build & >="1.0+beta7"}
   "base-bytes"
-  "ppx_sexp_conv"
+  "ppx_sexp_conv" {build}
   "ounit" {test}
 ]
 depopts: [ "base-unix" ]
-available: [ ocaml-version >= "4.02.2" ]
+available: [ ocaml-version >= "4.03.0" ]
