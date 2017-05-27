@@ -1,7 +1,9 @@
 ## 2.8.0 (2017-05-26)
 
 * Port to Jbuilder (#65 @vbmithr @avsm).
-* Minimum version of OCaml required is now 4.03.0 (formerly was 4.02.2).
+* Minimum version of OCaml required is now 4.03.0 (formerly was 4.02.2),
+  due to the use of recent `ppx_sexp_conv` with Jbuilder also having that
+  as the minimum supported compiler version.
 
 ## 2.7.2 (2017-02-16)
 
