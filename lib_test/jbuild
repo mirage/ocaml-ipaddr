@@ -1,6 +1,6 @@
 (executables
  ((names (test_ipaddr test_macaddr))
-  (libraries (ipaddr ipaddr.macaddr oUnit))))
+  (libraries (ipaddr oUnit))))
 
 (alias
  ((name    runtest)
