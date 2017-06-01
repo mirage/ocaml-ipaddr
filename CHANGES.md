@@ -1,6 +1,11 @@
-## 2.8.0 (2017-05-26)
+## 2.8.0 (2017-05-31)
 
 * Port to Jbuilder (#65 @vbmithr @avsm).
+  There should be no observable changes, except that `Ipaddr_unix` is now
+  in a separate subdirectory. This means that packages that implicitly
+  depended on the module without including the ocamlfind `ipaddr.unix`
+  package may now fail. Just adding the ocamlfind dependency will fix it,
+  and is backwards compatible with older Ipaddr releases.
 * Minimum version of OCaml required is now 4.03.0 (formerly was 4.02.2),
   due to the use of recent `ppx_sexp_conv` with Jbuilder also having that
   as the minimum supported compiler version.
