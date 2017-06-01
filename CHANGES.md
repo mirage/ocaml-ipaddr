@@ -1,4 +1,4 @@
-## 2.8.0 (2017-05-31)
+## 2.8.0 (2017-06-01)
 
 * Port to Jbuilder (#65 @vbmithr @avsm).
   There should be no observable changes, except that `Ipaddr_unix` is now
@@ -20,8 +20,8 @@
 
 ## 2.7.0 (2016-02-14)
 
-* Remove sexplib.syntax, type_conv deps and camlp4 transitive dependency
-* Add ppx_sexp_conv dependency
+* Remove `sexplib.syntax`, `type_conv` deps and camlp4 transitive dependency
+* Add `ppx_sexp_conv` dependency
 * Require OCaml 4.02.2+
 * Add `Ipaddr.Prefix.subset`, `Ipaddr.V4.Prefix.subset` and `Ipaddr.V6.subset`
   predicates to test containment of subnets (#52 from @seliopou)
@@ -35,11 +35,11 @@
 * Change IPv6 link-local address prefix from fe80::/10 to fe80::/64. (#39)
 * Remove type bytes = string alias (potentially breaking)
 * Turn on -safe-string (#41)
-* {V4,V6}.to_bytes_raw now uses Bytes.t rather than string (potentially breaking)
+* {V4,V6}.`to_bytes_raw` now uses Bytes.t rather than string (potentially breaking)
 * Add multicast MAC conversions from RFC 1112 and RFC 2464
-* Add to_domain_name conversions to DNS label lists (in-addr.arpa and ip6.arpa)
-* Add V6.interface_routers, V6.site_routers, and V6.Prefix.solicited_node
-* Add V6.link_address_of_mac to convert a MAC into a link local IP address
+* Add `to_domain_name` conversions to DNS label lists (in-addr.arpa and ip6.arpa)
+* Add `V6.interface_routers`, `V6.site_routers`, and `V6.Prefix.solicited_node`
+* Add `V6.link_address_of_mac` to convert a MAC into a link local IP address
 
 ## 2.5.0 (2014-05-27)
 
