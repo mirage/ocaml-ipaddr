@@ -53,6 +53,10 @@ val to_bytes : t -> string
     of [mac_addr], i.e. xx:xx:xx:xx:xx:xx. *)
 val to_string : ?sep:char -> t -> string
 
+(** [pp_hum f mac_addr] outputs a human-readable representation of [mac_addr] to
+    the formatter [f]. *)
+val pp_hum : Format.formatter -> t -> unit
+
 (** [broadcast] is ff:ff:ff:ff:ff:ff. *)
 val broadcast : t
 
