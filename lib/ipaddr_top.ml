@@ -1,10 +1,11 @@
 let printers = [
-  "Ipaddr.pp_hum";
-  "Ipaddr.Prefix.pp_hum";
-  "Ipaddr.V4.pp_hum";
-  "Ipaddr.V4.Prefix.pp_hum";
-  "Ipaddr.V6.pp_hum";
-  "Ipaddr.V6.Prefix.pp_hum";
+  "Ipaddr.pp";
+  "Ipaddr.Prefix.pp";
+  "Ipaddr.V4.pp";
+  "Ipaddr.V4.Prefix.pp";
+  "Ipaddr.V6.pp";
+  "Ipaddr.V6.Prefix.pp";
+  "Macaddr.pp";
 ]
 
 let eval_string
