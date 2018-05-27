@@ -34,7 +34,7 @@ let of_bytes_exn x =
 let of_bytes x = try Some (of_bytes_exn x) with _ -> None
 
 let int_of_hex_char c =
-  let c = int_of_char (Char.uppercase c) - 48 in
+  let c = int_of_char (Char.uppercase_ascii c) - 48 in
   if c > 9
   then if c > 16
     then c - 7 (* upper hex offset *)
@@ -88,7 +88,7 @@ let parse_sextuple s i =
       Bytes.set m 5 (Char.chr (parse_hex_int [] s i));
       (if !i - p <> 2 then raise (Parse_error ("hex pairs required",s)));
       m
-  with Invalid_argument "Char.chr" ->
+  with Invalid_argument _ ->
     raise (Parse_error ("address segment too large",s))
 
 (* Read a MAC address colon-separated string *)
