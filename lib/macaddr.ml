@@ -15,9 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Sexplib.Std
-
-exception Parse_error of string * string [@@deriving sexp]
+exception Parse_error of string * string
 
 let need_more x = Parse_error ("not enough data", x)
 

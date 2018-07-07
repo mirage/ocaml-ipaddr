@@ -3,7 +3,6 @@
   (public_name ipaddr)
   (modules (ipaddr macaddr))
   (wrapped false)
-  (preprocess (pps (ppx_sexp_conv)))
   (libraries (sexplib))))
 
 (library
