@@ -157,8 +157,10 @@ module V4 = struct
     to_buffer b i;
     Buffer.contents b
 
-  let pp_hum ppf i =
+  let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
+
+  let pp_hum = pp
 
   let sexp_of_t i =
     Sexplib.Sexp.Atom (to_string i)
@@ -302,8 +304,10 @@ module V4 = struct
       to_buffer b subnet;
       Buffer.contents b
 
-    let pp_hum ppf i =
+    let pp ppf i =
       Format.fprintf ppf "%s" (to_string i)
+
+    let pp_hum = pp
 
     let to_address_buffer buf ((_,sz) as subnet) addr =
       to_buffer buf (network_address subnet addr,sz)
@@ -596,8 +600,10 @@ module V6 = struct
     to_buffer ?v4 buf l;
     Buffer.contents buf
 
-  let pp_hum ppf i =
+  let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
+
+  let pp_hum = pp
 
   let sexp_of_t i =
     Sexplib.Sexp.Atom (to_string i)
@@ -760,8 +766,10 @@ module V6 = struct
       to_buffer buf subnet;
       Buffer.contents buf
 
-    let pp_hum ppf i =
+    let pp ppf i =
       Format.fprintf ppf "%s" (to_string i)
+
+    let pp_hum = pp
 
     let to_address_buffer buf ((_,sz) as subnet) addr =
       to_buffer buf (network_address subnet addr,sz)
@@ -852,8 +860,10 @@ let to_buffer buf = function
   | V4 x -> V4.to_buffer buf x
   | V6 x -> V6.to_buffer buf x
 
-let pp_hum ppf i =
+let pp ppf i =
       Format.fprintf ppf "%s" (to_string i)
+
+let pp_hum = pp
 
 let of_string_raw s offset =
   let len = String.length s in
@@ -982,6 +992,8 @@ module Prefix = struct
     | V4 p -> V4 (V4.Prefix.netmask p)
     | V6 p -> V6 (V6.Prefix.netmask p)
 
-  let pp_hum ppf i =
+  let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
+
+  let pp_hum = pp
 end

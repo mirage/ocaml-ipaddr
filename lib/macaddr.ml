@@ -109,6 +109,9 @@ let to_string ?(sep=':') x =
 
 let to_bytes x = Bytes.to_string x
 
+let pp ppf i =
+  Format.fprintf ppf "%s" (to_string i)
+
 let sexp_of_t m = Sexplib.Sexp.Atom (to_string m)
 
 let t_of_sexp m =
