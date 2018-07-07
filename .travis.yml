@@ -9,9 +9,8 @@ env:
    - PACKAGE="ipaddr"
  matrix:
    - REVDEPS=true DISTRO=debian-testing OCAML_VERSION=4.06.0
-   - DISTRO=centos-6 OCAML_VERSION=4.03.0
-   - DISTRO=centos-7 OCAML_VERSION=4.04.2
-   - DISTRO=fedora-25 OCAML_VERSION=4.06.0
+   - DISTRO=debian-testing OCAML_VERSION=4.03.0
+   - DISTRO=debian-unstable OCAML_VERSION=4.04.2
    - REVDEPS=true DISTRO=alpine-3.5 OCAML_VERSION=4.04.2
    - DISTRO=debian-stable OCAML_VERSION=4.05.0
    - DISTRO=ubuntu-16.04 OCAML_VERSION=4.05.0
