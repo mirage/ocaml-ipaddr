@@ -20,7 +20,7 @@
     {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** Raised when parsing of IP address syntax fails. *)
-exception Parse_error of string * string [@@deriving sexp]
+exception Parse_error of string * string
 
 (** Type of ordered address scope classifications *)
 type scope =
@@ -31,12 +31,20 @@ type scope =
 | Site
 | Organization
 | Global
-[@@deriving sexp]
+
+(** [sexp_of_scope scope] is a [Sexp.t] representing the [scope]. *)
+val sexp_of_scope : scope -> Sexplib.Sexp.t
+
+(** [scope_of_sexp sexp] is a [scope].
+    @raise Invalid_argument if not a valid tag. *)
+val scope_of_sexp : Sexplib.Sexp.t -> scope
 
 (** A collection of functions for IPv4 addresses. *)
 module V4 : sig
   (** Type of the internet protocol v4 address of a host *)
-  type t [@@deriving sexp]
+  type t
+
+  (** [compare t t'] compares [t] with [t']. *)
   val compare : t -> t -> int
 
   (** Converts the low bytes of four int values into an abstract {! V4.t }. *)
@@ -45,8 +53,9 @@ module V4 : sig
   (** {3 Text string conversion} *)
 
   (** [of_string_exn ipv4_string] is the address represented
-      by [ipv4_string]. Raises [Parse_error] if [ipv4_string] is not a
-      valid representation of an IPv4 address. *)
+      by [ipv4_string].
+      @raise [Parse_error] if [ipv4_string] is not a valid representation of an
+      IPv4 address. *)
   val of_string_exn : string -> t
 
   (** Same as [of_string_exn] but returns an option type instead of raising
@@ -75,6 +84,16 @@ module V4 : sig
       library. Please use pp instead. *)
   val pp_hum : Format.formatter -> t -> unit
   [@@ocaml.deprecated "Please use Ipaddr.V4.pp instead."]
+
+  (** {3 S-expression conversion} *)
+
+  (** [sexp_of_t t] outputs a s-expression of [t]. *)
+  val sexp_of_t : t -> Sexplib.Sexp.t
+
+  (** [t_of_sexp s] converts [s] to a [t].
+      @raise [Parse_error] if [s] is not a valid representation of an IPv4
+      address. *)
+  val t_of_sexp : Sexplib.Sexp.t -> t
 
   (** {3 Bytestring conversion} *)
 
@@ -149,12 +168,20 @@ module V4 : sig
 
   (** A module for manipulating IPv4 network prefixes. *)
   module Prefix : sig
-    type addr = t [@@deriving sexp]
+    type addr = t
 
     (** Type of a internet protocol subnet *)
-    type t [@@deriving sexp]
+    type t
 
     val compare : t -> t -> int
+
+    (** [sexp_of_t t] outputs a s-expression of [t]. *)
+    val sexp_of_t : t -> Sexplib.Sexp.t
+
+    (** [t_of_sexp s] converts [s] to a [t].
+        @raise [Parse_error] if [s] is not a valid representation of an IPv4
+        address. *)
+    val t_of_sexp : Sexplib.Sexp.t -> t
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
     val mask : int -> addr
@@ -297,7 +324,7 @@ end
 (** A collection of functions for IPv6 addresses. *)
 module V6 : sig
   (** Type of the internet protocol v6 address of a host *)
-  type t [@@deriving sexp]
+  type t
   val compare : t -> t -> int
 
   (** Converts the low bytes of eight int values into an abstract
@@ -337,6 +364,16 @@ module V6 : sig
       library. Please use pp instead. *)
   val pp_hum : Format.formatter -> t -> unit
   [@@ocaml.deprecated "Please use Ipaddr.V6.pp instead."]
+
+  (** {3 S-expression conversion} *)
+
+  (** [sexp_of_t t] outputs a s-expression of [t]. *)
+  val sexp_of_t : t -> Sexplib.Sexp.t
+
+  (** [t_of_sexp s] converts [s] to a [t].
+      @raise [Parse_error] if [s] is not a valid representation of an IPv4
+      address. *)
+  val t_of_sexp : Sexplib.Sexp.t -> t
 
   (** {3 Bytestring conversion} *)
 
@@ -416,12 +453,20 @@ module V6 : sig
 
   (** A module for manipulating IPv6 network prefixes. *)
   module Prefix : sig
-    type addr = t [@@deriving sexp]
+    type addr = t
 
     (** Type of a internet protocol subnet *)
-    type t [@@deriving sexp]
+    type t
 
     val compare : t -> t -> int
+
+    (** [sexp_of_t t] outputs a s-expression of [t]. *)
+    val sexp_of_t : t -> Sexplib.Sexp.t
+
+    (** [t_of_sexp s] converts [s] to a [t].
+        @raise [Parse_error] if [s] is not a valid representation of an IPv4
+        address. *)
+    val t_of_sexp : Sexplib.Sexp.t -> t
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
     val mask : int -> addr
@@ -559,10 +604,18 @@ module V6 : sig
 end
 
 (** Type of either an IPv4 value or an IPv6 value *)
-type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 [@@deriving sexp]
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
 
 (** Type of any IP address *)
-type t = (V4.t,V6.t) v4v6 [@@deriving sexp]
+type t = (V4.t,V6.t) v4v6
+
+(** [sexp_of_t t] outputs a s-expression of [t]. *)
+val sexp_of_t : t -> Sexplib.Sexp.t
+
+(** [t_of_sexp s] converts [s] to a [t].
+    @raise [Parse_error] if [s] is not a valid representation of an IP
+    address. *)
+val t_of_sexp : Sexplib.Sexp.t -> t
 
 val compare : t -> t -> int
 
@@ -636,10 +689,17 @@ val multicast_to_mac : t -> Macaddr.t
 val to_domain_name : t -> string list
 
 module Prefix : sig
-  type addr = t [@@deriving sexp]
+  type addr = t
 
   (** Type of a internet protocol subnet *)
-  type t = (V4.Prefix.t, V6.Prefix.t) v4v6 [@@deriving sexp]
+  type t = (V4.Prefix.t, V6.Prefix.t) v4v6
+
+  (** [sexp_of_t t] outputs a s-expression of [t]. *)
+  val sexp_of_t : t -> Sexplib.Sexp.t
+
+  (** [t_of_sexp s] converts [s] to a [t].
+      @raise [Failure] if [s] is not a valid representation of an IP prefix. *)
+  val t_of_sexp : Sexplib.Sexp.t -> t
 
   val compare : t -> t -> int
 

@@ -15,9 +15,7 @@
  *
  *)
 
-open Sexplib.Std
-
-exception Parse_error of string * string [@@deriving sexp]
+exception Parse_error of string * string
 
 type scope =
 | Point
@@ -27,7 +25,23 @@ type scope =
 | Site
 | Organization
 | Global
-[@@deriving sexp]
+
+let sexp_of_scope, scope_of_sexp =
+  let open Sexplib.Sexp in
+  let lst = [
+    Point, Atom "Point" ;
+    Interface, Atom "Interface";
+    Link, Atom "Link" ;
+    Admin, Atom "Admin" ;
+    Site, Atom "Site" ;
+    Organization, Atom "Organization" ;
+    Global, Atom "Global"
+  ]
+  in
+  (fun scope -> List.assoc scope lst),
+  (fun sexp -> fst (List.find (fun (_, sexp') -> match sexp, sexp' with
+       | Atom a, Atom b -> String.equal a b
+       | _ -> false) lst))
 
 let (~|) = Int32.of_int
 let (|~) = Int32.to_int
@@ -239,12 +253,8 @@ module V4 = struct
   let routers     = make 224   0   0   2
 
   module Prefix = struct
-    type addr = t [@@deriving sexp]
-    type t = addr * int [@@deriving sexp]
-
-    let compare (pre,sz) (pre',sz') =
-      let c = compare pre pre' in
-      if c = 0 then Pervasives.compare sz sz' else c
+    type addr = t
+    type t = addr * int
 
     let ip = make
 
@@ -254,6 +264,21 @@ module V4 = struct
       else 0x0_FF_FF_FF_FF_l <|< (32 - sz)
 
     let make sz pre = (pre &&& (mask sz),sz)
+
+    let sexp_of_t (ip, prefix) =
+      Sexplib.Sexp.List [ sexp_of_t ip ; Sexplib.Conv.sexp_of_int prefix ]
+
+    let t_of_sexp = function
+      | Sexplib.Sexp.List [ ip ; prefix ] ->
+        let prefix' = Sexplib.Conv.int_of_sexp prefix in
+        if prefix' < 0 || prefix' > 32 then
+          raise (Parse_error ("invalid prefix size", string_of_int prefix'));
+        make prefix' (t_of_sexp ip)
+      | _ -> raise (Failure "Ipaddr.V4.Prefix.t: Unexpected sexp")
+
+    let compare (pre,sz) (pre',sz') =
+      let c = compare pre pre' in
+      if c = 0 then Pervasives.compare sz sz' else c
 
     let network_address (pre,sz) addr =
       pre ||| (addr &&& Int32.lognot (mask sz))
@@ -697,8 +722,8 @@ module V6 = struct
   let site_routers      = make 0xff05 0 0 0 0 0 0 2
 
   module Prefix = struct
-    type addr = t [@@deriving sexp]
-    type t = addr * int [@@deriving sexp]
+    type addr = t
+    type t = addr * int
 
     let compare (pre,sz) (pre',sz') =
       let c = compare pre pre' in
@@ -717,6 +742,17 @@ module V6 = struct
       mask (sz - 96))
 
     let make sz pre = (logand pre (mask sz),sz)
+
+    let sexp_of_t (ip, prefix) =
+      Sexplib.Sexp.List [ sexp_of_t ip ; Sexplib.Conv.sexp_of_int prefix ]
+
+    let t_of_sexp = function
+      | Sexplib.Sexp.List [ ip ; prefix ] ->
+        let prefix' = Sexplib.Conv.int_of_sexp prefix in
+        if prefix' < 0 || prefix' > 128 then
+          raise (Parse_error ("invalid prefix size", string_of_int prefix'));
+        make prefix' (t_of_sexp ip)
+      | _ -> raise (Failure "Ipaddr.V6.Prefix.t: Unexpected sexp")
 
     let network_address (pre,sz) addr =
       logor pre (logand addr (lognot (mask sz)))
@@ -843,8 +879,20 @@ module V6 = struct
   let is_private i = (scope i) <> Global
 end
 
-type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 [@@deriving sexp]
-type t = (V4.t,V6.t) v4v6 [@@deriving sexp]
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
+type t = (V4.t,V6.t) v4v6
+let sexp_of_t = function
+  | V4 v4 -> Sexplib.Sexp.List [ Sexplib.Sexp.Atom "V4" ; V4.sexp_of_t v4 ]
+  | V6 v6 -> Sexplib.Sexp.List [ Sexplib.Sexp.Atom "V6" ; V6.sexp_of_t v6 ]
+
+let t_of_sexp = function
+  | Sexplib.Sexp.List [ Sexplib.Sexp.Atom v ; ip ] ->
+    begin match v with
+      | "V4" -> V4 (V4.t_of_sexp ip)
+      | "V6" -> V6 (V6.t_of_sexp ip)
+      | _ -> raise (Failure "Ipaddr.t: unexpected version")
+    end
+  | _ -> raise  (Failure "Ipaddr.t: Unexpected sexp")
 
 let compare a b = match a,b with
   | V4 a, V4 b -> V4.compare a b
@@ -925,8 +973,21 @@ module Prefix = struct
     let to_v6 = to_v6
   end
 
-  type addr = t [@@deriving sexp]
-  type t = (V4.Prefix.t,V6.Prefix.t) v4v6 [@@deriving sexp]
+  type addr = t
+  type t = (V4.Prefix.t,V6.Prefix.t) v4v6
+
+  let sexp_of_t = function
+    | V4 t -> Sexplib.Sexp.List [ Sexplib.Sexp.Atom "V4" ; V4.Prefix.sexp_of_t t ]
+    | V6 t -> Sexplib.Sexp.List [ Sexplib.Sexp.Atom "V6" ; V6.Prefix.sexp_of_t t ]
+
+  let t_of_sexp = function
+    | Sexplib.Sexp.List [ Sexplib.Sexp.Atom v ; prefix ] ->
+    begin match v with
+      | "V4" -> V4 (V4.Prefix.t_of_sexp prefix)
+      | "V6" -> V6 (V6.Prefix.t_of_sexp prefix)
+      | _ -> raise (Failure "Ipaddr.Prefix.t: unexpected version")
+    end
+  | _ -> raise  (Failure "Ipaddr.Prefix.t: Unexpected sexp")
 
   let compare a b = match a,b with
     | V4 a , V4 b -> V4.Prefix.compare a b

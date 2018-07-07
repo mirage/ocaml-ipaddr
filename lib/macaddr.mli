@@ -19,10 +19,18 @@
     {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** Raised when parsing of MAC address syntax fails. *)
-exception Parse_error of string * string [@@deriving sexp]
+exception Parse_error of string * string
 
 (** Type of the hardware address (MAC) of an ethernet interface. *)
-type t [@@deriving sexp]
+type t
+
+(** [sexp_of_t t] outputs a s-expression of [t]. *)
+val sexp_of_t : t -> Sexplib.Sexp.t
+
+(** [t_of_sexp s] converts [s] to a [t].
+    @raise [Parse_error] if [s] is not a valid representation of an IP
+    address. *)
+val t_of_sexp : Sexplib.Sexp.t -> t
 
 val compare : t -> t -> int
 
