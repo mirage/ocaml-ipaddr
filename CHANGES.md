@@ -1,3 +1,20 @@
+## 2.9.0 (2018-12-11)
+
+* Add `pp` functions for prettyprinting and deprecate `pp_hum` variants.
+  The two functions are currently the same, so porting is just a matter
+  of replacing existing uses of `pp_hum` with `pp` (#71 @verbosemode)
+* Fix deprecation warnings on newer OCaml standard libraries (#74 @cfcs).
+* Fix `base-unix` depopt to be a real dependency (#68 @rgrinberg).
+* Fix missing `sexplib` dependency (#66 #67 @bmillwood).
+* Port to Dune from jbuilder and update opam metadata to 2.0 format (#76 @avsm).
+* Remove unused variable and bindings warnings in the implementation and
+  signatures (#76 @avsm)
+* Fix toplevel handling of the `ipaddr.top` package by linking
+  to compiler-libs instead of compiler-libs.toplevel (#76 @avsm based on
+  fix in mirage/ocaml-uri#130 by @yallop)
+* Update Travis to test latest distros by using their aliases (#76 @avsm)
+* Upgrade opam metadata to the 2.0 format (#76 @avsm)
+
 ## 2.8.0 (2017-06-01)
 
 * Port to Jbuilder (#65 @vbmithr @avsm).
