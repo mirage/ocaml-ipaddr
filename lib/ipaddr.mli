@@ -37,7 +37,6 @@ type scope =
 module V4 : sig
   (** Type of the internet protocol v4 address of a host *)
   type t [@@deriving sexp]
-  val compare : t -> t -> int
 
   (** Converts the low bytes of four int values into an abstract {! V4.t }. *)
   val make : int -> int -> int -> int -> t
@@ -153,8 +152,6 @@ module V4 : sig
 
     (** Type of a internet protocol subnet *)
     type t [@@deriving sexp]
-
-    val compare : t -> t -> int
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
     val mask : int -> addr
@@ -298,7 +295,6 @@ end
 module V6 : sig
   (** Type of the internet protocol v6 address of a host *)
   type t [@@deriving sexp]
-  val compare : t -> t -> int
 
   (** Converts the low bytes of eight int values into an abstract
       {! V6.t }. *)
@@ -420,8 +416,6 @@ module V6 : sig
 
     (** Type of a internet protocol subnet *)
     type t [@@deriving sexp]
-
-    val compare : t -> t -> int
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
     val mask : int -> addr
@@ -564,8 +558,6 @@ type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 [@@deriving sexp]
 (** Type of any IP address *)
 type t = (V4.t,V6.t) v4v6 [@@deriving sexp]
 
-val compare : t -> t -> int
-
 (** [to_string addr] is the text string representation of [addr]. *)
 val to_string : t -> string
 
@@ -640,8 +632,6 @@ module Prefix : sig
 
   (** Type of a internet protocol subnet *)
   type t = (V4.Prefix.t, V6.Prefix.t) v4v6 [@@deriving sexp]
-
-  val compare : t -> t -> int
 
   (** [to_string subnet] is the text string representation of [subnet]. *)
   val to_string : t -> string

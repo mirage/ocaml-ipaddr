@@ -24,8 +24,6 @@ exception Parse_error of string * string [@@deriving sexp]
 (** Type of the hardware address (MAC) of an ethernet interface. *)
 type t [@@deriving sexp]
 
-val compare : t -> t -> int
-
 (** Functions converting MAC addresses to bytes/string and vice
     versa. *)
 
