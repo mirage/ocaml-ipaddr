@@ -160,8 +160,6 @@ module V4 = struct
   let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
 
-  let pp_hum = pp
-
   let sexp_of_t i =
     Sexplib.Sexp.Atom (to_string i)
 
@@ -306,8 +304,6 @@ module V4 = struct
 
     let pp ppf i =
       Format.fprintf ppf "%s" (to_string i)
-
-    let pp_hum = pp
 
     let to_address_buffer buf ((_,sz) as subnet) addr =
       to_buffer buf (network_address subnet addr,sz)
@@ -603,8 +599,6 @@ module V6 = struct
   let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
 
-  let pp_hum = pp
-
   let sexp_of_t i =
     Sexplib.Sexp.Atom (to_string i)
 
@@ -769,8 +763,6 @@ module V6 = struct
     let pp ppf i =
       Format.fprintf ppf "%s" (to_string i)
 
-    let pp_hum = pp
-
     let to_address_buffer buf ((_,sz) as subnet) addr =
       to_buffer buf (network_address subnet addr,sz)
 
@@ -862,8 +854,6 @@ let to_buffer buf = function
 
 let pp ppf i =
       Format.fprintf ppf "%s" (to_string i)
-
-let pp_hum = pp
 
 let of_string_raw s offset =
   let len = String.length s in
@@ -994,6 +984,4 @@ module Prefix = struct
 
   let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
-
-  let pp_hum = pp
 end

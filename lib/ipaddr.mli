@@ -20,7 +20,7 @@
     {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** Raised when parsing of IP address syntax fails. *)
-exception Parse_error of string * string [@@deriving sexp]
+exception Parse_error of string * string
 
 (** Type of ordered address scope classifications *)
 type scope =
@@ -31,12 +31,11 @@ type scope =
 | Site
 | Organization
 | Global
-[@@deriving sexp]
 
 (** A collection of functions for IPv4 addresses. *)
 module V4 : sig
   (** Type of the internet protocol v4 address of a host *)
-  type t [@@deriving sexp]
+  type t
 
   (** Converts the low bytes of four int values into an abstract {! V4.t }. *)
   val make : int -> int -> int -> int -> t
@@ -67,13 +66,6 @@ module V4 : sig
   (** [pp f ipv4] outputs a human-readable representation of [ipv4] to
       the formatter [f]. *)
   val pp : Format.formatter -> t -> unit
-
-  (** [pp_hum f ipv4] outputs a human-readable representation of [ipv4] to
-      the formatter [f].
-      @deprecated This function will be deprecated in a future version of this
-      library. Please use pp instead. *)
-  val pp_hum : Format.formatter -> t -> unit
-  [@@ocaml.deprecated "Please use Ipaddr.V4.pp instead."]
 
   (** {3 Bytestring conversion} *)
 
@@ -148,10 +140,10 @@ module V4 : sig
 
   (** A module for manipulating IPv4 network prefixes. *)
   module Prefix : sig
-    type addr = t [@@deriving sexp]
+    type addr = t
 
     (** Type of a internet protocol subnet *)
-    type t [@@deriving sexp]
+    type t
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
     val mask : int -> addr
@@ -184,13 +176,6 @@ module V4 : sig
     (** [pp f prefix] outputs a human-readable representation of [prefix]
         to the formatter [f]. *)
     val pp : Format.formatter -> t -> unit
-
-    (** [pp_hum f prefix] outputs a human-readable representation of [prefix]
-        to the formatter [f].
-        @deprecated This function will be deprecated in a future version of this
-        library. Please use pp instead. *)
-    val pp_hum : Format.formatter -> t -> unit
-    [@@ocaml.deprecated "Please use Ipaddr.V4.Prefix.pp instead."]
 
     (** [of_address_string_exn cidr_addr] is the address and prefix
         represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
@@ -294,7 +279,7 @@ end
 (** A collection of functions for IPv6 addresses. *)
 module V6 : sig
   (** Type of the internet protocol v6 address of a host *)
-  type t [@@deriving sexp]
+  type t
 
   (** Converts the low bytes of eight int values into an abstract
       {! V6.t }. *)
@@ -326,13 +311,6 @@ module V6 : sig
   (** [pp f ipv6] outputs a human-readable representation of [ipv6] to
       the formatter [f]. *)
   val pp : Format.formatter -> t -> unit
-
-  (** [pp_hum f ipv6] outputs a human-readable representation of [ipv6] to
-      the formatter [f].
-      @deprecated This function will be deprecated in a future version of this
-      library. Please use pp instead. *)
-  val pp_hum : Format.formatter -> t -> unit
-  [@@ocaml.deprecated "Please use Ipaddr.V6.pp instead."]
 
   (** {3 Bytestring conversion} *)
 
@@ -412,10 +390,10 @@ module V6 : sig
 
   (** A module for manipulating IPv6 network prefixes. *)
   module Prefix : sig
-    type addr = t [@@deriving sexp]
+    type addr = t
 
     (** Type of a internet protocol subnet *)
-    type t [@@deriving sexp]
+    type t
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
     val mask : int -> addr
@@ -448,13 +426,6 @@ module V6 : sig
     (** [pp f prefix] outputs a human-readable representation of [prefix]
         to the formatter [f]. *)
     val pp : Format.formatter -> t -> unit
-
-    (** [pp_hum f prefix] outputs a human-readable representation of [prefix]
-        to the formatter [f].
-        @deprecated This function will be deprecated in a future version of this
-        library. Please use pp instead. *)
-    val pp_hum : Format.formatter -> t -> unit
-    [@@ocaml.deprecated "Please use Ipaddr.V6.Prefix.pp instead."]
 
     (** [of_address_string_exn cidr_addr] is the address and prefix
         represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
@@ -553,10 +524,10 @@ module V6 : sig
 end
 
 (** Type of either an IPv4 value or an IPv6 value *)
-type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 [@@deriving sexp]
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
 
 (** Type of any IP address *)
-type t = (V4.t,V6.t) v4v6 [@@deriving sexp]
+type t = (V4.t,V6.t) v4v6
 
 (** [to_string addr] is the text string representation of [addr]. *)
 val to_string : t -> string
@@ -568,13 +539,6 @@ val to_buffer : Buffer.t -> t -> unit
 (** [pp f ip] outputs a human-readable representation of [ip] to the
     formatter [f]. *)
 val pp : Format.formatter -> t -> unit
-
-(** [pp_hum f ip] outputs a human-readable representation of [ip] to the
-    formatter [f].
-    @deprecated This function will be deprecated in a future version of this
-    library. Please use pp instead. *)
-val pp_hum : Format.formatter -> t -> unit
-[@@ocaml.deprecated "Please use Ipaddr.pp instead."]
 
 (** [of_string_exn s] parses [s] as an IPv4 or IPv6 address.
     Raises [Parse_error] if [s] is not a valid string representation of an IP
@@ -628,10 +592,10 @@ val multicast_to_mac : t -> Macaddr.t
 val to_domain_name : t -> string list
 
 module Prefix : sig
-  type addr = t [@@deriving sexp]
+  type addr = t
 
   (** Type of a internet protocol subnet *)
-  type t = (V4.Prefix.t, V6.Prefix.t) v4v6 [@@deriving sexp]
+  type t = (V4.Prefix.t, V6.Prefix.t) v4v6
 
   (** [to_string subnet] is the text string representation of [subnet]. *)
   val to_string : t -> string
@@ -643,13 +607,6 @@ module Prefix : sig
   (** [pp f subnet] outputs a human-readable representation of [subnet]
       to the formatter [f]. *)
   val pp : Format.formatter -> t -> unit
-
-  (** [pp_hum f subnet] outputs a human-readable representation of [subnet]
-      to the formatter [f].
-      @deprecated This function will be deprecated in a future version of this
-      library. Please use pp instead. *)
-  val pp_hum : Format.formatter -> t -> unit
-  [@@ocaml.deprecated "Please use Ipaddr.Prefix.pp instead."]
 
   (** [of_string_exn cidr] is the subnet prefix represented by the CIDR
       string, [cidr]. Raises [Parse_error] if [cidr] is not a valid

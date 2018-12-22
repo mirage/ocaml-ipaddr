@@ -1,3 +1,10 @@
+## 3.0.0
+
+* Remove the sexp serialisers from the main interface in favour
+  of `pp` functions.  Use the `Ipaddr_sexp` module if you still
+  need a sexp serialiser.
+* Remove `pp_hum` which was deprecated in 2.9.0.
+
 ## 2.9.0 (2018-12-11)
 
 * Add `pp` functions for prettyprinting and deprecate `pp_hum` variants.
