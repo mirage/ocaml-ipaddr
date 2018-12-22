@@ -15,9 +15,7 @@
  *
  *)
 
-open Sexplib.Std
-
-exception Parse_error of string * string [@@deriving sexp]
+exception Parse_error of string * string
 
 type scope =
 | Point
@@ -27,7 +25,6 @@ type scope =
 | Site
 | Organization
 | Global
-[@@deriving sexp]
 
 let (~|) = Int32.of_int
 let (|~) = Int32.to_int
@@ -147,6 +144,7 @@ module V4 = struct
     let x = of_string_raw s o in
     expect_end s o;
     x
+
   let of_string s = try Some (of_string_exn s) with _ -> None
 
   let to_buffer b i =
@@ -159,14 +157,6 @@ module V4 = struct
 
   let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
-
-  let sexp_of_t i =
-    Sexplib.Sexp.Atom (to_string i)
-
-  let t_of_sexp i =
-    match i with
-    | Sexplib.Sexp.Atom i -> of_string_exn i
-    | _ -> raise (Failure "Ipaddr.V4.t: Unexpected non-atom in sexp")
 
   (* Byte conversion *)
 
@@ -237,8 +227,8 @@ module V4 = struct
   let routers     = make 224   0   0   2
 
   module Prefix = struct
-    type addr = t [@@deriving sexp]
-    type t = addr * int [@@deriving sexp]
+    type addr = t
+    type t = addr * int
 
     let compare (pre,sz) (pre',sz') =
       let c = compare pre pre' in
@@ -599,14 +589,6 @@ module V6 = struct
   let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
 
-  let sexp_of_t i =
-    Sexplib.Sexp.Atom (to_string i)
-
-  let t_of_sexp i =
-    match i with
-    | Sexplib.Sexp.Atom i -> of_string_exn i
-    | _ -> raise (Failure "Ipaddr.V6.t: Unexpected non-atom in sexp")
-
   (* byte conversion *)
 
   let of_bytes_raw bs o = (* TODO : from cstruct *)
@@ -691,8 +673,8 @@ module V6 = struct
   let site_routers      = make 0xff05 0 0 0 0 0 0 2
 
   module Prefix = struct
-    type addr = t [@@deriving sexp]
-    type t = addr * int [@@deriving sexp]
+    type addr = t
+    type t = addr * int
 
     let compare (pre,sz) (pre',sz') =
       let c = compare pre pre' in
@@ -835,8 +817,8 @@ module V6 = struct
   let is_private i = (scope i) <> Global
 end
 
-type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6 [@@deriving sexp]
-type t = (V4.t,V6.t) v4v6 [@@deriving sexp]
+type ('v4,'v6) v4v6 = V4 of 'v4 | V6 of 'v6
+type t = (V4.t,V6.t) v4v6
 
 let compare a b = match a,b with
   | V4 a, V4 b -> V4.compare a b
@@ -915,8 +897,8 @@ module Prefix = struct
     let to_v6 = to_v6
   end
 
-  type addr = t [@@deriving sexp]
-  type t = (V4.Prefix.t,V6.Prefix.t) v4v6 [@@deriving sexp]
+  type addr = t
+  type t = (V4.Prefix.t,V6.Prefix.t) v4v6
 
   let compare a b = match a,b with
     | V4 a , V4 b -> V4.Prefix.compare a b
