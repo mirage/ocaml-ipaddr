@@ -4,6 +4,8 @@
   of `pp` functions.  Use the `Ipaddr_sexp` module if you still
   need a sexp serialiser.
 * Remove `pp_hum` which was deprecated in 2.9.0.
+* Break out the `Macaddr` module into a separate opam package so
+  that the `Ipaddr` module can be wrapped.
 
 ## 2.9.0 (2018-12-11)
 

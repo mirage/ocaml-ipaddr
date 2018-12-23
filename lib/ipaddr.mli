@@ -338,17 +338,20 @@ module V6 : sig
 
   (** [of_int64 (ho, lo)] is the IPv6 address represented by two int64. *)
   val of_int64 : int64 * int64 -> t
+
   (** [to_int64 ipv6] is the 128-bit packed encoding of [ipv6]. *)
   val to_int64 : t -> int64 * int64
 
   (** [of_int32 (a, b, c, d)] is the IPv6 address represented by four int32. *)
   val of_int32 : int32 * int32 * int32 * int32 -> t
+
   (** [to_int32 ipv6] is the 128-bit packed encoding of [ipv6]. *)
   val to_int32 : t -> int32 * int32 * int32 * int32
 
   (** [of_int16 (a, b, c, d, e, f, g, h)] is the IPv6 address represented by
       eight 16-bit int. *)
   val of_int16 : int * int * int * int * int * int * int * int -> t
+
   (** [to_int16 ipv6] is the 128-bit packed encoding of [ipv6]. *)
   val to_int16 : t -> int * int * int * int * int * int * int * int
 

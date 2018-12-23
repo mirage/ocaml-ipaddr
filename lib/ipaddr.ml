@@ -194,8 +194,8 @@ module V4 = struct
   let of_int16 (a,b) = (~| a <|< 16) ||| (~| b)
   let to_int16 a = ((|~) (a >|> 16), (|~) (a &&& 0xFF_FF_l))
 
-  (** MAC *)
-  (** {{:http://tools.ietf.org/html/rfc1112#section-6.2}RFC 1112}. *)
+  (* MAC *)
+  (* {{:http://tools.ietf.org/html/rfc1112#section-6.2}RFC 1112}. *)
   let multicast_to_mac i =
     let macb = Bytes.create 6 in
     Bytes.set macb 0 (Char.chr 0x01);
@@ -610,8 +610,8 @@ module V6 = struct
     to_bytes_raw i bs 0;
     Bytes.to_string bs
 
-  (** MAC *)
-  (** {{:https://tools.ietf.org/html/rfc2464#section-7}RFC 2464}. *)
+  (* MAC *)
+  (* {{:https://tools.ietf.org/html/rfc2464#section-7}RFC 2464}. *)
   let multicast_to_mac i =
     let (_,_,_,i) = to_int32 i in
     let macb = Bytes.create 6 in
