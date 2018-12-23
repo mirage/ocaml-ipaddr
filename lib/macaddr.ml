@@ -15,9 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Sexplib.Std
-
-exception Parse_error of string * string [@@deriving sexp]
+exception Parse_error of string * string
 
 let need_more x = Parse_error ("not enough data", x)
 
@@ -111,13 +109,6 @@ let to_bytes x = Bytes.to_string x
 
 let pp ppf i =
   Format.fprintf ppf "%s" (to_string i)
-
-let sexp_of_t m = Sexplib.Sexp.Atom (to_string m)
-
-let t_of_sexp m =
-  match m with
-  | Sexplib.Sexp.Atom m -> of_string_exn m
-  | _ -> raise (Failure "Macaddr.t: Unexpected non-atom in sexp")
 
 let broadcast = Bytes.make 6 '\255'
 

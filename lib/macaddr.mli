@@ -19,10 +19,10 @@
     {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** Raised when parsing of MAC address syntax fails. *)
-exception Parse_error of string * string [@@deriving sexp]
+exception Parse_error of string * string
 
 (** Type of the hardware address (MAC) of an ethernet interface. *)
-type t [@@deriving sexp]
+type t
 
 (** Functions converting MAC addresses to bytes/string and vice
     versa. *)
