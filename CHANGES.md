@@ -8,8 +8,35 @@ of the library.
   of `pp` functions.  Use the `Ipaddr_sexp` module if you still
   need a sexp serialiser.
 
+  To use these with ppx-based derivers, simply replace the
+  reference to the `Ipaddr` type definition with `Ipaddr_sexp`.
+  That will import the sexp-conversion functions, and the actual
+  type definitions are simply aliases to the corresponding type
+  within `Ipaddr`.  For example, you might do:
+
+  ```
+  type t = {
+    ip: Ipaddr_sexp.t;
+    mac: Macaddr_sexp.t;
+  } [@@deriving sexp]
+  ```
+
+  The actual types of the records will be aliases to the main
+  library types, and there will be two new functions available
+  as converters.  The signature after ppx has run will be:
+
+  ```
+  type t = {
+    ip: Ipaddr.t;
+    mac: Macaddr.t;
+  }
+  val sexp_of_t : t -> Sexplib0.t
+  val t_of_sexp : Sexplib0.t -> t
+  ```
+
 * Break out the `Macaddr` module into a separate opam package so
-  that the `Ipaddr` module can be wrapped.
+  that the `Ipaddr` module can be wrapped.  Use the `macaddr`
+  opam library now if you need just the MAC address functionality.
 
 * Replace all the `of_string/bytes` functions that formerly returned
   option types with the `Rresult` result types instead. This stops
@@ -18,7 +45,12 @@ of the library.
 
 * Remove `pp_hum` which was deprecated in 2.9.0.
 
-* Minimum OCaml version is now 4.04.0+
+* Sexplib0 is now used which is more lightweight tha the full
+  Sexplib library. Minimum OCaml version is now 4.04.0+ as a result
+  of this dependency.
+
+* Improvements to the ocamldoc formatting strings for better
+  layout and odoc compatibility.
 
 ## 2.9.0 (2018-12-11)
 
