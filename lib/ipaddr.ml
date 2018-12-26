@@ -26,6 +26,32 @@ type scope =
 | Organization
 | Global
 
+let try_with_result fn a =
+  try Ok (fn a)
+  with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
+
+let string_of_scope = function
+| Point -> "point"
+| Interface -> "interface"
+| Link -> "link"
+| Admin -> "admin"
+| Site -> "site"
+| Organization -> "organization"
+| Global -> "global"
+
+let scope_of_string = function
+| "point" -> Ok Point
+| "interface" -> Ok Interface
+| "link" -> Ok Link
+| "admin" -> Ok Admin
+| "site" -> Ok Site
+| "organization" -> Ok Organization
+| "global" -> Ok Global
+| s -> Error (`Msg ("unknown scope: " ^ s))
+
+let pp_scope fmt s =
+  Format.pp_print_string fmt (string_of_scope s)
+
 let (~|) = Int32.of_int
 let (|~) = Int32.to_int
 let (&&&) x y = Int32.logand x y
@@ -145,7 +171,7 @@ module V4 = struct
     expect_end s o;
     x
 
-  let of_string s = try Some (of_string_exn s) with _ -> None
+  let of_string s = try_with_result of_string_exn s
 
   let to_buffer b i =
     Printf.bprintf b "%ld.%ld.%ld.%ld" (i >! 24) (i >! 16) (i >! 8) (i >! 0)
@@ -173,7 +199,7 @@ module V4 = struct
     if len < 4 then raise (need_more bs);
     of_bytes_raw bs 0
 
-  let of_bytes bs = try Some (of_bytes_exn bs) with _ -> None
+  let of_bytes bs = try_with_result of_bytes_exn bs
 
   let to_bytes_raw i b o =
     Bytes.set b (0 + o) (Char.chr ((|~) (i >! 24)));
@@ -268,12 +294,12 @@ module V4 = struct
 
     let of_string_exn s = let (p,quad) = _of_string_exn s in make p quad
 
-    let of_string s = try Some (of_string_exn s) with _ -> None
+    let of_string s = try_with_result of_string_exn s
 
     let of_address_string_exn s =
       let (p,quad) = _of_string_exn s in (make p quad, quad)
 
-    let of_address_string s = try Some (of_address_string_exn s) with _ -> None
+    let of_address_string s = try_with_result of_address_string_exn s
 
     let of_netmask nm addr =
       let rec find_greatest_one bits i =
@@ -533,7 +559,7 @@ module V6 = struct
     expect_end s o;
     x
 
-  let of_string s = try Some (of_string_exn s) with _ -> None
+  let of_string s = try_with_result of_string_exn s
 
   (* http://tools.ietf.org/html/rfc5952 *)
   let to_buffer ?(v4=false) buf addr =
@@ -604,7 +630,8 @@ module V6 = struct
     if len < 16 then raise (need_more bs);
     of_bytes_raw bs 0
 
-  let of_bytes bs = try Some (of_bytes_exn bs) with _ -> None
+  let of_bytes bs = try_with_result of_bytes_exn bs
+
   let to_bytes i =
     let bs = Bytes.create 16 in
     to_bytes_raw i bs 0;
@@ -717,12 +744,12 @@ module V6 = struct
 
     let of_string_exn s = let (p,v6) = _of_string_exn s in make p v6
 
-    let of_string s = try Some (of_string_exn s) with _ -> None
+    let of_string s = try_with_result of_string_exn s
 
     let of_address_string_exn s =
       let (p,v6) = _of_string_exn s in (make p v6, v6)
 
-    let of_address_string s = try Some (of_address_string_exn s) with _ -> None
+    let of_address_string s = try_with_result of_address_string_exn s
 
     let of_netmask nm addr =
       make (match nm with
@@ -856,7 +883,7 @@ let of_string_raw s offset =
 
 let of_string_exn s = of_string_raw s (ref 0)
 
-let of_string s = try Some (of_string_exn s) with _ -> None
+let of_string s = try_with_result of_string_exn s
 
 let v6_of_v4 v4 =
   V6.(Prefix.(network_address ipv4_mapped (of_int32 (0l,0l,0l,v4))))
@@ -925,7 +952,7 @@ module Prefix = struct
 
   let of_string_exn s = of_string_raw s (ref 0)
 
-  let of_string s = try Some (of_string_exn s) with _ -> None
+  let of_string s = try_with_result of_string_exn s
 
   let v6_of_v4 v4 = V6.Prefix.make
     (96 + V4.Prefix.bits v4)
