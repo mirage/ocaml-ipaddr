@@ -15,7 +15,32 @@
  *
  *)
 
-(** serialisers to and from {!Macaddr} and s-expression {!Sexplib0} format *)
+(** serialisers to and from {!Macaddr} and s-expression {!Sexplib0} format
+
+  To use these with ppx-based derivers, simply replace the reference to the
+  {!Macaddr} type definition with {!Macaddr_sexp} instead. That will import the
+  sexp-conversion functions, and the actual type definitions are simply aliases
+  to the corresponding type within {!Ipaddr}.  For example, you might do:
+
+  {[
+    type t = {
+      ip: Ipaddr_sexp.t;
+      mac: Macaddr_sexp.t;
+    } [@@deriving sexp]
+  ]}
+
+  The actual types of the records will be aliases to the main library types,
+  and there will be two new functions available as converters.
+
+  {[
+     type t = {
+       ip: Ipaddr.t;
+       mac: Macaddr.t;
+     }
+     val sexp_of_t : t -> Sexplib0.t
+     val t_of_sexp : Sexplib0.t -> t
+  ]}
+*)
 
 type t = Macaddr.t
 
