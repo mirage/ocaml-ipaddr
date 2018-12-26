@@ -44,7 +44,7 @@ module Test_v4 = struct
       let os = V4.of_string_exn addr in
       let ts = V4.to_string os in
       assert_equal ~msg:addr ts rt;
-      let os = V4.t_of_sexp (V4.sexp_of_t os) in
+      let os = Ipaddr_sexp.(V4.t_of_sexp (V4.sexp_of_t os)) in
       let ts = V4.to_string os in
       assert_equal ~msg:addr ts rt;
     ) addrs
@@ -117,7 +117,7 @@ module Test_v4 = struct
       let os = V4.Prefix.of_string_exn subnet in
       let ts = V4.Prefix.to_string os in
       assert_equal ~msg:subnet ts rt;
-      let os = V4.Prefix.(t_of_sexp (sexp_of_t os)) in
+      let os = Ipaddr_sexp.(V4.Prefix.(t_of_sexp (sexp_of_t os))) in
       let ts = V4.Prefix.to_string os in
       assert_equal ~msg:subnet ts rt;
     ) subnets
@@ -332,7 +332,7 @@ module Test_v6 = struct
       let os = V6.of_string_exn addr in
       let ts = V6.to_string os in
       assert_equal ~msg:(addr^" <> "^rt^" ("^ts^")") ts rt;
-      let os = V6.t_of_sexp (V6.sexp_of_t os) in
+      let os = Ipaddr_sexp.(V6.t_of_sexp (V6.sexp_of_t os)) in
       let ts = V6.to_string os in
       assert_equal ~msg:(addr^" <> "^rt^" ("^ts^")") ts rt;
     ) addrs
@@ -437,7 +437,7 @@ module Test_v6 = struct
       let os = V6.Prefix.of_string_exn subnet in
       let ts = V6.Prefix.to_string os in
       assert_equal ~msg:subnet ts rt;
-      let os = V6.Prefix.(t_of_sexp (sexp_of_t os)) in
+      let os = Ipaddr_sexp.(V6.Prefix.(t_of_sexp (sexp_of_t os))) in
       let ts = V6.Prefix.to_string os in
       assert_equal ~msg:subnet ts rt;
     ) subnets

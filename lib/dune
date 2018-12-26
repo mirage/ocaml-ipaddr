@@ -5,6 +5,12 @@
  (libraries macaddr))
 
 (library
+ (name        ipaddr_sexp)
+ (public_name ipaddr.sexp)
+ (modules ipaddr_sexp)
+ (libraries ipaddr sexplib0))
+
+(library
  (name        macaddr)
  (public_name macaddr)
  (modules macaddr))

@@ -1,12 +1,22 @@
 ## 3.0.0
 
+This release features several backwards incompatible changes,
+but ones that should increase the portability and robustness
+of the library.
+
 * Remove the sexp serialisers from the main interface in favour
   of `pp` functions.  Use the `Ipaddr_sexp` module if you still
   need a sexp serialiser.
-* Remove `pp_hum` which was deprecated in 2.9.0.
+
 * Break out the `Macaddr` module into a separate opam package so
   that the `Ipaddr` module can be wrapped.
 
+
+* Replace all the `of_string/bytes` functions that formerly returned
+  option types with the `Rresult` result types instead. This stops
+  the 
+
+* Remove `pp_hum` which was deprecated in 2.9.0.
 ## 2.9.0 (2018-12-11)
 
 * Add `pp` functions for prettyprinting and deprecate `pp_hum` variants.

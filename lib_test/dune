@@ -1,6 +1,6 @@
 (executables
  (names test_ipaddr test_macaddr)
- (libraries ipaddr oUnit))
+ (libraries ipaddr oUnit ipaddr.sexp))
 
 (alias
  (name    runtest)
