@@ -1,6 +1,6 @@
 # ipaddr: IP (and MAC) address manipulation
 
-A library for manipulation of IP (and MAC) address representations.
+A library for manipulation of IP and MAC address representations.
 
 Features:
 
@@ -19,3 +19,14 @@ Features:
  * MAC-48 (Ethernet) address support
  * `Macaddr` is a `Map.OrderedType`
  * All types have sexplib serializers/deserializers
+
+## Usage
+
+There are the following ocamlfind libraries included as part of this repository:
+
+- `ipaddr`: The `Ipaddr` module for IPv4/6 manipulation.
+- `macaddr`: The `Macaddr` module for MAC address manipulation.
+- `ipaddr.top`: Toplevel printers for Ipaddr.
+- `macaddr.top`: Toplevel printers for Macaddr.
+- `ipaddr.sexp`: S-expression converters for Ipaddr.
+- `macaddr.sexp`: S-expression converters for Macaddr.
