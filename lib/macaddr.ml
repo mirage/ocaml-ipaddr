@@ -19,6 +19,10 @@ exception Parse_error of string * string
 
 let need_more x = Parse_error ("not enough data", x)
 
+let try_with_result fn a =
+  try Ok (fn a)
+  with Parse_error (msg, _) -> Error (`Msg ("Macaddr: " ^ msg))
+
 type t = Bytes.t (* length 6 only *)
 
 let compare = Bytes.compare
@@ -29,7 +33,7 @@ let of_bytes_exn x =
   then raise (Parse_error ("MAC is exactly 6 bytes", x))
   else Bytes.of_string x
 
-let of_bytes x = try Some (of_bytes_exn x) with _ -> None
+let of_bytes x = try_with_result of_bytes_exn x
 
 let int_of_hex_char c =
   let c = int_of_char (Char.uppercase_ascii c) - 48 in
@@ -92,7 +96,7 @@ let parse_sextuple s i =
 (* Read a MAC address colon-separated string *)
 let of_string_exn x = parse_sextuple x (ref 0)
 
-let of_string x = try Some (of_string_exn x) with _ -> None
+let of_string x = try_with_result of_string_exn x
 
 let chri x i = Char.code (Bytes.get x i)
 

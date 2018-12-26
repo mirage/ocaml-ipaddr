@@ -27,7 +27,7 @@ let test_string_rt () =
     let os = of_string_exn addr in
     let ts = to_string ~sep os in
     assert_equal ~msg:(addr ^ " <> " ^ ts) ts addr;
-    let os = t_of_sexp (sexp_of_t os) in
+    let os = Macaddr_sexp.(t_of_sexp (sexp_of_t os)) in
     let ts = to_string ~sep os in
     assert_equal ~msg:(addr ^ " <> " ^ ts) ts addr;
   ) addrs

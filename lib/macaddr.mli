@@ -18,14 +18,15 @@
 
     {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
-(** Raised when parsing of MAC address syntax fails. *)
+(** [Parse_error (err,packet)] is raised when parsing of the MAC
+    address syntax fails. [err] contains a human-readable error
+    and [packet] is the original octet list that failed to parse. *)
 exception Parse_error of string * string
 
 (** Type of the hardware address (MAC) of an ethernet interface. *)
 type t
 
-(** Functions converting MAC addresses to bytes/string and vice
-    versa. *)
+(** {2 Functions converting MAC addresses to/from bytes/string} *)
 
 (** [of_bytes_exn buf] is the hardware address extracted from
     [buf]. Raises [Parse_error] if [buf] has not length 6. *)
@@ -33,7 +34,7 @@ val of_bytes_exn : string -> t
 
 (** Same as above but returns an option type instead of raising an
     exception. *)
-val of_bytes : string -> t option
+val of_bytes : string -> (t, [> `Msg of string]) result
 
 (** [of_string_exn mac_string] is the hardware address represented by
     [mac_string]. Raises [Parse_error] if [mac_string] is not a
@@ -42,7 +43,7 @@ val of_string_exn : string -> t
 
 (** Same as above but returns an option type instead of raising an
     exception. *)
-val of_string : string -> t option
+val of_string : string ->  (t, [> `Msg of string]) result
 
 (** [to_bytes mac_addr] is a string of size 6 encoding [mac_addr]. *)
 val to_bytes : t -> string
