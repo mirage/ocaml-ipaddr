@@ -1,6 +1,12 @@
 (executables
- (names test_ipaddr test_macaddr)
+ (names test_ipaddr test_macaddr test_ppx)
+ (preprocess (pps ppx_sexp_conv))
  (libraries ipaddr oUnit ipaddr.sexp macaddr.sexp))
+
+(alias
+ (name    runtest)
+ (deps    test_ppx.exe)
+ (action  (run %{deps})))
 
 (alias
  (name    runtest)
