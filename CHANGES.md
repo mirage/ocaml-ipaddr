@@ -11,12 +11,15 @@ of the library.
 * Break out the `Macaddr` module into a separate opam package so
   that the `Ipaddr` module can be wrapped.
 
-
 * Replace all the `of_string/bytes` functions that formerly returned
   option types with the `Rresult` result types instead. This stops
-  the 
+  the cause of the exception from being swallowed, and the error
+  message in the new functions can be displayed usefully.
 
 * Remove `pp_hum` which was deprecated in 2.9.0.
+
+* Minimum OCaml version is now 4.04.0+
+
 ## 2.9.0 (2018-12-11)
 
 * Add `pp` functions for prettyprinting and deprecate `pp_hum` variants.
