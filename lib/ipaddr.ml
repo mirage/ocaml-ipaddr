@@ -550,13 +550,13 @@ module V6 = struct
   let of_string s = try Some (of_string_exn s) with _ -> None
 
   (* http://tools.ietf.org/html/rfc5952 *)
-  let to_buffer ?(v4=false) buf addr =
+  let to_buffer buf addr =
 
     let (a,b,c,d,e,f,g,h) as comp = to_int16 addr in
 
     let v4 = match comp with
       | (0,0,0,0,0,0xffff,_,_) -> true
-      | _ -> v4
+      | _ -> false
     in
 
     let rec loop elide zeros acc = function
@@ -595,9 +595,9 @@ module V6 = struct
       | [] -> ()
     in fill (List.rev lrev)
 
-  let to_string ?v4 l =
+  let to_string l =
     let buf = Buffer.create 39 in
-    to_buffer ?v4 buf l;
+    to_buffer buf l;
     Buffer.contents buf
 
   let pp ppf i =
@@ -759,7 +759,7 @@ module V6 = struct
       ) addr
 
     let to_buffer buf (pre,sz) =
-      Printf.bprintf buf "%a/%d" (to_buffer ~v4:false) pre sz
+      Printf.bprintf buf "%a/%d" to_buffer pre sz
 
     let to_string subnet =
       let buf = Buffer.create 43 in

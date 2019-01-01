@@ -317,11 +317,11 @@ module V6 : sig
 
   (** [to_string ipv6] is the string representation of [ipv6],
       i.e. XXX:XX:X::XXX:XX. *)
-  val to_string : ?v4:bool -> t -> string
+  val to_string : t -> string
 
   (** [to_buffer buf ipv6] writes the string representation of [ipv6] into the
       buffer [buf]. *)
-  val to_buffer : ?v4:bool -> Buffer.t -> t -> unit
+  val to_buffer : Buffer.t -> t -> unit
 
   (** [pp f ipv6] outputs a human-readable representation of [ipv6] to
       the formatter [f]. *)
