@@ -1,4 +1,4 @@
-## 3.0.0
+## 3.0.0 (2019-01-02)
 
 This release features several backwards incompatible changes,
 but ones that should increase the portability and robustness
@@ -42,6 +42,10 @@ of the library.
   option types with the `Rresult` result types instead. This stops
   the cause of the exception from being swallowed, and the error
   message in the new functions can be displayed usefully.
+
+* In the `Ipaddr.V6.to_string` and `to_buffer` functions, remove the
+  optional labelled argument `v4` and always output v4-mapped strings
+  as recommended by RFC5952. (#80 by @hannesm).
 
 * Remove `pp_hum` which was deprecated in 2.9.0.
 
