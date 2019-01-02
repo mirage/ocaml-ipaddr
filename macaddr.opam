@@ -2,6 +2,17 @@ opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["David Sheets" "Anil Madhavapeddy" "Hugo Heuzard"]
 synopsis: "A library for manipulation of MAC address representations"
+description: """
+Manipulate 48-bit Ethernet MAC addresses using this library.
+
+There are the following ocamlfind libraries included as part of this
+package:
+
+- `macaddr`: The `Macaddr` module for MAC address manipulation.
+- `macaddr.top`: Toplevel printers for Macaddr.
+- `macaddr.sexp`: S-expression converters for Macaddr.
+"""
+
 license: "ISC"
 tags: ["org:mirage" "org:xapi-project"]
 homepage: "https://github.com/mirage/ocaml-ipaddr"
