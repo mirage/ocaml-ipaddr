@@ -340,6 +340,7 @@ module Test_v6 = struct
   let test_string_rt_bad () =
     let addrs = [
       need_more "[";
+      need_more "[:";
       need_more "[]"; (* ? *)
       need_more ":";
       need_more "[::";

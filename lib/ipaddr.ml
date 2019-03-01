@@ -458,9 +458,10 @@ module V6 = struct
   let parse_ipv6 s i =
     let compressed = ref false in (* :: *)
     let len = String.length s in
-    if len < !i + 2 then (raise (need_more s));
+    if len < !i + 1 then (raise (need_more s));
     let use_bracket = s.[!i] = '[';  in
     if use_bracket then incr i;
+    if len < !i + 2 then (raise (need_more s));
     (* check if it starts with :: *)
     let l =
       if s.[!i] = ':' then begin
