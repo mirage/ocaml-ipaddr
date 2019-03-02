@@ -8,7 +8,6 @@ env:
  global:
    - PACKAGE="ipaddr"
    - PINS="ipaddr:. macaddr:."
-   - REVDEPS="true"
  matrix:
    - DISTRO=debian-stable OCAML_VERSION=4.04
    - DISTRO=ubuntu OCAML_VERSION=4.05

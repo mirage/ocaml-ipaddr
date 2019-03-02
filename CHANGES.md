@@ -1,3 +1,11 @@
+## v3.1.0 (2019-03-02)
+
+* Do not throw an exception when parsing `[:` in IPv6
+  (found by fuzz testing in #84 by @dinosaure)
+* Install automatic toplevel printers for the Ipaddr
+  types via `[@@ocaml.toplevel_printer]`. This enables
+  utop to automatically install the printers (@avsm)
+
 ## 3.0.0 (2019-01-02)
 
 This release features several backwards incompatible changes,

@@ -44,7 +44,7 @@ val scope_of_string : string -> (scope, [> `Msg of string]) result
 
 (** [pp_scope fmt scope] outputs a human-readable representation
   of {!scope} to the [fmt] formatter. *)
-val pp_scope : Format.formatter -> scope -> unit
+val pp_scope : Format.formatter -> scope -> unit [@@ocaml.toplevel_printer]
 
 (** A collection of functions for IPv4 addresses. *)
 module V4 : sig
@@ -80,7 +80,7 @@ module V4 : sig
 
   (** [pp f ipv4] outputs a human-readable representation of [ipv4] to
       the formatter [f]. *)
-  val pp : Format.formatter -> t -> unit
+  val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
   (** {3 Bytestring conversion} *)
 
@@ -193,7 +193,7 @@ module V4 : sig
 
     (** [pp f prefix] outputs a human-readable representation of [prefix]
         to the formatter [f]. *)
-    val pp : Format.formatter -> t -> unit
+    val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
     (** [of_address_string_exn cidr_addr] is the address and prefix
         represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
@@ -328,7 +328,7 @@ module V6 : sig
 
   (** [pp f ipv6] outputs a human-readable representation of [ipv6] to
       the formatter [f]. *)
-  val pp : Format.formatter -> t -> unit
+  val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
   (** {3 Bytestring conversion} *)
 
@@ -446,7 +446,7 @@ module V6 : sig
 
     (** [pp f prefix] outputs a human-readable representation of [prefix]
         to the formatter [f]. *)
-    val pp : Format.formatter -> t -> unit
+    val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
     (** [of_address_string_exn cidr_addr] is the address and prefix
         represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
@@ -559,7 +559,7 @@ val to_buffer : Buffer.t -> t -> unit
 
 (** [pp f ip] outputs a human-readable representation of [ip] to the
     formatter [f]. *)
-val pp : Format.formatter -> t -> unit
+val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
 (** [of_string_exn s] parses [s] as an IPv4 or IPv6 address.
     Raises {!Parse_error} if [s] is not a valid string representation of an IP
@@ -627,7 +627,7 @@ module Prefix : sig
 
   (** [pp f subnet] outputs a human-readable representation of [subnet]
       to the formatter [f]. *)
-  val pp : Format.formatter -> t -> unit
+  val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
   (** [of_string_exn cidr] is the subnet prefix represented by the CIDR
       string, [cidr]. Raises [Parse_error] if [cidr] is not a valid
