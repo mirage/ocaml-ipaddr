@@ -54,7 +54,7 @@ val to_string : ?sep:char -> t -> string
 
 (** [pp f mac_addr] outputs a human-readable representation of [mac_addr] to
     the formatter [f]. *)
-val pp : Format.formatter -> t -> unit
+val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
 (** [broadcast] is [ff:ff:ff:ff:ff:ff]. *)
 val broadcast : t
