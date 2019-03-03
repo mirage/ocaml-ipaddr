@@ -1,7 +1,8 @@
 ## v3.1.0 (2019-03-02)
 
-* Do not throw an exception when parsing `[:` in IPv6
-  (found by fuzz testing in #84 by @dinosaure)
+* Do not leak a `Not_found` exception when parsing `[:`
+  in IPv6 and instead raise `Parse_error` as other errors
+  do (found by fuzz testing in #84 by @dinosaure)
 * Install automatic toplevel printers for the Ipaddr
   types via `[@@ocaml.toplevel_printer]`. This enables
   utop to automatically install the printers (@avsm)
