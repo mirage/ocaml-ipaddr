@@ -21,3 +21,13 @@ build: [
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 dev-repo: "git+https://github.com/mirage/ocaml-ipaddr.git"
+description: """
+A library for manipulation of MAC address representations.
+
+Features:
+
+ * oUnit-based tests
+ * MAC-48 (Ethernet) address support
+ * `Macaddr` is a `Map.OrderedType`
+ * All types have sexplib serializers/deserializers optionally via the `Macaddr_sexp` library.
+ """
