@@ -11,14 +11,16 @@
 
 (library
  (name        ipaddr_sexp)
- (public_name ipaddr.sexp)
+ (public_name ipaddr-sexp)
  (modules ipaddr_sexp)
+ (preprocess (pps ppx_sexp_conv))
  (libraries ipaddr sexplib0))
 
 (library
  (name        macaddr_sexp)
- (public_name macaddr.sexp)
+ (public_name macaddr-sexp)
  (modules macaddr_sexp)
+ (preprocess (pps ppx_sexp_conv))
  (libraries macaddr sexplib0))
 
 (library
