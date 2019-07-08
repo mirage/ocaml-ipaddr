@@ -244,6 +244,25 @@ module V4 = struct
     in
     Domain_name.(host_exn (of_strings_exn name))
 
+  let of_domain_name n =
+    match Domain_name.to_strings n with
+    | [ a ; b ; c ; d ; in_addr ; arpa ] when
+        Domain_name.(compare_sub arpa "arpa" = 0 && compare_sub in_addr "in-addr" = 0) ->
+      begin
+        let conv_add bits data =
+          let i = Int32.of_int (parse_dec_int data (ref 0)) in
+          if i > 0xFFl then
+            raise (Parse_error ("label with a too big number", data))
+          else
+            i <! bits
+        in
+        try
+          Some Int32.(add (conv_add 0 a) (add (conv_add 8 b) (add (conv_add 16 c) (conv_add 24 d))))
+        with
+        | Parse_error _ -> None
+      end
+    | _ -> None
+
   (* constant *)
 
   let any         = make   0   0   0   0
@@ -693,6 +712,39 @@ module V6 = struct
     in
     Domain_name.(host_exn (of_strings_exn name))
 
+  let of_domain_name n =
+    let open Domain_name in
+    if count_labels n = 34 then
+      let ip6 = get_label_exn n 32 and arpa = get_label_exn n 33 in
+      if compare_sub ip6 "ip6" = 0 && compare_sub arpa "arpa" = 0 then
+        let back = true in
+        let n' = drop_label_exn ~back ~amount:2 n in
+        let d = drop_label_exn ~back ~amount:24 n'
+        and c = drop_label_exn ~amount:8 (drop_label_exn ~back ~amount:16 n')
+        and b = drop_label_exn ~amount:16 (drop_label_exn ~back ~amount:8 n')
+        and a = drop_label_exn ~amount:24 n'
+        in
+        let t b d =
+          let v = Int32.of_int (parse_hex_int d (ref 0)) in
+          if v > 0xFl then
+            raise (Parse_error ("number in label too big", d))
+          else
+            v <|< b
+        in
+        let f d =
+          List.fold_left (fun (acc, b) d -> Int32.add acc (t b d), b + 4)
+            (0l, 0) (to_strings d)
+        in
+        try
+          let a', _ = f a and b', _ = f b and c', _ = f c and d', _ = f d in
+          Some (a', b', c', d')
+        with
+        | Parse_error _ -> None
+      else
+        None
+    else
+      None
+
   (* constant *)
 
   let unspecified       = make      0 0 0 0 0 0 0 0
@@ -922,6 +974,20 @@ let multicast_to_mac = function
 let to_domain_name = function
   | V4 v4 -> V4.to_domain_name v4
   | V6 v6 -> V6.to_domain_name v6
+
+let of_domain_name n =
+  match Domain_name.count_labels n with
+  | 6 ->
+    begin match V4.of_domain_name n with
+      | None -> None
+      | Some x -> Some (V4 x)
+    end
+  | 34 ->
+    begin match V6.of_domain_name n with
+      | None -> None
+      | Some x -> Some (V6 x)
+    end
+  | _ -> None
 
 module Prefix = struct
   module Addr = struct

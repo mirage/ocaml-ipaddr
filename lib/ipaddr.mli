@@ -134,6 +134,10 @@ module V4 : sig
       lookups of [ipv4]. This includes the [.in-addr.arpa] suffix. *)
   val to_domain_name : t -> [ `host ] Domain_name.t
 
+  (** [of_domain_name name] is [Some t] if the [name] has an [.in-addr.arpa]
+      suffix, and an IPv4 address prefixed. *)
+  val of_domain_name : 'a Domain_name.t -> t option
+
   (** {3 Common addresses} *)
 
   (** [any] is 0.0.0.0. *)
@@ -386,6 +390,10 @@ module V6 : sig
       lookups of [ipv6]. This includes the [.ip6.arpa] suffix. *)
   val to_domain_name : t -> [ `host ] Domain_name.t
 
+  (** [of_domain_name name] is [Some t] if the [name] has an [.ip6.arpa]
+      suffix, and an IPv6 address prefixed. *)
+  val of_domain_name : 'a Domain_name.t -> t option
+
   (** {3 Common addresses} *)
 
   (** [unspecified] is ::. *)
@@ -611,6 +619,10 @@ val multicast_to_mac : t -> Macaddr.t
 (** [to_domain_name addr] is the domain name label list for reverse
     lookups of [addr]. This includes the [.in-addr.arpa] or [.ip6.arpa] suffix. *)
 val to_domain_name : t -> [ `host ] Domain_name.t
+
+(** [of_domain_name name] is [Some t] if the [name] has an [.in-addr.arpa] or
+    [ip6.arpa] suffix, and an IP address prefixed. *)
+val of_domain_name : 'a Domain_name.t -> t option
 
 module Prefix : sig
   type addr = t
