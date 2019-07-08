@@ -247,9 +247,9 @@ module V4 = struct
   let of_domain_name n =
     match Domain_name.to_strings n with
     | [ a ; b ; c ; d ; in_addr ; arpa ] when
-        Domain_name.(compare_sub arpa "arpa" = 0 && compare_sub in_addr "in-addr" = 0) ->
+        Domain_name.(equal_label arpa "arpa" && equal_label in_addr "in-addr") ->
       begin
-        let conv_add bits data =
+        let conv bits data =
           let i = Int32.of_int (parse_dec_int data (ref 0)) in
           if i > 0xFFl then
             raise (Parse_error ("label with a too big number", data))
@@ -257,7 +257,8 @@ module V4 = struct
             i <! bits
         in
         try
-          Some Int32.(add (conv_add 0 a) (add (conv_add 8 b) (add (conv_add 16 c) (conv_add 24 d))))
+          let ( + ) = Int32.add in
+          Some ((conv 0 a) + (conv 8 b) + (conv 16 c) + (conv 24 d))
         with
         | Parse_error _ -> None
       end
@@ -716,12 +717,12 @@ module V6 = struct
     let open Domain_name in
     if count_labels n = 34 then
       let ip6 = get_label_exn n 32 and arpa = get_label_exn n 33 in
-      if compare_sub ip6 "ip6" = 0 && compare_sub arpa "arpa" = 0 then
-        let back = true in
-        let n' = drop_label_exn ~back ~amount:2 n in
-        let d = drop_label_exn ~back ~amount:24 n'
-        and c = drop_label_exn ~amount:8 (drop_label_exn ~back ~amount:16 n')
-        and b = drop_label_exn ~amount:16 (drop_label_exn ~back ~amount:8 n')
+      if equal_label ip6 "ip6" && equal_label arpa "arpa" then
+        let rev = true in
+        let n' = drop_label_exn ~rev ~amount:2 n in
+        let d = drop_label_exn ~rev ~amount:24 n'
+        and c = drop_label_exn ~amount:8 (drop_label_exn ~rev ~amount:16 n')
+        and b = drop_label_exn ~amount:16 (drop_label_exn ~rev ~amount:8 n')
         and a = drop_label_exn ~amount:24 n'
         in
         let t b d =
