@@ -131,8 +131,8 @@ module V4 : sig
   (** {3 Host conversion} *)
 
   (** [to_domain_name ipv4] is the domain name label list for reverse
-      lookups of [ipv4]. This includes the [.in-addr.arpa.] suffix. *)
-  val to_domain_name : t -> string list
+      lookups of [ipv4]. This includes the [.in-addr.arpa] suffix. *)
+  val to_domain_name : t -> [ `host ] Domain_name.t
 
   (** {3 Common addresses} *)
 
@@ -383,8 +383,8 @@ module V6 : sig
   (** {3 Host conversion} *)
 
   (** [to_domain_name ipv6] is the domain name label list for reverse
-      lookups of [ipv6]. This includes the [.ip6.arpa.] suffix. *)
-  val to_domain_name : t -> string list
+      lookups of [ipv6]. This includes the [.ip6.arpa] suffix. *)
+  val to_domain_name : t -> [ `host ] Domain_name.t
 
   (** {3 Common addresses} *)
 
@@ -609,8 +609,8 @@ val is_private : t -> bool
 val multicast_to_mac : t -> Macaddr.t
 
 (** [to_domain_name addr] is the domain name label list for reverse
-    lookups of [addr]. This includes the [.arpa.] suffix. *)
-val to_domain_name : t -> string list
+    lookups of [addr]. This includes the [.in-addr.arpa] or [.ip6.arpa] suffix. *)
+val to_domain_name : t -> [ `host ] Domain_name.t
 
 module Prefix : sig
   type addr = t

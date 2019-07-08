@@ -233,15 +233,16 @@ module V4 = struct
     Macaddr.of_bytes_exn (Bytes.to_string macb)
 
   (* Host *)
-  let to_domain_name i = [
-    Int32.to_string (i >!  0);
-    Int32.to_string (i >!  8);
-    Int32.to_string (i >! 16);
-    Int32.to_string (i >! 24);
-    "in-addr";
-    "arpa";
-    "";
-  ]
+  let to_domain_name i =
+    let name = [
+      Int32.to_string (i >!  0);
+      Int32.to_string (i >!  8);
+      Int32.to_string (i >! 16);
+      Int32.to_string (i >! 24);
+      "in-addr";
+      "arpa" ]
+    in
+    Domain_name.(host_exn (of_strings_exn name))
 
   (* constant *)
 
@@ -652,43 +653,45 @@ module V6 = struct
     Macaddr.of_bytes_exn (Bytes.to_string macb)
 
   (* Host *)
-  let to_domain_name (a,b,c,d) = [
-    hex_string_of_int32 ((d >|>  0) &&& 0xF_l);
-    hex_string_of_int32 ((d >|>  4) &&& 0xF_l);
-    hex_string_of_int32 ((d >|>  8) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 12) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 16) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 20) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 24) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 28) &&& 0xF_l);
-    hex_string_of_int32 ((c >|>  0) &&& 0xF_l);
-    hex_string_of_int32 ((c >|>  4) &&& 0xF_l);
-    hex_string_of_int32 ((c >|>  8) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 12) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 16) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 20) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 24) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 28) &&& 0xF_l);
-    hex_string_of_int32 ((b >|>  0) &&& 0xF_l);
-    hex_string_of_int32 ((b >|>  4) &&& 0xF_l);
-    hex_string_of_int32 ((b >|>  8) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 12) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 16) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 20) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 24) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 28) &&& 0xF_l);
-    hex_string_of_int32 ((a >|>  0) &&& 0xF_l);
-    hex_string_of_int32 ((a >|>  4) &&& 0xF_l);
-    hex_string_of_int32 ((a >|>  8) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 12) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 16) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 20) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 24) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 28) &&& 0xF_l);
-    "ip6";
-    "arpa";
-    "";
-  ]
+  let to_domain_name (a,b,c,d) =
+    let name = [
+      hex_string_of_int32 ((d >|>  0) &&& 0xF_l);
+      hex_string_of_int32 ((d >|>  4) &&& 0xF_l);
+      hex_string_of_int32 ((d >|>  8) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 12) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 16) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 20) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 24) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 28) &&& 0xF_l);
+      hex_string_of_int32 ((c >|>  0) &&& 0xF_l);
+      hex_string_of_int32 ((c >|>  4) &&& 0xF_l);
+      hex_string_of_int32 ((c >|>  8) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 12) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 16) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 20) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 24) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 28) &&& 0xF_l);
+      hex_string_of_int32 ((b >|>  0) &&& 0xF_l);
+      hex_string_of_int32 ((b >|>  4) &&& 0xF_l);
+      hex_string_of_int32 ((b >|>  8) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 12) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 16) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 20) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 24) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 28) &&& 0xF_l);
+      hex_string_of_int32 ((a >|>  0) &&& 0xF_l);
+      hex_string_of_int32 ((a >|>  4) &&& 0xF_l);
+      hex_string_of_int32 ((a >|>  8) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 12) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 16) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 20) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 24) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 28) &&& 0xF_l);
+      "ip6";
+      "arpa"
+    ]
+    in
+    Domain_name.(host_exn (of_strings_exn name))
 
   (* constant *)
 
