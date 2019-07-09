@@ -54,20 +54,22 @@ module V4 : sig
   (** Converts the low bytes of four int values into an abstract {! V4.t }. *)
   val make : int -> int -> int -> int -> t
 
-  (** {3 Text string conversion} *)
+  (** {3 Text string conversion}
+      These manipulate human-readable IPv4 addresses (for example [192.168.1.2]). *)
 
-  (** [of_string s] is the address {!t} represented by the IPv4 address [s].
-      Returns a human-readable error string if parsing failed. *)
+  (** [of_string s] is the address {!t} represented by the human-readable IPv4
+      address [s]. Returns a human-readable error string if parsing failed. *)
   val of_string : string -> (t, [> `Msg of string ]) result
 
-  (** [of_string_exn s] is the address {!t} represented
-      by [s]. Raises {!Parse_error} if [s] is not a
-      valid representation of an IPv4 address. *)
+  (** [of_string_exn s] is the address {!t} represented as a human-readable IPv4
+      address [s]. Raises {!Parse_error} if [s] is not exactly 4 bytes long. *)
   val of_string_exn : string -> t
 
   (** [of_string_raw s off] acts as {!of_string_exn} but takes as an extra
       argument the offset into the string for reading. [off] will be
-      mutated to an unspecified value during the function call. *)
+      mutated to an unspecified value during the function call. [s] must be
+      of at least length [off+4] or else a {!Parse_error} exception will be
+      raised. *)
   val of_string_raw : string -> int ref -> t
 
   (** [to_string ipv4] is the dotted decimal string representation
@@ -82,28 +84,32 @@ module V4 : sig
       the formatter [f]. *)
   val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
-  (** {3 Bytestring conversion} *)
+  (** {3 Octets conversion}
+      These manipulate IPv4 addresses represented as a sequence of
+      four bytes. (e.g for example [0xc0a80102] will be the representation
+      of the human-readable [192.168.1.2] address. *)
 
-  (** [of_bytes s] is the address {!t} represented by the IPv4 octets
+  (** [of_octets s] is the address {!t} represented by the IPv4 octets
       represented by [s].  [s] should be exactly 4 bytes long.
       Returns a human-readable error string if parsing fails. *)
-  val of_bytes : string -> (t, [> `Msg of string ]) result
+  val of_octets : string -> (t, [> `Msg of string ]) result
 
-  (** [of_bytes_exn ipv4_octets] is the address represented
-      by [ipv4_octets]. Raises [Parse_error] if [ipv4_octets] is not a
-      valid representation of an IPv4 address. *)
-  val of_bytes_exn : string -> t
+  (** [of_octets_exn ipv4_octets] is the IPv4 address represented
+      by [ipv4_octets]. Raises {!Parse_error} if [ipv4_octets] is not
+      exactly 4 bytes long. *)
+  val of_octets_exn : string -> t
 
-  (** [of_bytes_raw s off] is the same as {!of_bytes_exn} but takes
-      an extra paramenter [off] the offset into the bytes for reading. *)
-  val of_bytes_raw : string -> int -> t
+  (** [of_octets_raw s off] is the IPv4 address represented by four bytes into
+      the string [s] starting from offset [off].
+      Raises {!Parse_error} if [s] is not of length at least [off+4]. *)
+  val of_octets_raw : string -> int -> t
 
-  (** [to_bytes ipv4] is a string of length 4 encoding [ipv4]. *)
-  val to_bytes : t -> string
+  (** [to_octets ipv4] is a string of length 4 encoding [ipv4] as octets. *)
+  val to_octets : t -> string
 
-  (** [to_bytes_raw ipv4 bytes offset] writes the 4 byte encoding of [ipv4]
+  (** [to_octets_raw ipv4 bytes offset] writes the 4 byte encoding of [ipv4]
       into [bytes] at offset [offset]. *)
-  val to_bytes_raw : t -> Bytes.t -> int -> unit
+  val to_octets_raw : t -> Bytes.t -> int -> unit
 
   (** {3 Int conversion} *)
 
@@ -200,7 +206,7 @@ module V4 : sig
     val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
     (** [of_address_string_exn cidr_addr] is the address and prefix
-        represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
+        represented by [cidr_addr]. Raises {!Parse_error} if [cidr_addr] is not
         a valid representation of a CIDR-scoped address. *)
     val of_address_string_exn : string -> t * addr
 
@@ -310,7 +316,7 @@ module V6 : sig
   (** {3 Text string conversion} *)
 
   (** [of_string_exn ipv6_string] is the address represented
-      by [ipv6_string]. Raises [Parse_error] if [ipv6_string] is not a
+      by [ipv6_string]. Raises {!Parse_error} if [ipv6_string] is not a
       valid representation of an IPv6 address. *)
   val of_string_exn : string -> t
 
@@ -334,27 +340,27 @@ module V6 : sig
       the formatter [f]. *)
   val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
-  (** {3 Bytestring conversion} *)
+  (** {3 Octets conversion} *)
 
-  (** [of_bytes_exn ipv6_octets] is the address represented
-      by [ipv6_octets]. Raises [Parse_error] if [ipv6_octets] is not a
+  (** [of_octets_exn ipv6_octets] is the address represented
+      by [ipv6_octets]. Raises {!Parse_error} if [ipv6_octets] is not a
       valid representation of an IPv6 address. *)
-  val of_bytes_exn : string -> t
+  val of_octets_exn : string -> t
 
-  (** Same as {!of_bytes_exn} but returns an result type instead of raising
+  (** Same as {!of_octets_exn} but returns an result type instead of raising
       an exception. *)
-  val of_bytes : string -> (t, [> `Msg of string ]) result
+  val of_octets : string -> (t, [> `Msg of string ]) result
 
-  (** Same as {!of_bytes_exn} but takes an extra paramenter, the offset into
+  (** Same as {!of_octets_exn} but takes an extra paramenter, the offset into
       the bytes for reading. *)
-  val of_bytes_raw : string -> int -> t
+  val of_octets_raw : string -> int -> t
 
-  (** [to_bytes ipv6] is a string of length 16 encoding [ipv6]. *)
-  val to_bytes : t -> string
+  (** [to_octets ipv6] is a string of length 16 encoding [ipv6]. *)
+  val to_octets : t -> string
 
   (** [to_bytes_raw ipv6 bytes offset] writes the 16 bytes encoding of [ipv6]
       into [bytes] at offset [offset]. *)
-  val to_bytes_raw : t -> Bytes.t -> int -> unit
+  val to_octets_raw : t -> Bytes.t -> int -> unit
 
   (** {3 Int conversion} *)
 
@@ -436,7 +442,7 @@ module V6 : sig
     val network_address : t -> addr -> addr
 
     (** [of_string_exn cidr] is the subnet prefix represented by the CIDR
-        string, [cidr]. Raises [Parse_error] if [cidr] is not a valid
+        string, [cidr]. Raises {!Parse_error} if [cidr] is not a valid
         representation of a CIDR notation routing prefix. *)
     val of_string_exn : string -> t
 
@@ -457,7 +463,7 @@ module V6 : sig
     val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
     (** [of_address_string_exn cidr_addr] is the address and prefix
-        represented by [cidr_addr]. Raises [Parse_error] if [cidr_addr] is not
+        represented by [cidr_addr]. Raises {!Parse_error} if [cidr_addr] is not
         a valid representation of a CIDR-scoped address. *)
     val of_address_string_exn : string -> t * addr
 
@@ -642,7 +648,7 @@ module Prefix : sig
   val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
   (** [of_string_exn cidr] is the subnet prefix represented by the CIDR
-      string, [cidr]. Raises [Parse_error] if [cidr] is not a valid
+      string, [cidr]. Raises {!Parse_error} if [cidr] is not a valid
       representation of a CIDR notation routing prefix. *)
   val of_string_exn : string -> t
 

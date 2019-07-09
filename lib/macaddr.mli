@@ -26,17 +26,17 @@ exception Parse_error of string * string
 (** Type of the hardware address (MAC) of an ethernet interface. *)
 type t
 
-(** {2 Functions converting MAC addresses to/from bytes/string} *)
+(** {2 Functions converting MAC addresses to/from octets/string} *)
 
-(** [of_bytes_exn buf] is the hardware address extracted from
+(** [of_octets_exn buf] is the hardware address extracted from
     [buf]. Raises [Parse_error] if [buf] has not length 6. *)
-val of_bytes_exn : string -> t
+val of_octets_exn : string -> t
 
-(** Same as {!of_bytes_exn buf] but returns a result type instead of
+(** Same as {!of_octets_exn buf] but returns a result type instead of
     raising an exception. *)
-val of_bytes : string -> (t, [> `Msg of string]) result
+val of_octets : string -> (t, [> `Msg of string]) result
 
-(** [of_string_exn mac_string] is the hardware address represented by
+(** [of_string_exn mac_string] is the human-readable hardware address represented by
     [mac_string]. Raises {!Parse_error} if [mac_string] is not a
     valid representation of a MAC address. *)
 val of_string_exn : string -> t
@@ -45,8 +45,9 @@ val of_string_exn : string -> t
     exception. *)
 val of_string : string ->  (t, [> `Msg of string]) result
 
-(** [to_bytes mac_addr] is a string of size 6 encoding [mac_addr]. *)
-val to_bytes : t -> string
+(** [to_octets mac_addr] is a string of size 6 encoding [mac_addr] as a
+    sequence of bytes. *)
+val to_octets : t -> string
 
 (** [to_string ?(sep=':') mac_addr] is the [sep]-separated string representation
     of [mac_addr], i.e. [xx:xx:xx:xx:xx:xx]. *)

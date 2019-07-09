@@ -1,3 +1,24 @@
+## v4.0.0
+
+* Rename the `to/from_bytes` functions to refer to `octets`
+  instead.  This distinguishes the meaning of human-readable
+  addresses (`string`s in this library) and byte-packed
+  representations(`octet`s in this library) from the OCaml
+  `bytes` type that represents mutable strings.
+
+  Porting code should just be a matter of renaming functions
+  such as:
+   - `Ipaddr.of_bytes` becomes `Ipaddr.of_octets`
+   - `Macaddr.to_bytes_raw` becomes `Macaddr.to_octets_raw`
+  and so on.
+
+* Use the `domain-name` library to produce domain names
+  from IP addresses.
+
+* Remove the `ipaddr.sexp` and `macaddr.sexp` ocamlfind
+  subpackages and instead have `ipaddr-sexp` and `macaddr-sexp`
+  to match the opam package names.
+
 ## v3.1.0 (2019-03-02)
 
 * Do not leak a `Not_found` exception when parsing `[:`

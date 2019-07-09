@@ -28,12 +28,12 @@ type t = Bytes.t (* length 6 only *)
 let compare = Bytes.compare
 
 (* Raw MAC address off the wire (network endian) *)
-let of_bytes_exn x =
+let of_octets_exn x =
   if String.length x <> 6
   then raise (Parse_error ("MAC is exactly 6 bytes", x))
   else Bytes.of_string x
 
-let of_bytes x = try_with_result of_bytes_exn x
+let of_octets x = try_with_result of_octets_exn x
 
 let int_of_hex_char c =
   let c = int_of_char (Char.uppercase_ascii c) - 48 in
@@ -109,7 +109,7 @@ let to_string ?(sep=':') x =
     (chri x 4) sep
     (chri x 5)
 
-let to_bytes x = Bytes.to_string x
+let to_octets x = Bytes.to_string x
 
 let pp ppf i =
   Format.fprintf ppf "%s" (to_string i)
