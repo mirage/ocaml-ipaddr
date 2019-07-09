@@ -233,15 +233,36 @@ module V4 = struct
     Macaddr.of_bytes_exn (Bytes.to_string macb)
 
   (* Host *)
-  let to_domain_name i = [
-    Int32.to_string (i >!  0);
-    Int32.to_string (i >!  8);
-    Int32.to_string (i >! 16);
-    Int32.to_string (i >! 24);
-    "in-addr";
-    "arpa";
-    "";
-  ]
+  let to_domain_name i =
+    let name = [
+      Int32.to_string (i >!  0);
+      Int32.to_string (i >!  8);
+      Int32.to_string (i >! 16);
+      Int32.to_string (i >! 24);
+      "in-addr";
+      "arpa" ]
+    in
+    Domain_name.(host_exn (of_strings_exn name))
+
+  let of_domain_name n =
+    match Domain_name.to_strings n with
+    | [ a ; b ; c ; d ; in_addr ; arpa ] when
+        Domain_name.(equal_label arpa "arpa" && equal_label in_addr "in-addr") ->
+      begin
+        let conv bits data =
+          let i = Int32.of_int (parse_dec_int data (ref 0)) in
+          if i > 0xFFl then
+            raise (Parse_error ("label with a too big number", data))
+          else
+            i <! bits
+        in
+        try
+          let ( + ) = Int32.add in
+          Some ((conv 0 a) + (conv 8 b) + (conv 16 c) + (conv 24 d))
+        with
+        | Parse_error _ -> None
+      end
+    | _ -> None
 
   (* constant *)
 
@@ -652,43 +673,78 @@ module V6 = struct
     Macaddr.of_bytes_exn (Bytes.to_string macb)
 
   (* Host *)
-  let to_domain_name (a,b,c,d) = [
-    hex_string_of_int32 ((d >|>  0) &&& 0xF_l);
-    hex_string_of_int32 ((d >|>  4) &&& 0xF_l);
-    hex_string_of_int32 ((d >|>  8) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 12) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 16) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 20) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 24) &&& 0xF_l);
-    hex_string_of_int32 ((d >|> 28) &&& 0xF_l);
-    hex_string_of_int32 ((c >|>  0) &&& 0xF_l);
-    hex_string_of_int32 ((c >|>  4) &&& 0xF_l);
-    hex_string_of_int32 ((c >|>  8) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 12) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 16) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 20) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 24) &&& 0xF_l);
-    hex_string_of_int32 ((c >|> 28) &&& 0xF_l);
-    hex_string_of_int32 ((b >|>  0) &&& 0xF_l);
-    hex_string_of_int32 ((b >|>  4) &&& 0xF_l);
-    hex_string_of_int32 ((b >|>  8) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 12) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 16) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 20) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 24) &&& 0xF_l);
-    hex_string_of_int32 ((b >|> 28) &&& 0xF_l);
-    hex_string_of_int32 ((a >|>  0) &&& 0xF_l);
-    hex_string_of_int32 ((a >|>  4) &&& 0xF_l);
-    hex_string_of_int32 ((a >|>  8) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 12) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 16) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 20) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 24) &&& 0xF_l);
-    hex_string_of_int32 ((a >|> 28) &&& 0xF_l);
-    "ip6";
-    "arpa";
-    "";
-  ]
+  let to_domain_name (a,b,c,d) =
+    let name = [
+      hex_string_of_int32 ((d >|>  0) &&& 0xF_l);
+      hex_string_of_int32 ((d >|>  4) &&& 0xF_l);
+      hex_string_of_int32 ((d >|>  8) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 12) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 16) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 20) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 24) &&& 0xF_l);
+      hex_string_of_int32 ((d >|> 28) &&& 0xF_l);
+      hex_string_of_int32 ((c >|>  0) &&& 0xF_l);
+      hex_string_of_int32 ((c >|>  4) &&& 0xF_l);
+      hex_string_of_int32 ((c >|>  8) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 12) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 16) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 20) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 24) &&& 0xF_l);
+      hex_string_of_int32 ((c >|> 28) &&& 0xF_l);
+      hex_string_of_int32 ((b >|>  0) &&& 0xF_l);
+      hex_string_of_int32 ((b >|>  4) &&& 0xF_l);
+      hex_string_of_int32 ((b >|>  8) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 12) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 16) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 20) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 24) &&& 0xF_l);
+      hex_string_of_int32 ((b >|> 28) &&& 0xF_l);
+      hex_string_of_int32 ((a >|>  0) &&& 0xF_l);
+      hex_string_of_int32 ((a >|>  4) &&& 0xF_l);
+      hex_string_of_int32 ((a >|>  8) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 12) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 16) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 20) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 24) &&& 0xF_l);
+      hex_string_of_int32 ((a >|> 28) &&& 0xF_l);
+      "ip6";
+      "arpa"
+    ]
+    in
+    Domain_name.(host_exn (of_strings_exn name))
+
+  let of_domain_name n =
+    let open Domain_name in
+    if count_labels n = 34 then
+      let ip6 = get_label_exn n 32 and arpa = get_label_exn n 33 in
+      if equal_label ip6 "ip6" && equal_label arpa "arpa" then
+        let rev = true in
+        let n' = drop_label_exn ~rev ~amount:2 n in
+        let d = drop_label_exn ~rev ~amount:24 n'
+        and c = drop_label_exn ~amount:8 (drop_label_exn ~rev ~amount:16 n')
+        and b = drop_label_exn ~amount:16 (drop_label_exn ~rev ~amount:8 n')
+        and a = drop_label_exn ~amount:24 n'
+        in
+        let t b d =
+          let v = Int32.of_int (parse_hex_int d (ref 0)) in
+          if v > 0xFl then
+            raise (Parse_error ("number in label too big", d))
+          else
+            v <|< b
+        in
+        let f d =
+          List.fold_left (fun (acc, b) d -> Int32.add acc (t b d), b + 4)
+            (0l, 0) (to_strings d)
+        in
+        try
+          let a', _ = f a and b', _ = f b and c', _ = f c and d', _ = f d in
+          Some (a', b', c', d')
+        with
+        | Parse_error _ -> None
+      else
+        None
+    else
+      None
 
   (* constant *)
 
@@ -919,6 +975,20 @@ let multicast_to_mac = function
 let to_domain_name = function
   | V4 v4 -> V4.to_domain_name v4
   | V6 v6 -> V6.to_domain_name v6
+
+let of_domain_name n =
+  match Domain_name.count_labels n with
+  | 6 ->
+    begin match V4.of_domain_name n with
+      | None -> None
+      | Some x -> Some (V4 x)
+    end
+  | 34 ->
+    begin match V6.of_domain_name n with
+      | None -> None
+      | Some x -> Some (V6 x)
+    end
+  | _ -> None
 
 module Prefix = struct
   module Addr = struct

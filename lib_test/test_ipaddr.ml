@@ -285,9 +285,12 @@ module Test_v4 = struct
 
   let test_domain_name () =
     let ip = V4.of_string_exn "128.64.32.16" in
-    let name = "16.32.64.128.in-addr.arpa." in
-    assert_equal ~msg:"domain_name"
-      (String.concat "." (V4.to_domain_name ip)) name
+    let name =
+      Domain_name.(host_exn (of_string_exn "16.32.64.128.in-addr.arpa"))
+    in
+    assert_equal ~cmp:Domain_name.equal ~msg:"to_domain_name"
+      (V4.to_domain_name ip) name ;
+    assert_equal ~msg:"of_domain_name" (V4.of_domain_name name) (Some ip)
 
   let suite = "Test V4" >::: [
     "string_rt"            >:: test_string_rt;
@@ -602,10 +605,12 @@ module Test_v6 = struct
   let test_domain_name () =
     let ip = V6.of_string_exn "2a00:1450:4009:800::200e" in
     let name =
-      "e.0.0.2.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.0.9.0.0.4.0.5.4.1.0.0.a.2.ip6.arpa."
+      "e.0.0.2.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.0.9.0.0.4.0.5.4.1.0.0.a.2.ip6.arpa"
     in
-    assert_equal ~msg:"domain_name"
-      (String.concat "." (V6.to_domain_name ip)) name
+    let name = Domain_name.(host_exn (of_string_exn name)) in
+    assert_equal ~cmp:Domain_name.equal ~msg:"to_domain_name"
+      (V6.to_domain_name ip) name ;
+    assert_equal ~msg:"of_domain_name" (V6.of_domain_name name) (Some ip)
 
   let test_link_address_of_mac () =
     let mac = Macaddr.of_string_exn "34-56-78-9A-BC-DE" in
