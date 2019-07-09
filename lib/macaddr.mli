@@ -32,16 +32,16 @@ type t
     [buf]. Raises [Parse_error] if [buf] has not length 6. *)
 val of_bytes_exn : string -> t
 
-(** Same as above but returns an option type instead of raising an
-    exception. *)
+(** Same as {!of_bytes_exn buf] but returns a result type instead of
+    raising an exception. *)
 val of_bytes : string -> (t, [> `Msg of string]) result
 
 (** [of_string_exn mac_string] is the hardware address represented by
-    [mac_string]. Raises [Parse_error] if [mac_string] is not a
+    [mac_string]. Raises {!Parse_error} if [mac_string] is not a
     valid representation of a MAC address. *)
 val of_string_exn : string -> t
 
-(** Same as above but returns an option type instead of raising an
+(** Same as {!of_string_exn} but returns a result type instead of raising an
     exception. *)
 val of_string : string ->  (t, [> `Msg of string]) result
 
