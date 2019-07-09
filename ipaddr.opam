@@ -33,7 +33,7 @@ depends: [
   "sexplib0"
   "domain-name" {>= "0.3.0"}
   "ounit" {with-test}
-  "ppx_sexp_conv" {with-test}
+  "ppx_sexp_conv" {with-test & >= "v0.9.0"}
 ]
 build: [
   ["dune" "subst"] {pinned}

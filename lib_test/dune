@@ -1,19 +1,34 @@
-(executables
- (names test_ipaddr test_macaddr test_ppx)
+(rule (copy# ../lib/ipaddr_sexp.ml ipaddr_sexp.ml))
+(rule (copy# ../lib/macaddr_sexp.ml macaddr_sexp.ml))
+
+(library
+ (name test_macaddr_sexp)
+ (wrapped false)
+ (modules macaddr_sexp)
  (preprocess (pps ppx_sexp_conv))
- (libraries ipaddr oUnit ipaddr.sexp macaddr.sexp))
+ (libraries macaddr sexplib0))
 
-(alias
- (name    runtest)
- (deps    test_ppx.exe)
- (action  (run %{deps})))
+(library
+ (name test_ipaddr_sexp)
+ (wrapped false)
+ (modules ipaddr_sexp)
+ (preprocess (pps ppx_sexp_conv))
+ (libraries ipaddr sexplib0))
 
-(alias
- (name    runtest)
- (deps    test_macaddr.exe)
- (action  (run %{deps})))
+(test
+ (name test_ipaddr)
+ (package ipaddr)
+ (modules test_ipaddr)
+ (libraries ipaddr test_ipaddr_sexp oUnit))
 
-(alias
- (name    runtest)
- (deps    test_ipaddr.exe)
- (action  (run %{deps})))
+(test
+ (name test_macaddr)
+ (package macaddr)
+ (modules test_macaddr)
+ (libraries macaddr test_macaddr_sexp oUnit))
+
+(test
+ (name test_ppx)
+ (modules test_ppx)
+ (package ipaddr)
+ (libraries ipaddr macaddr test_ipaddr_sexp test_macaddr_sexp oUnit))
