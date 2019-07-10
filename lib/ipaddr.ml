@@ -62,7 +62,6 @@ let (>!)  x y = (x >|> y) &&& 0xFF_l
 let (<!)  x y = (x &&& 0xFF_l) <|< y
 
 let need_more x = Parse_error ("not enough data", x)
-let too_much x = Parse_error ("too much data", x)
 
 let char_0 = int_of_char '0'
 let char_a = int_of_char 'a'
@@ -184,35 +183,38 @@ module V4 = struct
   let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
 
-  (* Byte conversion *)
+  (* Octets conversion *)
 
-  let of_bytes_raw bs o =
-    make
-      (Char.code bs.[0 + o])
-      (Char.code bs.[1 + o])
-      (Char.code bs.[2 + o])
-      (Char.code bs.[3 + o])
+  let of_octets_exn ?(off=0) bs =
+    try
+      make
+      (Char.code bs.[0 + off])
+      (Char.code bs.[1 + off])
+      (Char.code bs.[2 + off])
+      (Char.code bs.[3 + off])
+    with _ -> raise (need_more bs)
 
-  let of_bytes_exn bs =
-    let len = String.length bs in
-    if len > 4 then raise (too_much bs);
-    if len < 4 then raise (need_more bs);
-    of_bytes_raw bs 0
+  let of_octets ?off bs = try_with_result (of_octets_exn ?off) bs
 
-  let of_bytes bs = try_with_result of_bytes_exn bs
+  let write_octets_exn ?(off=0) i b =
+    try
+      Bytes.set b (0 + off) (Char.chr ((|~) (i >! 24)));
+      Bytes.set b (1 + off) (Char.chr ((|~) (i >! 16)));
+      Bytes.set b (2 + off) (Char.chr ((|~) (i >!  8)));
+      Bytes.set b (3 + off) (Char.chr ((|~) (i >!  0)))
+    with _ -> raise (need_more (Bytes.to_string b))
 
-  let to_bytes_raw i b o =
-    Bytes.set b (0 + o) (Char.chr ((|~) (i >! 24)));
-    Bytes.set b (1 + o) (Char.chr ((|~) (i >! 16)));
-    Bytes.set b (2 + o) (Char.chr ((|~) (i >!  8)));
-    Bytes.set b (3 + o) (Char.chr ((|~) (i >!  0)))
+  let write_octets ?off i bs = try_with_result (write_octets_exn ?off i) bs
 
-  let to_bytes i =
-    let b = Bytes.create 4 in
-    to_bytes_raw i b 0;
-    Bytes.to_string b
+  let to_octets i =
+    String.init 4 (function
+      | 0 -> Char.chr ((|~) (i >! 24))
+      | 1 -> Char.chr ((|~) (i >! 16))
+      | 2 -> Char.chr ((|~) (i >! 8))
+      | 3 -> Char.chr ((|~) (i >! 0))
+      | _ -> assert false)
 
-  (* Int32*)
+  (* Int32 *)
   let of_int32 i = i
   let to_int32 i = i
 
@@ -230,7 +232,7 @@ module V4 = struct
     Bytes.set macb 3 (Char.chr ((|~) (i >|> 16 &&& 0x7F_l)));
     Bytes.set macb 4 (Char.chr ((|~) (i >! 8)));
     Bytes.set macb 5 (Char.chr ((|~) (i >! 0)));
-    Macaddr.of_bytes_exn (Bytes.to_string macb)
+    Macaddr.of_octets_exn (Bytes.to_string macb)
 
   (* Host *)
   let to_domain_name i =
@@ -433,21 +435,11 @@ module B128 = struct
     in
     (a,b,c,d,e,f,g,h)
 
-  let to_bytes_raw (a,b,c,d) byte o =
-    V4.to_bytes_raw a byte (o+0);
-    V4.to_bytes_raw b byte (o+4);
-    V4.to_bytes_raw c byte (o+8);
-    V4.to_bytes_raw d byte (o+12)
-
-  let _of_bytes_exn bs = (* TODO : from cstruct *)
-    let len = String.length bs in
-    if len > 16 then raise (too_much bs);
-    if len < 16 then raise (need_more bs);
-    let hihi = V4.of_bytes_raw bs 0 in
-    let hilo = V4.of_bytes_raw bs 4 in
-    let lohi = V4.of_bytes_raw bs 8 in
-    let lolo = V4.of_bytes_raw bs 12 in
-    of_int32 (hihi, hilo, lohi, lolo)
+  let write_octets_exn ?(off=0) (a,b,c,d) byte =
+    V4.write_octets_exn ~off a byte;
+    V4.write_octets_exn ~off:(off+4) b byte;
+    V4.write_octets_exn ~off:(off+8) c byte;
+    V4.write_octets_exn ~off:(off+12) d byte
 
   let compare (a1,b1,c1,d1) (a2,b2,c2,d2) =
     match V4.compare a1 a2 with
@@ -639,25 +631,21 @@ module V6 = struct
 
   (* byte conversion *)
 
-  let of_bytes_raw bs o = (* TODO : from cstruct *)
-    let hihi = V4.of_bytes_raw bs (o + 0) in
-    let hilo = V4.of_bytes_raw bs (o + 4) in
-    let lohi = V4.of_bytes_raw bs (o + 8) in
-    let lolo = V4.of_bytes_raw bs (o + 12) in
+  let of_octets_exn ?(off=0) bs = (* TODO : from cstruct *)
+    let hihi = V4.of_octets_exn ~off bs in
+    let hilo = V4.of_octets_exn ~off:(off+4) bs in
+    let lohi = V4.of_octets_exn ~off:(off+8) bs in
+    let lolo = V4.of_octets_exn ~off:(off+12) bs in
     of_int32 (hihi, hilo, lohi, lolo)
 
-  let of_bytes_exn bs = (* TODO : from cstruct *)
-    let len = String.length bs in
-    if len > 16 then raise (too_much bs);
-    if len < 16 then raise (need_more bs);
-    of_bytes_raw bs 0
+  let of_octets ?off bs = try_with_result (of_octets_exn ?off) bs
 
-  let of_bytes bs = try_with_result of_bytes_exn bs
+  let write_octets ?off i bs = try_with_result (write_octets_exn ?off i) bs
 
-  let to_bytes i =
-    let bs = Bytes.create 16 in
-    to_bytes_raw i bs 0;
-    Bytes.to_string bs
+  let to_octets i =
+    let b = Bytes.create 16 in
+    write_octets_exn i b;
+    Bytes.to_string b
 
   (* MAC *)
   (* {{:https://tools.ietf.org/html/rfc2464#section-7}RFC 2464}. *)
@@ -670,7 +658,7 @@ module V6 = struct
     Bytes.set macb 3 (Char.chr ((|~) (i >! 16)));
     Bytes.set macb 4 (Char.chr ((|~) (i >! 8)));
     Bytes.set macb 5 (Char.chr ((|~) (i >! 0)));
-    Macaddr.of_bytes_exn (Bytes.to_string macb)
+    Macaddr.of_octets_exn (Bytes.to_string macb)
 
   (* Host *)
   let to_domain_name (a,b,c,d) =
@@ -886,7 +874,7 @@ module V6 = struct
   let link_address_of_mac =
     let c b i = Char.code (String.get b i) in
     fun mac ->
-      let bmac = Macaddr.to_bytes mac in
+      let bmac = Macaddr.to_octets mac in
       let c_0 = c bmac 0 lxor 2 in
       let addr = make 0 0 0 0
         (c_0      lsl 8 + c bmac 1)

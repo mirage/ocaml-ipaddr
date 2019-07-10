@@ -20,7 +20,6 @@ open Ipaddr
 
 let error s msg = s, Parse_error (msg,s)
 let need_more s = error s "not enough data"
-let too_much s  = error s "too much data"
 let bad_char i s =
   error s (Printf.sprintf "invalid character '%c' at %d" s.[i] i)
 
@@ -89,16 +88,15 @@ module Test_v4 = struct
   let test_bytes_rt () =
     let addr = "\254\099\003\128" in
     assert_equal ~msg:(String.escaped addr)
-      V4.(to_bytes (of_bytes_exn addr)) addr
+      V4.(to_octets (of_octets_exn addr)) addr
 
   let test_bytes_rt_bad () =
     let addrs = [
       need_more "\254\099\003";
-      too_much "\254\099\003\128\001";
     ] in
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:(String.escaped addr) exn
-        (fun () -> V4.of_bytes_exn addr)
+        (fun () -> V4.of_octets_exn addr)
     ) addrs
 
   let test_int32_rt () =
@@ -273,7 +271,7 @@ module Test_v4 = struct
     assert_equal ~msg:"localhost" true V4.(Prefix.(mem localhost loopback))
 
   let test_multicast_mac () =
-    let ip = V4.of_bytes_exn "\xff\xbf\x9f\x8f" in
+    let ip = V4.of_octets_exn "\xff\xbf\x9f\x8f" in
     let multicast = V4.Prefix.(network_address multicast ip) in
     let unicast_mac_str   = Macaddr.to_string (V4.multicast_to_mac ip) in
     let multicast_mac_str = Macaddr.to_string (V4.multicast_to_mac multicast) in
@@ -405,18 +403,16 @@ module Test_v6 = struct
     let addr =
       "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\000\001"
     in
-    let v6 = V6.of_bytes_exn addr in
-    assert_equal ~msg:(String.escaped addr) V6.(to_bytes v6) addr
+    let v6 = V6.of_octets_exn addr in
+    assert_equal ~msg:(String.escaped addr) V6.(to_octets v6) addr
 
   let test_bytes_rt_bad () =
     let addrs = [
       need_more "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\001";
-      too_much
-        "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\000\000\001";
     ] in
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:(String.escaped addr) exn
-        (fun () -> V6.of_bytes_exn addr)
+        (fun () -> V6.of_octets_exn addr)
     ) addrs
 
   let test_int32_rt () =

@@ -50,7 +50,7 @@ let test_string_rt_bad () =
 
 let test_bytes_rt () =
   let addr = "\254\099\003\128\000\000" in
-  assert_equal ~msg:(String.escaped addr) (to_bytes (of_bytes_exn addr)) addr
+  assert_equal ~msg:(String.escaped addr) (to_octets (of_octets_exn addr)) addr
 
 let test_bytes_rt_bad () =
   let addrs = [
@@ -58,7 +58,7 @@ let test_bytes_rt_bad () =
     "\254\099\003\128\000\000\233";
   ] in
   List.iter (fun addr ->
-    assert_result_failure ~msg:(String.escaped addr) (of_bytes addr)) addrs
+    assert_result_failure ~msg:(String.escaped addr) (of_octets addr)) addrs
 
 let test_make_local () =
   let () = Random.self_init () in
@@ -66,10 +66,10 @@ let test_make_local () =
   let local_addr = make_local bytegen in
   assert_equal ~msg:"is_local" (is_local local_addr) true;
   assert_equal ~msg:"is_unicast" (is_unicast local_addr) true;
-  assert_equal ~msg:"localize" (to_bytes local_addr).[0] (Char.chr 254);
+  assert_equal ~msg:"localize" (to_octets local_addr).[0] (Char.chr 254);
   for i=1 to 5 do
     assert_equal ~msg:("addr.["^(string_of_int i)^"]")
-      (to_bytes local_addr).[i] (Char.chr (bytegen i))
+      (to_octets local_addr).[i] (Char.chr (bytegen i))
   done;
   assert_equal ~msg:"get_oui" (get_oui local_addr)
     ((254 lsl 16) + (254 lsl 8) + 253)
