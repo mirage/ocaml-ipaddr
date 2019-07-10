@@ -32,7 +32,7 @@ type t
     [buf]. Raises [Parse_error] if [buf] has not length 6. *)
 val of_octets_exn : string -> t
 
-(** Same as {!of_octets_exn buf] but returns a result type instead of
+(** Same as {!of_octets_exn} but returns a result type instead of
     raising an exception. *)
 val of_octets : string -> (t, [> `Msg of string]) result
 

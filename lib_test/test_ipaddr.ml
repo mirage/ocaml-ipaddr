@@ -20,7 +20,6 @@ open Ipaddr
 
 let error s msg = s, Parse_error (msg,s)
 let need_more s = error s "not enough data"
-let too_much s  = error s "too much data"
 let bad_char i s =
   error s (Printf.sprintf "invalid character '%c' at %d" s.[i] i)
 
@@ -94,7 +93,6 @@ module Test_v4 = struct
   let test_bytes_rt_bad () =
     let addrs = [
       need_more "\254\099\003";
-      too_much "\254\099\003\128\001";
     ] in
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:(String.escaped addr) exn
@@ -411,8 +409,6 @@ module Test_v6 = struct
   let test_bytes_rt_bad () =
     let addrs = [
       need_more "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\001";
-      too_much
-        "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\000\000\001";
     ] in
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:(String.escaped addr) exn

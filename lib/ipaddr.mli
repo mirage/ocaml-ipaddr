@@ -1,4 +1,5 @@
 (*
+ * Copyright (c) 2019 Anil Madhavapeddy <anil@recoil.org>
  * Copyright (c) 2013-2015 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -67,9 +68,8 @@ module V4 : sig
 
   (** [of_string_raw s off] acts as {!of_string_exn} but takes as an extra
       argument the offset into the string for reading. [off] will be
-      mutated to an unspecified value during the function call. [s] must be
-      of at least length [off+4] or else a {!Parse_error} exception will be
-      raised. *)
+      mutated to an unspecified value during the function call. [s] will
+      a {!Parse_error} exception if it is an invalid or truncated IP address. *)
   val of_string_raw : string -> int ref -> t
 
   (** [to_string ipv4] is the dotted decimal string representation
@@ -89,27 +89,31 @@ module V4 : sig
       four bytes. (e.g for example [0xc0a80102] will be the representation
       of the human-readable [192.168.1.2] address. *)
 
-  (** [of_octets s] is the address {!t} represented by the IPv4 octets
-      represented by [s].  [s] should be exactly 4 bytes long.
-      Returns a human-readable error string if parsing fails. *)
-  val of_octets : string -> (t, [> `Msg of string ]) result
+  (** [of_octets ?off s] is the address {!t} represented by the IPv4 octets
+      represented by [s] starting from offset [off] within the string.
+      [s] must be at least [off+4] bytes long.
+      Returns a human-readable error string if parsing fails.
+      [off] defaults to 0. *)
+  val of_octets : ?off:int -> string -> (t, [> `Msg of string ]) result
 
   (** [of_octets_exn ipv4_octets] is the IPv4 address represented
-      by [ipv4_octets]. Raises {!Parse_error} if [ipv4_octets] is not
-      exactly 4 bytes long. *)
-  val of_octets_exn : string -> t
+      by [ipv4_octets] starting from offset [off] within the string.
+      Raises {!Parse_error} if [ipv4_octets] is not at least [off+4] bytes long. 
+      [off] defaults to 0. *)
+  val of_octets_exn : ?off:int -> string -> t
 
-  (** [of_octets_raw s off] is the IPv4 address represented by four bytes into
-      the string [s] starting from offset [off].
-      Raises {!Parse_error} if [s] is not of length at least [off+4]. *)
-  val of_octets_raw : string -> int -> t
+  (** [write_octets ?off ipv4 b] writes the [ipv4] as octets to [b] starting
+       from offset [off]. [b] must be at least [off+4] long or an error is
+       returned. *)
+  val write_octets : ?off:int -> t -> bytes -> (unit, [> `Msg of string ]) result
 
-  (** [to_octets ipv4] is a string of length 4 encoding [ipv4] as octets. *)
+  (** [write_octets_exn ?off ipv4 b] writes the [ipv4] as octets to [b] starting
+       from offset [off]. [b] must be at least [off+4] long or a
+       {!Parse_error} is raised. *)
+  val write_octets_exn : ?off:int -> t -> bytes -> unit
+
+  (** [to_octets ipv4] returns the 4 bytes representing the [ipv4] octets. *)
   val to_octets : t -> string
-
-  (** [to_octets_raw ipv4 bytes offset] writes the 4 byte encoding of [ipv4]
-      into [bytes] at offset [offset]. *)
-  val to_octets_raw : t -> Bytes.t -> int -> unit
 
   (** {3 Int conversion} *)
 
@@ -329,7 +333,7 @@ module V6 : sig
   val of_string_raw : string -> int ref -> t
 
   (** [to_string ipv6] is the string representation of [ipv6],
-      i.e. XXX:XX:X::XXX:XX. *)
+      i.e. [XXX:XX:X::XXX:XX]. *)
   val to_string : t -> string
 
   (** [to_buffer buf ipv6] writes the string representation of [ipv6] into the
@@ -342,25 +346,28 @@ module V6 : sig
 
   (** {3 Octets conversion} *)
 
-  (** [of_octets_exn ipv6_octets] is the address represented
-      by [ipv6_octets]. Raises {!Parse_error} if [ipv6_octets] is not a
-      valid representation of an IPv6 address. *)
-  val of_octets_exn : string -> t
+  (** [of_octets_exn ?off ipv6_octets] is the address represented
+      by [ipv6_octets], starting from offset [off].
+      Raises {!Parse_error} if [ipv6_octets] is not a valid representation of
+      an IPv6 address. *)
+  val of_octets_exn : ?off:int -> string -> t
 
   (** Same as {!of_octets_exn} but returns an result type instead of raising
       an exception. *)
-  val of_octets : string -> (t, [> `Msg of string ]) result
+  val of_octets : ?off:int -> string -> (t, [> `Msg of string ]) result
 
-  (** Same as {!of_octets_exn} but takes an extra paramenter, the offset into
-      the bytes for reading. *)
-  val of_octets_raw : string -> int -> t
+  (** [write_octets_exn ?off ipv6 b] writes 16 bytes that encode [ipv6] into [b] starting
+      from offset [off] within [b].  [b] must be at least [off+16] bytes long or
+      a {!Parse_error} exception will be raised. *)
+  val write_octets_exn : ?off:int -> t -> bytes -> unit
 
-  (** [to_octets ipv6] is a string of length 16 encoding [ipv6]. *)
+  (** [write_octets ?off ipv6 b] writes 16 bytes that encode [ipv6] into [b] starting
+      from offset [off] within [b].  [b] must be at least [off+16] bytes long or
+      an error is returned. *)
+  val write_octets : ?off:int -> t -> bytes -> (unit, [> `Msg of string ]) result
+ 
+  (** [to_octets ipv6] returns the 16 bytes representing the [ipv6] octets. *)
   val to_octets : t -> string
-
-  (** [to_bytes_raw ipv6 bytes offset] writes the 16 bytes encoding of [ipv6]
-      into [bytes] at offset [offset]. *)
-  val to_octets_raw : t -> Bytes.t -> int -> unit
 
   (** {3 Int conversion} *)
 
