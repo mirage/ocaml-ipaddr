@@ -9,8 +9,10 @@
   Porting code should just be a matter of renaming functions
   such as:
    - `Ipaddr.of_bytes` becomes `Ipaddr.of_octets`
-   - `Macaddr.to_bytes_raw` becomes `Macaddr.to_octets_raw`
-  and so on.
+   - `Macaddr.to_bytes` becomes `Macaddr.to_octets`
+
+* Introduce new `write_octets` functions that can write
+  octet representations of IPv4/v6 into an existing bytestring.
 
 * Use the `domain-name` library to produce domain names
   from IP addresses.
