@@ -21,6 +21,9 @@
   subpackages and instead have `ipaddr-sexp` and `macaddr-sexp`
   to match the opam package names.
 
+* Add new `Ipaddr_cstruct` and `Macaddr_cstruct` libraries
+  for conversion to/from cstructs (#36 @nojb @avsm)
+
 ## v3.1.0 (2019-03-02)
 
 * Do not leak a `Not_found` exception when parsing `[:`

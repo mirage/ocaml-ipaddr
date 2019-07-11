@@ -7,7 +7,7 @@ script: bash ./.travis-docker.sh
 env:
  global:
    - PACKAGE="ipaddr"
-   - PINS="ipaddr:. macaddr:."
+   - PINS="ipaddr:. macaddr:. ipaddr-sexp:. macaddr-sexp:. ipaddr-cstruct:. macaddr-cstruct:."
  matrix:
    - DISTRO=debian-stable OCAML_VERSION=4.04
    - DISTRO=ubuntu OCAML_VERSION=4.05

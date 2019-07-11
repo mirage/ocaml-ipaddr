@@ -1,7 +1,7 @@
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["David Sheets" "Anil Madhavapeddy" "Hugo Heuzard"]
-synopsis: "A library for manipulation of MAC address representations using sexp"
+synopsis: "A library for manipulation of IP address representations using Cstructs"
 license: "ISC"
 tags: ["org:mirage" "org:xapi-project"]
 homepage: "https://github.com/mirage/ocaml-ipaddr"
@@ -10,12 +10,9 @@ bug-reports: "https://github.com/mirage/ocaml-ipaddr/issues"
 depends: [
   "ocaml" {>= "4.04.0"}
   "dune" {build}
-  "macaddr"
-  "macaddr-cstruct" {with-test}
-  "ounit" {with-test}
-  "ppx_sexp_conv" {>= "v0.9.0"}
+  "ipaddr"
+  "cstruct"
 ]
-conflicts: [ "ipaddr" {< "3.0.0"} ]
 build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
@@ -23,5 +20,5 @@ build: [
 ]
 dev-repo: "git+https://github.com/mirage/ocaml-ipaddr.git"
 description: """
-Sexp convertions for macaddr
+Cstruct convertions for macaddr
 """

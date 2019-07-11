@@ -17,18 +17,18 @@
 
 (test
  (name test_ipaddr)
- (package ipaddr)
+ (package ipaddr-sexp)
  (modules test_ipaddr)
- (libraries ipaddr test_ipaddr_sexp oUnit))
+ (libraries ipaddr ipaddr-cstruct test_ipaddr_sexp oUnit))
 
 (test
  (name test_macaddr)
- (package macaddr)
+ (package macaddr-sexp)
  (modules test_macaddr)
- (libraries macaddr test_macaddr_sexp oUnit))
+ (libraries macaddr macaddr-cstruct test_macaddr_sexp oUnit))
 
 (test
  (name test_ppx)
  (modules test_ppx)
- (package ipaddr)
+ (package ipaddr-sexp)
  (libraries ipaddr macaddr test_ipaddr_sexp test_macaddr_sexp oUnit))

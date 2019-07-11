@@ -30,6 +30,18 @@
  (libraries unix ipaddr))
 
 (library
+ (name        ipaddr_cstruct)
+ (public_name ipaddr-cstruct)
+ (modules ipaddr_cstruct)
+ (libraries ipaddr cstruct))
+
+(library
+ (name        macaddr_cstruct)
+ (public_name macaddr-cstruct)
+ (modules macaddr_cstruct)
+ (libraries macaddr cstruct))
+
+(library
  (name        ipaddr_top)
  (public_name ipaddr.top)
  (modules ipaddr_top)
