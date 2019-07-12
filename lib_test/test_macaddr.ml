@@ -60,6 +60,23 @@ let test_bytes_rt_bad () =
   List.iter (fun addr ->
     assert_result_failure ~msg:(String.escaped addr) (of_octets addr)) addrs
 
+let test_cstruct_rt () =
+  let open Macaddr_cstruct in
+  let addr = "\254\099\003\128\000\000" in
+  assert_equal ~msg:(String.escaped addr)
+    (Cstruct.to_string (to_cstruct (of_cstruct_exn (Cstruct.of_string addr)))) addr
+
+let error s = s, Parse_error ("MAC is exactly 6 bytes",s)
+
+let test_cstruct_rt_bad () =
+  let open Macaddr_cstruct in
+  let addrs = [
+    error "\254\099\003\128\000";
+    error "\254\099\003\128\000\000\233";
+  ] in
+  List.iter (fun (addr,exn) ->
+    assert_raises ~msg:(String.escaped addr) exn (fun () -> of_cstruct_exn (Cstruct.of_string addr))) addrs
+
 let test_make_local () =
   let () = Random.self_init () in
   let bytegen i = if i = 0 then 253 else 255 - i in
@@ -79,6 +96,8 @@ let suite = "Test" >::: [
   "string_rt_bad"        >:: test_string_rt_bad;
   "bytes_rt"             >:: test_bytes_rt;
   "bytes_rt_bad"         >:: test_bytes_rt_bad;
+  "cstruct_rt"           >:: test_cstruct_rt;
+  "cstruct_rt_bad"       >:: test_cstruct_rt_bad;
   "make_local"           >:: test_make_local;
 ]
 ;;

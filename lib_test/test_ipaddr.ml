@@ -290,6 +290,20 @@ module Test_v4 = struct
       (V4.to_domain_name ip) name ;
     assert_equal ~msg:"of_domain_name" (V4.of_domain_name name) (Some ip)
 
+  let test_cstruct_rt () =
+    let addr = "\254\099\003\128" in
+    assert_equal ~msg:(String.escaped addr)
+      (Cstruct.to_string Ipaddr_cstruct.V4.(to_cstruct (of_cstruct_exn (Cstruct.of_string addr)))) addr
+
+  let test_cstruct_rt_bad () =
+    let addrs = [
+      need_more "\254\099\003";
+    ] in
+    List.iter (fun (addr,exn) ->
+      assert_raises ~msg:(String.escaped addr) exn
+        (fun () -> Ipaddr_cstruct.V4.of_cstruct_exn (Cstruct.of_string addr))
+    ) addrs
+
   let suite = "Test V4" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -297,6 +311,8 @@ module Test_v4 = struct
     "string_raw_rt_bad"    >:: test_string_raw_rt_bad;
     "bytes_rt"             >:: test_bytes_rt;
     "bytes_rt_bad"         >:: test_bytes_rt_bad;
+    "cstruct_rt"           >:: test_cstruct_rt;
+    "cstruct_rt_bad"       >:: test_cstruct_rt_bad;
     "int32_rt"             >:: test_int32_rt;
     "prefix_string_rt"     >:: test_prefix_string_rt;
     "prefix_string_rt_bad" >:: test_prefix_string_rt_bad;
@@ -413,6 +429,22 @@ module Test_v6 = struct
     List.iter (fun (addr,exn) ->
       assert_raises ~msg:(String.escaped addr) exn
         (fun () -> V6.of_octets_exn addr)
+    ) addrs
+
+  let test_cstruct_rt () =
+    let addr =
+      "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\000\001"
+    in
+    let v6 = Ipaddr_cstruct.V6.of_cstruct_exn (Cstruct.of_string addr) in
+    assert_equal ~msg:(String.escaped addr) (Cstruct.to_string Ipaddr_cstruct.V6.(to_cstruct v6)) addr
+
+  let test_cstruct_rt_bad () =
+    let addrs = [
+      need_more "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\001";
+    ] in
+    List.iter (fun (addr,exn) ->
+      assert_raises ~msg:(String.escaped addr) exn
+        (fun () -> Ipaddr_cstruct.V6.of_cstruct_exn (Cstruct.of_string addr))
     ) addrs
 
   let test_int32_rt () =
@@ -622,6 +654,8 @@ module Test_v6 = struct
     "string_raw_rt_bad"    >:: test_string_raw_rt_bad;
     "bytes_rt"             >:: test_bytes_rt;
     "bytes_rt_bad"         >:: test_bytes_rt_bad;
+    "cstruct_rt"           >:: test_cstruct_rt;
+    "cstruct_rt_bad"       >:: test_cstruct_rt_bad;
     "int32_rt"             >:: test_int32_rt;
     "prefix_string_rt"     >:: test_prefix_string_rt;
     "prefix_string_rt_bad" >:: test_prefix_string_rt_bad;
