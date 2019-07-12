@@ -1,4 +1,4 @@
-## v4.0.0 (2019-07-12)
+## v4.0.0 (2019-07-12)
 
 * Rename the `to/from_bytes` functions to refer to `octets`
   instead.  This distinguishes the meaning of human-readable
