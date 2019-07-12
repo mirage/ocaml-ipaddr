@@ -24,17 +24,23 @@ Features:
 There are the following opam packages included:
 
 - `ipaddr`: the `Ipaddr` and associated modules
+- `ipaddr-sexp`
+- `ipaddr-cstruct`
 - `macaddr`: the `Macaddr` and associated modules.
+- `macaddr-sexp`
+- `macaddr-cstruct`
 
 There are the following ocamlfind libraries included as part of this
 repository, included as part of the respective opam packages.
 
 - `ipaddr`: The `Ipaddr` module for IPv4/6 manipulation.
 - `ipaddr.top`: Toplevel printers for Ipaddr.
+- `ipaddr-cstruct`: The `Ipaddr_cstruct` module
 - `macaddr`: The `Macaddr` module for MAC address manipulation.
 - `macaddr.top`: Toplevel printers for Macaddr.
-- `ipaddr.sexp`: S-expression converters for Ipaddr.
-- `macaddr.sexp`: S-expression converters for Macaddr.
+- `macaddr-cstruct`: The `Macaddr_cstruct` module
+- `ipaddr-sexp`: S-expression converters for Ipaddr.
+- `macaddr-sexp`: S-expression converters for Macaddr.
 
 ## Contact
 

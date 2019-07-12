@@ -29,7 +29,7 @@ bug-reports: "https://github.com/mirage/ocaml-ipaddr/issues"
 depends: [
   "ocaml" {>= "4.04.0"}
   "dune" {build}
-  "macaddr"
+  "macaddr" {=version}
   "sexplib0"
   "domain-name" {>= "0.3.0"}
   "ounit" {with-test}
