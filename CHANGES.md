@@ -1,3 +1,8 @@
+## v4.0.1
+
+* Use stdlib-shims to prevent deprecation warnings on OCaml 4.08
+  (@avsm)
+
 ## v4.0.0 (2019-07-12)
 
 * Rename the `to/from_bytes` functions to refer to `octets`
