@@ -91,3 +91,17 @@ type scope = I.scope
 let sexp_of_scope = to_sexp I.string_of_scope
 
 let scope_of_sexp = of_sexp I.scope_of_string
+
+module Prefix = struct
+  module I = Ipaddr.Prefix
+
+  type addr = I.addr
+
+  type t = I.t
+
+  let sexp_of_t = to_sexp I.to_string
+
+  let t_of_sexp = of_sexp I.of_string
+
+  let compare = I.compare
+end
