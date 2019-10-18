@@ -305,6 +305,29 @@ module Test_v4 = struct
         (fun () -> Ipaddr_cstruct.V4.of_cstruct_exn (Cstruct.of_string addr))
     ) addrs
 
+  let test_prefix_first_last () =
+    let open V4.Prefix in
+    let assert_equal = assert_equal ~printer:V4.to_string in
+    assert_equal ~msg:"first 192.168.1.0/24"
+      (V4.of_string_exn "192.168.1.1")
+      (first (of_string_exn "192.168.1.0/24"));
+    assert_equal ~msg:"first 169.254.169.254/31"
+      (Ipaddr.V4.of_string_exn "169.254.169.254")
+      (first (of_string_exn "169.254.169.254/31"));
+    assert_equal ~msg:"first 169.254.169.254/32"
+      (Ipaddr.V4.of_string_exn "169.254.169.254")
+      (first (of_string_exn "169.254.169.254/32"));
+    assert_equal ~msg:"last 192.168.1.0/24"
+      (Ipaddr.V4.of_string_exn "192.168.1.254")
+      (last (of_string_exn "192.168.1.0/24"));
+    assert_equal ~msg:"last 169.254.169.254/31"
+      (Ipaddr.V4.of_string_exn "169.254.169.255")
+      (last (of_string_exn "169.254.169.254/31"));
+    assert_equal ~msg:"last 169.254.169.254/32"
+      (Ipaddr.V4.of_string_exn "169.254.169.254")
+      (last (of_string_exn "169.254.169.254/32"))
+
+
   let suite = "Test V4" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -328,6 +351,7 @@ module Test_v4 = struct
     "special_addr"         >:: test_special_addr;
     "multicast_mac"        >:: test_multicast_mac;
     "domain_name"          >:: test_domain_name;
+    "prefix_first_last"    >:: test_prefix_first_last;
   ]
 end
 
@@ -649,6 +673,51 @@ module Test_v6 = struct
     assert_equal ~msg:("link_address_of_mac "^ip_str^" <> "^expected)
       ip_str expected
 
+  let test_succ_pred () =
+    let open V6 in
+    let assert_equal = assert_equal ~printer:V6.to_string in
+    let ip1 = of_string_exn "::" in
+    let ip2 = of_string_exn "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" in
+    let ip3 = of_string_exn "::2" in
+    assert_equal ~msg:"succ ::" (of_string_exn "::1") (succ ip1);
+    assert_equal ~msg:"succ (succ ::)"
+      (of_string_exn "::2") (succ (succ ip1));
+    assert_raises ~msg:"succ ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+      (Failure "B128 overflow") (fun () -> succ ip2);
+    assert_equal ~msg:"pred ::2" (of_string_exn "::1") (pred ip3) ;
+    assert_equal ~msg:"pred ::ffff:ffff"
+      (of_string_exn "::ffff:fffd")
+      (pred (pred (of_string_exn "::ffff:ffff")));
+    assert_raises ~msg:"pred ::"
+      (Failure "B128 overflow") (fun () -> pred ip1);
+    assert_equal ~msg:"pred (succ ::2)" ip3 (pred (succ ip3))
+
+  let test_first_last () =
+    let open V6 in
+    let open Prefix in
+    let ip_of_string = V6.of_string_exn in
+    let assert_equal = assert_equal ~printer:V6.to_string in
+    assert_equal ~msg:"first ::/64"
+      (ip_of_string "::1") (first @@ of_string_exn "::/64");
+    assert_equal ~msg:"first ::ff00/120"
+      (ip_of_string "::ff01") (first @@ of_string_exn "::ff00/120");
+    assert_equal ~msg:"first ::aaa0/127"
+      (ip_of_string "::aaa0") (first @@ of_string_exn "::aaa0/127");
+    assert_equal ~msg:"first ::aaa0/128" (ip_of_string "::aaa0")
+      (first @@ of_string_exn "::aaa0/128");
+    assert_equal ~msg:"last ::/64" (ip_of_string "::ffff:ffff:ffff:ffff")
+      (last @@ of_string_exn "::/64");
+    assert_equal ~msg:"last ::/120" (ip_of_string "::ff")
+      (last @@ of_string_exn "::/120");
+    assert_equal ~msg:"last ::/112" (ip_of_string "::ffff")
+      (last @@ of_string_exn "::/112");
+    assert_equal ~msg:"last ::bbbb:eeee:0000:0000/64" (ip_of_string "::ffff:ffff:ffff:ffff")
+      (last @@ of_string_exn "::bbbb:eeee:0000:0000/64");
+    assert_equal ~msg:"last ::aaa0/127" (ip_of_string "::aaa1")
+      (last @@ of_string_exn "::aaa0/127");
+    assert_equal ~msg:"last ::aaa0/128" (ip_of_string "::aaa0")
+      (last @@ of_string_exn "::aaa0/128")
+
   let suite = "Test V6" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -671,6 +740,8 @@ module Test_v6 = struct
     "multicast_mac"        >:: test_multicast_mac;
     "domain_name"          >:: test_domain_name;
     "link_address_of_mac"  >:: test_link_address_of_mac;
+    "succ_pred"            >:: test_succ_pred;
+    "first_last"           >:: test_first_last;
   ]
 end
 

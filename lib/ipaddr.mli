@@ -148,6 +148,14 @@ module V4 : sig
       suffix, and an IPv4 address prefixed. *)
   val of_domain_name : 'a Domain_name.t -> t option
 
+  (** {3 Utility functions} *)
+
+  (** [succ ipv4] is ip address next to [ipv4] *)
+  val succ : t -> t
+
+  (** [pred ipv4] is ip address before [ipv4] *)
+  val pred : t -> t
+
   (** {3 Common addresses} *)
 
   (** [any] is 0.0.0.0. *)
@@ -290,6 +298,12 @@ module V4 : sig
     (** [bits subnet] is the bit size of the [subnet] prefix. *)
     val bits : t -> int
 
+    (** [first subnet] is first valid unicast address in this [subnet]. *)
+    val first : t -> addr
+
+    (** [last subnet] is last valid unicast address in this [subnet]. *)
+    val last : t -> addr
+
     include Map.OrderedType with type t := t
   end
 
@@ -411,6 +425,14 @@ module V6 : sig
   (** [of_domain_name name] is [Some t] if the [name] has an [.ip6.arpa]
       suffix, and an IPv6 address prefixed. *)
   val of_domain_name : 'a Domain_name.t -> t option
+
+  (** {3 Utility functions} *)
+
+  (** [succ ipv6] is ip address next to [ipv6] *)
+  val succ : t -> t
+
+  (** [pred ipv6] is ip address before [ipv6] *)
+  val pred : t -> t
 
   (** {3 Common addresses} *)
 
@@ -546,6 +568,12 @@ module V6 : sig
     (** [bits subnet] is the bit size of the [subnet] prefix. *)
     val bits : t -> int
 
+    (** [first subnet] is first valid unicast address in this [subnet]. *)
+    val first : t -> addr
+
+    (** [last subnet] is last valid unicast address in this [subnet]. *)
+    val last : t -> addr
+
     include Map.OrderedType with type t := t
   end
 
@@ -647,6 +675,12 @@ val to_domain_name : t -> [ `host ] Domain_name.t
     [ip6.arpa] suffix, and an IP address prefixed. *)
 val of_domain_name : 'a Domain_name.t -> t option
 
+(** [succ addr] is ip address next to [addr] *)
+val succ : t -> t
+
+(** [pred addr] is ip address before [addr] *)
+val pred : t -> t
+
 module Prefix : sig
   type addr = t
 
@@ -705,6 +739,12 @@ module Prefix : sig
 
   (** [netmask subnet] is the netmask for [subnet]. *)
   val netmask : t -> addr
+
+  (** [first subnet] is first valid unicast address in this [subnet]. *)
+  val first : t -> addr
+
+  (** [last subnet] is last valid unicast address in this [subnet]. *)
+  val last : t -> addr
 
   include Map.OrderedType with type t := t
 end
