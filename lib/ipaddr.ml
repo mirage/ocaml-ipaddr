@@ -324,15 +324,20 @@ module V4 = struct
 
     let of_address_string s = try_with_result of_address_string_exn s
 
-    let of_netmask nm addr =
+    let _of_netmask_exn ~netmask address =
       let rec find_greatest_one bits i =
         if bits = 0_l then i-1 else find_greatest_one (bits >|> 1) (i+1)
       in
-      let one = nm &&& (Int32.neg nm) in
+      let one = netmask &&& (Int32.neg netmask) in
       let sz = 32 - (find_greatest_one one (if one = 0_l then 33 else 0)) in
-      if nm <> (mask sz)
-      then raise (Parse_error ("invalid netmask",to_string nm))
-      else make sz addr
+      if netmask <> (mask sz)
+      then raise (Parse_error ("invalid netmask",to_string netmask))
+      else make sz address
+
+    let of_netmask_exn ~netmask ~address = _of_netmask_exn ~netmask address
+
+    let of_netmask ~netmask ~address =
+      try_with_result (_of_netmask_exn ~netmask) address
 
     let to_buffer buf (pre,sz) = Printf.bprintf buf "%a/%d" to_buffer pre sz
 
@@ -796,15 +801,25 @@ module V6 = struct
 
     let of_address_string s = try_with_result of_address_string_exn s
 
-    let of_netmask nm addr =
-      make (match nm with
-      | (0_l,0_l,0_l,0_l) -> 0
-      | (lsw ,0_l ,0_l ,0_l) -> V4.Prefix.(bits (of_netmask lsw V4.any))
-      | (-1_l,lsw ,0_l ,0_l) -> V4.Prefix.(bits (of_netmask lsw V4.any)) + 32
-      | (-1_l,-1_l,lsw ,0_l) -> V4.Prefix.(bits (of_netmask lsw V4.any)) + 64
-      | (-1_l,-1_l,-1_l,lsw) -> V4.Prefix.(bits (of_netmask lsw V4.any)) + 96
-      | _ -> raise (Parse_error ("invalid netmask", to_string nm))
-      ) addr
+    let _of_netmask_exn ~netmask address =
+      let nm =
+        let bits netmask =
+          V4.Prefix.bits (V4.Prefix.of_netmask_exn ~netmask ~address:V4.any)
+        in
+        match netmask with
+        | (0_l,0_l,0_l,0_l) -> 0
+        | (lsw ,0_l ,0_l ,0_l) -> bits lsw
+        | (-1_l,lsw ,0_l ,0_l) -> bits lsw + 32
+        | (-1_l,-1_l,lsw ,0_l) -> bits lsw + 64
+        | (-1_l,-1_l,-1_l,lsw) -> bits lsw + 96
+        | _ -> raise (Parse_error ("invalid netmask", to_string netmask))
+      in
+      make nm address
+
+    let of_netmask_exn ~netmask ~address = _of_netmask_exn ~netmask address
+
+    let of_netmask ~netmask ~address =
+      try_with_result (_of_netmask_exn ~netmask) address
 
     let to_buffer buf (pre,sz) =
       Printf.bprintf buf "%a/%d" to_buffer pre sz

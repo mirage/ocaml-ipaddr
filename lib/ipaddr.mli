@@ -230,9 +230,14 @@ module V4 : sig
         network address representing [addr] in [prefix] to the buffer [buf]. *)
     val to_address_buffer : Buffer.t -> t -> addr -> unit
 
-    (** [of_netmask netmask addr] is the subnet prefix of [addr] with netmask
-        [netmask]. *)
-    val of_netmask : addr -> addr -> t
+    (** [of_netmask_exn ~netmask ~address] is the subnet prefix of [address]
+        with netmask [netmask]. *)
+    val of_netmask_exn : netmask:addr -> address:addr -> t
+
+    (** [of_netmask ~netmask ~address] is the subnet prefix of [address] with
+        netmask [netmask]. *)
+    val of_netmask : netmask:addr -> address:addr ->
+      (t, [> `Msg of string ]) result
 
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool
@@ -490,9 +495,14 @@ module V6 : sig
         network address representing [addr] in [prefix] to the buffer [buf]. *)
     val to_address_buffer : Buffer.t -> t -> addr -> unit
 
-    (** [of_netmask netmask addr] is the subnet prefix of [addr] with netmask
-        [netmask]. *)
-    val of_netmask : addr -> addr -> t
+    (** [of_netmask_exn ~netmask ~address] is the subnet prefix of [address]
+        with netmask [netmask]. *)
+    val of_netmask_exn : netmask:addr -> address:addr -> t
+
+    (** [of_netmask ~netmask ~address] is the subnet prefix of [address] with
+        netmask [netmask]. *)
+    val of_netmask : netmask:addr -> address:addr ->
+      (t, [> `Msg of string ]) result
 
     (** [mem ip subnet] checks whether [ip] is found within [subnet]. *)
     val mem : addr -> t -> bool

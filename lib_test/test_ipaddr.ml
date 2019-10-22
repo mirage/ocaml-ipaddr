@@ -183,13 +183,13 @@ module Test_v4 = struct
       "192.168.0.1/0", "0.0.0.0";
     ] in
     List.iter (fun (net_str,nm_str) ->
-      let prefix, v4 = V4.Prefix.of_address_string_exn net_str in
-      let nm = V4.Prefix.netmask prefix in
-      let nnm_str = V4.to_string nm in
+      let prefix, address = V4.Prefix.of_address_string_exn net_str in
+      let netmask = V4.Prefix.netmask prefix in
+      let nnm_str = V4.to_string netmask in
       let msg = Printf.sprintf "netmask %s <> %s" nnm_str nm_str in
       assert_equal ~msg nnm_str nm_str;
-      let prefix = V4.Prefix.of_netmask nm v4 in
-      let nns = V4.Prefix.to_address_string prefix v4 in
+      let prefix = V4.Prefix.of_netmask_exn ~netmask ~address in
+      let nns = V4.Prefix.to_address_string prefix address in
       let msg = Printf.sprintf "%s is %s under netmask iso" net_str nns in
       assert_equal ~msg net_str nns
     ) nets
@@ -200,9 +200,10 @@ module Test_v4 = struct
       error "255.255.254.128" "invalid netmask";
     ] in
     List.iter (fun (nm_str,exn) ->
-      let nm = V4.of_string_exn nm_str in
-      let addr = V4.of_string_exn "192.168.0.1" in
-      assert_raises ~msg:nm_str exn (fun () -> V4.Prefix.of_netmask nm addr)
+      let netmask = V4.of_string_exn nm_str in
+      let address = V4.of_string_exn "192.168.0.1" in
+      assert_raises ~msg:nm_str exn
+        (fun () -> V4.Prefix.of_netmask_exn ~netmask ~address)
     ) bad_masks
 
   let test_scope () =
@@ -527,13 +528,13 @@ module Test_v6 = struct
       "8::1/0",  "::";
     ] in
     List.iter (fun (net_str,nm_str) ->
-      let prefix, v6 = V6.Prefix.of_address_string_exn net_str in
-      let nm = V6.Prefix.netmask prefix in
-      let nnm_str = V6.to_string nm in
+      let prefix, address = V6.Prefix.of_address_string_exn net_str in
+      let netmask = V6.Prefix.netmask prefix in
+      let nnm_str = V6.to_string netmask in
       let msg = Printf.sprintf "netmask %s <> %s" nnm_str nm_str in
       assert_equal ~msg nnm_str nm_str;
-      let prefix = V6.Prefix.of_netmask nm v6 in
-      let nns = V6.Prefix.to_address_string prefix v6 in
+      let prefix = V6.Prefix.of_netmask_exn ~netmask ~address in
+      let nns = V6.Prefix.to_address_string prefix address in
       let msg = Printf.sprintf "%s is %s under netmask iso" net_str nns in
       assert_equal ~msg net_str nns
     ) nets
@@ -546,9 +547,10 @@ module Test_v6 = struct
       error "ffff:fffe:8000::" "invalid netmask";
     ] in
     List.iter (fun (nm_str,exn) ->
-      let nm = V6.of_string_exn nm_str in
-      let addr = V6.of_string_exn "::" in
-      assert_raises ~msg:nm_str exn (fun () -> V6.Prefix.of_netmask nm addr)
+      let netmask = V6.of_string_exn nm_str in
+      let address = V6.of_string_exn "::" in
+      assert_raises ~msg:nm_str exn
+        (fun () -> V6.Prefix.of_netmask_exn ~netmask ~address)
     ) bad_masks
 
   let test_scope () =
