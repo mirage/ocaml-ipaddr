@@ -1,7 +1,10 @@
-## v4.0.1
+## v5.0.0
 
 * Use stdlib-shims to prevent deprecation warnings on OCaml 4.08
   (@avsm)
+* Rename `Prefix.of_netmask` to `Prefix.of_netmask_exn` with labelled
+  arguments (~netmask and ~address), provide `Prefix.of_netmask` which returns
+  a (t, [> `Msg of string ]) result value (#95 @hannesm)
 
 ## v4.0.0 (2019-07-12)
 
