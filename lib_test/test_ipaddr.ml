@@ -305,6 +305,21 @@ module Test_v4 = struct
         (fun () -> Ipaddr_cstruct.V4.of_cstruct_exn (Cstruct.of_string addr))
     ) addrs
 
+  let test_succ_pred () =
+    let open V4 in
+    let assert_equal = assert_equal ~printer:V4.to_string in
+    let ip1 = of_string_exn "0.0.0.0" in
+    let ip2 = of_string_exn "255.255.255.255" in
+    assert_equal ~msg:"succ 0.0.0.0"
+      (of_string_exn "0.0.0.1") (succ ip1);
+    assert_equal ~msg:"succ 255.255.255.255"
+      (of_string_exn "0.0.0.0") (succ ip2);
+    assert_equal ~msg:"succ (succ 255.255.255.255)"
+      (of_string_exn "0.0.0.1") (succ (succ ip2));
+    assert_equal ~msg:"pred 0.0.0.0"
+      (of_string_exn "255.255.255.255") (pred ip1);
+    ()
+
   let test_prefix_first_last () =
     let open V4.Prefix in
     let assert_equal = assert_equal ~printer:V4.to_string in
@@ -351,6 +366,7 @@ module Test_v4 = struct
     "special_addr"         >:: test_special_addr;
     "multicast_mac"        >:: test_multicast_mac;
     "domain_name"          >:: test_domain_name;
+    "succ_pred"            >:: test_succ_pred;
     "prefix_first_last"    >:: test_prefix_first_last;
   ]
 end
@@ -682,15 +698,20 @@ module Test_v6 = struct
     assert_equal ~msg:"succ ::" (of_string_exn "::1") (succ ip1);
     assert_equal ~msg:"succ (succ ::)"
       (of_string_exn "::2") (succ (succ ip1));
-    assert_raises ~msg:"succ ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
-      (Failure "B128 overflow") (fun () -> succ ip2);
+    assert_equal ~msg:"pred ::" ip2 (pred ip1);
+    assert_equal ~msg:"pred (pred ::)"
+      (of_string_exn "ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffe")
+      (pred (pred ip1));
+    assert_equal ~msg:"succ ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+      (of_string_exn "::") (succ ip2);
+    assert_equal ~msg:"succ (succ ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff)"
+      (of_string_exn "::1") (succ (succ ip2));
     assert_equal ~msg:"pred ::2" (of_string_exn "::1") (pred ip3) ;
     assert_equal ~msg:"pred ::ffff:ffff"
       (of_string_exn "::ffff:fffd")
       (pred (pred (of_string_exn "::ffff:ffff")));
-    assert_raises ~msg:"pred ::"
-      (Failure "B128 overflow") (fun () -> pred ip1);
-    assert_equal ~msg:"pred (succ ::2)" ip3 (pred (succ ip3))
+    assert_equal ~msg:"pred (succ ::2)" ip3 (pred (succ ip3));
+    assert_equal ~msg:"pred (succ ::)" ip1 (pred (succ ip1))
 
   let test_first_last () =
     let open V6 in

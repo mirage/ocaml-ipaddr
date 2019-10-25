@@ -496,7 +496,7 @@ module B128 = struct
     in
     match List.fold_left cb (1l,[]) [d;c;b;a] with
     | 0l, [a;b;c;d] -> of_int32 (a,b,c,d)
-    | n, [_;_;_;_] when n > 0l -> failwith "B128 overflow"
+    | n, [a;b;c;d] when n > 0l -> of_int32 (a,b,c,d)
     | _ -> failwith "Unexpected error with B128"
 
   let pred (a,b,c,d) =
@@ -514,7 +514,7 @@ module B128 = struct
     in
     match List.fold_left cb (-1l,[]) [d;c;b;a] with
     | 0l, [a;b;c;d] -> of_int32 (a,b,c,d)
-    | n, [_;_;_;_] when n < 0l -> failwith "B128 overflow"
+    | n, [a;b;c;d] when n < 0l -> of_int32 (a,b,c,d)
     | _ -> failwith "Unexpected error with B128"
 
   let shift_right (a,b,c,d) sz =
