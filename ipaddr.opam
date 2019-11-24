@@ -30,7 +30,6 @@ depends: [
   "ocaml" {>= "4.04.0"}
   "dune"
   "macaddr" {=version}
-  "sexplib0"
   "stdlib-shims"
   "domain-name" {>= "0.3.0"}
   "ounit" {with-test}
