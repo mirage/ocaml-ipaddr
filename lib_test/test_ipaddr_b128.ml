@@ -20,30 +20,34 @@ open OUnit
 let test_shift_right () =
   let open Ipaddr_internal in
   let open V6 in
-  let assert_equal = assert_equal ~printer:to_string in
+  let printer = function
+    | Ok v -> Printf.sprintf "Ok %s" (to_string v)
+    | Error (`Msg e) -> Printf.sprintf "Error `Msg \"%s\"" e
+  in
+  let assert_equal = assert_equal ~printer in
   assert_equal ~msg:":: >> 32"
-    (of_string_exn "::")
+    (of_string "::")
     (B128.shift_right (of_string_exn "::ffff:ffff") 32);
   assert_equal ~msg:"::aaaa:bbbb:ffff:ffff >> 32"
-    (of_string_exn "::aaaa:bbbb")
+    (of_string "::aaaa:bbbb")
     (B128.shift_right (of_string_exn "::aaaa:bbbb:ffff:ffff") 32);
   assert_equal ~msg:"::aaaa:bbbb:ffff:ffff >> 40"
-    (of_string_exn "::aa:aabb")
+    (of_string "::aa:aabb")
     (B128.shift_right (of_string_exn "::aaaa:bbbb:ffff:ffff")  40);
   assert_equal ~msg:"::ffff >> 2"
-    (of_string_exn "::3fff")
+    (of_string "::3fff")
     (B128.shift_right (of_string_exn "::ffff")  2);
   assert_equal ~msg:"ffff:: >> 128"
-    (of_string_exn "::")
+    (of_string "::")
     (B128.shift_right (of_string_exn "ffff::")  128);
   assert_equal ~msg:"aaaa:bbbb:cccc:dddd:: >> 120"
-    (of_string_exn "::aa")
+    (of_string "::aa")
     (B128.shift_right (of_string_exn "aaaa:bbbb:cccc:dddd::")  120);
   assert_equal ~msg:"ffff:: >> 140"
-    (of_string_exn "::")
+    (of_string "::")
     (B128.shift_right (of_string_exn "ffff::")  140);
   assert_equal ~msg:"::ffff:ffff >> -8"
-    (of_string_exn "::")
+    (of_string "::")
     (B128.shift_right (of_string_exn "::ffff:ffff") (-8))
 
 let suite = "Test B128 module" >::: [

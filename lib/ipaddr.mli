@@ -150,11 +150,13 @@ module V4 : sig
 
   (** {3 Utility functions} *)
 
-  (** [succ ipv4] is ip address next to [ipv4] *)
-  val succ : t -> t
+  (** [succ ipv4] is ip address next to [ipv4].
+      Returns a human-readable error string if it's already the highest address. *)
+  val succ : t -> (t, [> `Msg of string ]) result
 
-  (** [pred ipv4] is ip address before [ipv4] *)
-  val pred : t -> t
+  (** [pred ipv4] is ip address before [ipv4].
+      Returns a human-readable error string if it's already the lowest address. *)
+  val pred : t -> (t, [> `Msg of string ]) result
 
   (** {3 Common addresses} *)
 
@@ -428,11 +430,13 @@ module V6 : sig
 
   (** {3 Utility functions} *)
 
-  (** [succ ipv6] is ip address next to [ipv6] *)
-  val succ : t -> t
+  (** [succ ipv6] is ip address next to [ipv6]. Returns a human-readable
+      error string if it's already the highest address. *)
+  val succ : t -> (t, [> `Msg of string ]) result
 
-  (** [pred ipv6] is ip address before [ipv6] *)
-  val pred : t -> t
+  (** [pred ipv6] is ip address before [ipv6]. Returns a human-readable
+      error string if it's already the lowest address. *)
+  val pred : t -> (t, [> `Msg of string ]) result
 
   (** {3 Common addresses} *)
 
@@ -675,11 +679,13 @@ val to_domain_name : t -> [ `host ] Domain_name.t
     [ip6.arpa] suffix, and an IP address prefixed. *)
 val of_domain_name : 'a Domain_name.t -> t option
 
-(** [succ addr] is ip address next to [addr] *)
-val succ : t -> t
+(** [succ addr] is ip address next to [addr]. Returns a human-readable
+    error string if it's already the highest address. *)
+val succ : t -> (t, [> `Msg of string ]) result
 
-(** [pred addr] is ip address before [addr] *)
-val pred : t -> t
+(** [pred addr] is ip address before [addr]. Returns a human-readable
+    error string if it's already the lowest address. *)
+val pred : t -> (t, [> `Msg of string ]) result
 
 module Prefix : sig
   type addr = t

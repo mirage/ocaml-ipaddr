@@ -30,6 +30,12 @@ let try_with_result fn a =
   try Ok (fn a)
   with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
 
+let failwith_msg = function
+  | Ok x -> x
+  | Error (`Msg m) -> failwith m
+
+let map_result v f = match v with Ok v -> Ok (f v) | Error _ as e -> e
+
 let string_of_scope = function
 | Point -> "point"
 | Interface -> "interface"
@@ -266,9 +272,17 @@ module V4 = struct
       end
     | _ -> None
 
-  let succ = Int32.succ
+  let succ t =
+    if Int32.equal t 0xFF_FF_FF_FFl then
+      Error (`Msg "Ipaddr: highest address has been reached")
+    else
+      Ok (Int32.succ t)
 
-  let pred = Int32.pred
+  let pred t =
+    if Int32.equal t 0x00_00_00_00l then
+      Error (`Msg "Ipaddr: lowest address has been reached")
+    else
+      Ok (Int32.pred t)
 
   (* constant *)
 
@@ -395,13 +409,13 @@ module V4 = struct
       if sz > 30 then
         pre
       else
-        succ pre
+        succ pre |> failwith_msg
 
     let last (_,sz as t) =
       if sz > 30 then
         broadcast t
       else
-        broadcast t |> pred
+        broadcast t |> pred |> failwith_msg
   end
 
   (* TODO: this could be optimized with something trie-like *)
@@ -487,7 +501,7 @@ module B128 = struct
       | 0l -> (0l,v::tl)
       | n ->
          let n =
-           if v = 0xFF_FF_FF_FFl then
+           if Int32.equal v 0xFF_FF_FF_FFl then
              n
            else
              0l
@@ -495,9 +509,10 @@ module B128 = struct
          (n,Int32.succ v::tl)
     in
     match List.fold_left cb (1l,[]) [d;c;b;a] with
-    | 0l, [a;b;c;d] -> of_int32 (a,b,c,d)
-    | n, [a;b;c;d] when n > 0l -> of_int32 (a,b,c,d)
-    | _ -> failwith "Unexpected error with B128"
+    | 0l, [a;b;c;d] -> Ok (of_int32 (a,b,c,d))
+    | n, [_;_;_;_] when n > 0l ->
+      Error (`Msg "Ipaddr: highest address has been reached")
+    | _ -> Error (`Msg "Ipaddr: unexpected error with B128")
 
   let pred (a,b,c,d) =
     let cb (n,tl) v =
@@ -513,9 +528,10 @@ module B128 = struct
          (n,Int32.pred v::tl)
     in
     match List.fold_left cb (-1l,[]) [d;c;b;a] with
-    | 0l, [a;b;c;d] -> of_int32 (a,b,c,d)
-    | n, [a;b;c;d] when n < 0l -> of_int32 (a,b,c,d)
-    | _ -> failwith "Unexpected error with B128"
+    | 0l, [a;b;c;d] -> Ok (of_int32 (a,b,c,d))
+    | n, [_;_;_;_] when n < 0l ->
+      Error (`Msg "Ipaddr: lowest address has been reached")
+    | _ -> Error (`Msg "Ipaddr: unexpected error with B128")
 
   let shift_right (a,b,c,d) sz =
     let rec loop (a,b,c,d) sz =
@@ -529,8 +545,8 @@ module B128 = struct
       (new_saved, new_part::tl)
     in
     match List.fold_left fn (0l,[]) [a;b;c;d] with
-    | _, [d;c;b;a] -> of_int32 (a, b, c, d)
-    | _ -> failwith "Unexpected error in B128.shift_right"
+    | _, [d;c;b;a] -> Ok (of_int32 (a, b, c, d))
+    | _ -> Error (`Msg "Ipaddr: unexpected error with B128.shift_right")
 end
 
 module V6 = struct
@@ -932,12 +948,12 @@ module V6 = struct
       if sz > 126 then
         pre
       else
-        succ pre
+        succ pre |> failwith_msg
 
     let last (pre,sz) =
       let ffff = ip 0xffff 0xffff 0xffff 0xffff
-                   0xffff 0xffff 0xffff 0xffff in
-      logor pre (shift_right ffff sz)
+          0xffff 0xffff 0xffff 0xffff in
+      logor pre (shift_right ffff sz |> failwith_msg)
   end
 
   (* TODO: This could be optimized with something trie-like *)
@@ -1072,12 +1088,12 @@ let of_domain_name n =
   | _ -> None
 
 let succ = function
-  | V4 addr -> V4 (V4.succ addr)
-  | V6 addr -> V6 (V6.succ addr)
+  | V4 addr -> map_result (V4.succ addr) (fun v -> V4 v)
+  | V6 addr -> map_result (V6.succ addr) (fun v -> V6 v)
 
 let pred = function
-  | V4 addr -> V4 (V4.pred addr)
-  | V6 addr -> V6 (V6.pred addr)
+  | V4 addr -> map_result (V4.pred addr) (fun v -> V4 v)
+  | V6 addr -> map_result (V6.pred addr) (fun v -> V6 v)
 
 module Prefix = struct
   module Addr = struct

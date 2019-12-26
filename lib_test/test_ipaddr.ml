@@ -23,6 +23,8 @@ let need_more s = error s "not enough data"
 let bad_char i s =
   error s (Printf.sprintf "invalid character '%c' at %d" s.[i] i)
 
+let (>>=) v f = match v with Ok v -> f v | Error _ as e -> e
+
 let assert_raises ~msg exn test_fn =
   assert_raises ~msg exn (fun () ->
     try test_fn ()
@@ -307,17 +309,22 @@ module Test_v4 = struct
 
   let test_succ_pred () =
     let open V4 in
-    let assert_equal = assert_equal ~printer:V4.to_string in
+    let printer = function
+      | Ok v -> Printf.sprintf "Ok %s" (to_string v)
+      | Error (`Msg e) -> Printf.sprintf "Error `Msg \"%s\"" e
+    in
+    let assert_equal = assert_equal ~printer in
     let ip1 = of_string_exn "0.0.0.0" in
     let ip2 = of_string_exn "255.255.255.255" in
     assert_equal ~msg:"succ 0.0.0.0"
-      (of_string_exn "0.0.0.1") (succ ip1);
+      (of_string "0.0.0.1") (succ ip1);
     assert_equal ~msg:"succ 255.255.255.255"
-      (of_string_exn "0.0.0.0") (succ ip2);
+      (Error (`Msg "Ipaddr: highest address has been reached")) (succ ip2);
     assert_equal ~msg:"succ (succ 255.255.255.255)"
-      (of_string_exn "0.0.0.1") (succ (succ ip2));
+      (Error (`Msg "Ipaddr: highest address has been reached"))
+      (succ ip2 >>= succ);
     assert_equal ~msg:"pred 0.0.0.0"
-      (of_string_exn "255.255.255.255") (pred ip1);
+      (Error (`Msg "Ipaddr: lowest address has been reached")) (pred ip1);
     ()
 
   let test_prefix_first_last () =
@@ -691,27 +698,26 @@ module Test_v6 = struct
 
   let test_succ_pred () =
     let open V6 in
-    let assert_equal = assert_equal ~printer:V6.to_string in
+    let printer = function
+      | Ok v -> Printf.sprintf "Ok %s" (V6.to_string v)
+      | Error (`Msg e) -> Printf.sprintf "Error `Msg \"%s\"" e
+    in
+    let assert_equal = assert_equal ~printer in
     let ip1 = of_string_exn "::" in
     let ip2 = of_string_exn "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" in
     let ip3 = of_string_exn "::2" in
-    assert_equal ~msg:"succ ::" (of_string_exn "::1") (succ ip1);
+    assert_equal ~msg:"succ ::" (of_string "::1") (succ ip1);
     assert_equal ~msg:"succ (succ ::)"
-      (of_string_exn "::2") (succ (succ ip1));
-    assert_equal ~msg:"pred ::" ip2 (pred ip1);
-    assert_equal ~msg:"pred (pred ::)"
-      (of_string_exn "ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffe")
-      (pred (pred ip1));
+      (of_string "::2") (succ ip1 >>= succ);
     assert_equal ~msg:"succ ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
-      (of_string_exn "::") (succ ip2);
-    assert_equal ~msg:"succ (succ ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff)"
-      (of_string_exn "::1") (succ (succ ip2));
-    assert_equal ~msg:"pred ::2" (of_string_exn "::1") (pred ip3) ;
+      (Error (`Msg "Ipaddr: highest address has been reached")) (succ ip2);
+    assert_equal ~msg:"pred ::2" (of_string "::1") (pred ip3) ;
     assert_equal ~msg:"pred ::ffff:ffff"
-      (of_string_exn "::ffff:fffd")
-      (pred (pred (of_string_exn "::ffff:ffff")));
-    assert_equal ~msg:"pred (succ ::2)" ip3 (pred (succ ip3));
-    assert_equal ~msg:"pred (succ ::)" ip1 (pred (succ ip1))
+      (of_string "::ffff:fffd")
+      (of_string "::ffff:ffff" >>= pred >>= pred);
+    assert_equal ~msg:"pred ::"
+      (Error (`Msg "Ipaddr: lowest address has been reached")) (pred ip1);
+    assert_equal ~msg:"pred (succ ::2)" (Ok ip3) (succ ip3 >>= pred)
 
   let test_first_last () =
     let open V6 in
