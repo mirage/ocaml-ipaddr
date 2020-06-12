@@ -375,7 +375,9 @@ module V4 = struct
       to_address_buffer b subnet addr;
       Buffer.contents b
 
-    let mem ip (pre,sz) = let host = 32 - sz in (ip >|> host) = (pre >|> host)
+    let mem ip (pre,sz) =
+      let m = mask sz in
+      (ip &&& m) = (pre &&& m)
 
     let subset ~subnet:(pre1,sz1) ~network:(pre2,sz2) =
       sz1 >= sz2 && mem pre1 (pre2,sz2)

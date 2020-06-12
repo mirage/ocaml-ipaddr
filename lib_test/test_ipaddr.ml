@@ -307,6 +307,26 @@ module Test_v4 = struct
         (fun () -> Ipaddr_cstruct.V4.of_cstruct_exn (Cstruct.of_string addr))
     ) addrs
 
+  let test_prefix_mem () =
+    let ip = V4.of_string_exn in
+    let prefix = V4.Prefix.of_string_exn in
+    let ships = [
+      ip "10.0.0.7",            prefix "10.0.0.0/29",            true;
+      ip "172.16.255.254",      prefix "172.16.255.254/31",      true;
+      ip "192.168.0.1",         prefix "0.0.0.0/0",              true;
+      ip "192.168.0.1",         V4.Prefix.private_192,           true;
+      ip "255.255.255.255",     prefix "255.255.255.255/32",     true;
+      ip "192.0.2.1",           prefix "192.0.2.0/32",           false;
+      ip "192.0.2.1",           prefix "192.0.0.0/23",           false;
+      ip "255.255.255.255",     prefix "0.0.0.0/1",              false;
+    ] in
+    List.iter (fun (addr,subnet,is_mem) ->
+      let msg = Printf.sprintf "%s is%s in %s"
+        (V4.to_string addr) (if is_mem then "" else " not") (V4.Prefix.to_string subnet)
+      in
+      assert_equal ~msg (V4.Prefix.mem addr subnet) is_mem
+    ) ships
+
   let test_succ_pred () =
     let open V4 in
     let printer = function
@@ -349,7 +369,6 @@ module Test_v4 = struct
       (Ipaddr.V4.of_string_exn "169.254.169.254")
       (last (of_string_exn "169.254.169.254/32"))
 
-
   let suite = "Test V4" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -373,6 +392,7 @@ module Test_v4 = struct
     "special_addr"         >:: test_special_addr;
     "multicast_mac"        >:: test_multicast_mac;
     "domain_name"          >:: test_domain_name;
+    "prefix_mem"           >:: test_prefix_mem;
     "succ_pred"            >:: test_succ_pred;
     "prefix_first_last"    >:: test_prefix_first_last;
   ]
