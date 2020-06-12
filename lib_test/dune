@@ -1,5 +1,7 @@
 (rule (copy# ../lib/ipaddr_sexp.ml ipaddr_sexp.ml))
 (rule (copy# ../lib/macaddr_sexp.ml macaddr_sexp.ml))
+(rule (copy# ../lib/ipaddr.ml ipaddr_internal.ml))
+
 
 (library
  (name test_macaddr_sexp)
@@ -19,6 +21,12 @@
  (name test_ipaddr)
  (package ipaddr-sexp)
  (modules test_ipaddr)
+ (libraries ipaddr ipaddr-cstruct test_ipaddr_sexp oUnit))
+
+(test
+ (name test_ipaddr_b128)
+ (package ipaddr-sexp)
+ (modules test_ipaddr_b128 ipaddr_internal)
  (libraries ipaddr ipaddr-cstruct test_ipaddr_sexp oUnit))
 
 (test

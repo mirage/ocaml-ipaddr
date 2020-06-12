@@ -23,6 +23,8 @@ let need_more s = error s "not enough data"
 let bad_char i s =
   error s (Printf.sprintf "invalid character '%c' at %d" s.[i] i)
 
+let (>>=) v f = match v with Ok v -> f v | Error _ as e -> e
+
 let assert_raises ~msg exn test_fn =
   assert_raises ~msg exn (fun () ->
     try test_fn ()
@@ -325,6 +327,48 @@ module Test_v4 = struct
       assert_equal ~msg (V4.Prefix.mem addr subnet) is_mem
     ) ships
 
+  let test_succ_pred () =
+    let open V4 in
+    let printer = function
+      | Ok v -> Printf.sprintf "Ok %s" (to_string v)
+      | Error (`Msg e) -> Printf.sprintf "Error `Msg \"%s\"" e
+    in
+    let assert_equal = assert_equal ~printer in
+    let ip1 = of_string_exn "0.0.0.0" in
+    let ip2 = of_string_exn "255.255.255.255" in
+    assert_equal ~msg:"succ 0.0.0.0"
+      (of_string "0.0.0.1") (succ ip1);
+    assert_equal ~msg:"succ 255.255.255.255"
+      (Error (`Msg "Ipaddr: highest address has been reached")) (succ ip2);
+    assert_equal ~msg:"succ (succ 255.255.255.255)"
+      (Error (`Msg "Ipaddr: highest address has been reached"))
+      (succ ip2 >>= succ);
+    assert_equal ~msg:"pred 0.0.0.0"
+      (Error (`Msg "Ipaddr: lowest address has been reached")) (pred ip1);
+    ()
+
+  let test_prefix_first_last () =
+    let open V4.Prefix in
+    let assert_equal = assert_equal ~printer:V4.to_string in
+    assert_equal ~msg:"first 192.168.1.0/24"
+      (V4.of_string_exn "192.168.1.1")
+      (first (of_string_exn "192.168.1.0/24"));
+    assert_equal ~msg:"first 169.254.169.254/31"
+      (Ipaddr.V4.of_string_exn "169.254.169.254")
+      (first (of_string_exn "169.254.169.254/31"));
+    assert_equal ~msg:"first 169.254.169.254/32"
+      (Ipaddr.V4.of_string_exn "169.254.169.254")
+      (first (of_string_exn "169.254.169.254/32"));
+    assert_equal ~msg:"last 192.168.1.0/24"
+      (Ipaddr.V4.of_string_exn "192.168.1.254")
+      (last (of_string_exn "192.168.1.0/24"));
+    assert_equal ~msg:"last 169.254.169.254/31"
+      (Ipaddr.V4.of_string_exn "169.254.169.255")
+      (last (of_string_exn "169.254.169.254/31"));
+    assert_equal ~msg:"last 169.254.169.254/32"
+      (Ipaddr.V4.of_string_exn "169.254.169.254")
+      (last (of_string_exn "169.254.169.254/32"))
+
   let suite = "Test V4" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -349,6 +393,8 @@ module Test_v4 = struct
     "multicast_mac"        >:: test_multicast_mac;
     "domain_name"          >:: test_domain_name;
     "prefix_mem"           >:: test_prefix_mem;
+    "succ_pred"            >:: test_succ_pred;
+    "prefix_first_last"    >:: test_prefix_first_last;
   ]
 end
 
@@ -670,6 +716,55 @@ module Test_v6 = struct
     assert_equal ~msg:("link_address_of_mac "^ip_str^" <> "^expected)
       ip_str expected
 
+  let test_succ_pred () =
+    let open V6 in
+    let printer = function
+      | Ok v -> Printf.sprintf "Ok %s" (V6.to_string v)
+      | Error (`Msg e) -> Printf.sprintf "Error `Msg \"%s\"" e
+    in
+    let assert_equal = assert_equal ~printer in
+    let ip1 = of_string_exn "::" in
+    let ip2 = of_string_exn "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" in
+    let ip3 = of_string_exn "::2" in
+    assert_equal ~msg:"succ ::" (of_string "::1") (succ ip1);
+    assert_equal ~msg:"succ (succ ::)"
+      (of_string "::2") (succ ip1 >>= succ);
+    assert_equal ~msg:"succ ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
+      (Error (`Msg "Ipaddr: highest address has been reached")) (succ ip2);
+    assert_equal ~msg:"pred ::2" (of_string "::1") (pred ip3) ;
+    assert_equal ~msg:"pred ::ffff:ffff"
+      (of_string "::ffff:fffd")
+      (of_string "::ffff:ffff" >>= pred >>= pred);
+    assert_equal ~msg:"pred ::"
+      (Error (`Msg "Ipaddr: lowest address has been reached")) (pred ip1);
+    assert_equal ~msg:"pred (succ ::2)" (Ok ip3) (succ ip3 >>= pred)
+
+  let test_first_last () =
+    let open V6 in
+    let open Prefix in
+    let ip_of_string = V6.of_string_exn in
+    let assert_equal = assert_equal ~printer:V6.to_string in
+    assert_equal ~msg:"first ::/64"
+      (ip_of_string "::1") (first @@ of_string_exn "::/64");
+    assert_equal ~msg:"first ::ff00/120"
+      (ip_of_string "::ff01") (first @@ of_string_exn "::ff00/120");
+    assert_equal ~msg:"first ::aaa0/127"
+      (ip_of_string "::aaa0") (first @@ of_string_exn "::aaa0/127");
+    assert_equal ~msg:"first ::aaa0/128" (ip_of_string "::aaa0")
+      (first @@ of_string_exn "::aaa0/128");
+    assert_equal ~msg:"last ::/64" (ip_of_string "::ffff:ffff:ffff:ffff")
+      (last @@ of_string_exn "::/64");
+    assert_equal ~msg:"last ::/120" (ip_of_string "::ff")
+      (last @@ of_string_exn "::/120");
+    assert_equal ~msg:"last ::/112" (ip_of_string "::ffff")
+      (last @@ of_string_exn "::/112");
+    assert_equal ~msg:"last ::bbbb:eeee:0000:0000/64" (ip_of_string "::ffff:ffff:ffff:ffff")
+      (last @@ of_string_exn "::bbbb:eeee:0000:0000/64");
+    assert_equal ~msg:"last ::aaa0/127" (ip_of_string "::aaa1")
+      (last @@ of_string_exn "::aaa0/127");
+    assert_equal ~msg:"last ::aaa0/128" (ip_of_string "::aaa0")
+      (last @@ of_string_exn "::aaa0/128")
+
   let suite = "Test V6" >::: [
     "string_rt"            >:: test_string_rt;
     "string_rt_bad"        >:: test_string_rt_bad;
@@ -692,6 +787,8 @@ module Test_v6 = struct
     "multicast_mac"        >:: test_multicast_mac;
     "domain_name"          >:: test_domain_name;
     "link_address_of_mac"  >:: test_link_address_of_mac;
+    "succ_pred"            >:: test_succ_pred;
+    "first_last"           >:: test_first_last;
   ]
 end
 

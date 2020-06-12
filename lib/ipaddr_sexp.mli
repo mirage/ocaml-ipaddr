@@ -99,3 +99,15 @@ module V6 : sig
     val compare : Ipaddr.V6.Prefix.t -> Ipaddr.V6.Prefix.t -> int
   end
 end
+
+module Prefix : sig
+  type addr = Ipaddr.Prefix.addr
+
+  type t = Ipaddr.Prefix.t
+
+  val sexp_of_t : Ipaddr.Prefix.t -> Sexplib0.Sexp.t
+
+  val t_of_sexp : Sexplib0.Sexp.t -> Ipaddr.Prefix.t
+
+  val compare : Ipaddr.Prefix.t -> Ipaddr.Prefix.t -> int
+end

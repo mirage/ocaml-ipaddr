@@ -23,4 +23,5 @@ type t = {
   ipv4p: Ipaddr_sexp.V4.Prefix.t;
   scope: Ipaddr_sexp.scope;
   mac: Macaddr_sexp.t;
+  ipp: Ipaddr_sexp.Prefix.t;
 } [@@deriving sexp]

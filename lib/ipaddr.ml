@@ -30,6 +30,12 @@ let try_with_result fn a =
   try Ok (fn a)
   with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
 
+let failwith_msg = function
+  | Ok x -> x
+  | Error (`Msg m) -> failwith m
+
+let map_result v f = match v with Ok v -> Ok (f v) | Error _ as e -> e
+
 let string_of_scope = function
 | Point -> "point"
 | Interface -> "interface"
@@ -266,6 +272,18 @@ module V4 = struct
       end
     | _ -> None
 
+  let succ t =
+    if Int32.equal t 0xFF_FF_FF_FFl then
+      Error (`Msg "Ipaddr: highest address has been reached")
+    else
+      Ok (Int32.succ t)
+
+  let pred t =
+    if Int32.equal t 0x00_00_00_00l then
+      Error (`Msg "Ipaddr: lowest address has been reached")
+    else
+      Ok (Int32.pred t)
+
   (* constant *)
 
   let any         = make   0   0   0   0
@@ -388,6 +406,18 @@ module V4 = struct
     let network (pre,_) = pre
     let bits (_,sz) = sz
     let netmask subnet = mask (bits subnet)
+
+    let first (pre,sz) =
+      if sz > 30 then
+        pre
+      else
+        succ pre |> failwith_msg
+
+    let last (_,sz as t) =
+      if sz > 30 then
+        broadcast t
+      else
+        broadcast t |> pred |> failwith_msg
   end
 
   (* TODO: this could be optimized with something trie-like *)
@@ -466,6 +496,59 @@ module B128 = struct
     (a1 ||| a2, b1 ||| b2, c1 ||| c2, d1 ||| d2)
 
   let lognot (a,b,c,d) = Int32.(lognot a, lognot b, lognot c, lognot d)
+
+  let succ (a,b,c,d) =
+    let cb (n,tl) v =
+      match n with
+      | 0l -> (0l,v::tl)
+      | n ->
+         let n =
+           if Int32.equal v 0xFF_FF_FF_FFl then
+             n
+           else
+             0l
+         in
+         (n,Int32.succ v::tl)
+    in
+    match List.fold_left cb (1l,[]) [d;c;b;a] with
+    | 0l, [a;b;c;d] -> Ok (of_int32 (a,b,c,d))
+    | n, [_;_;_;_] when n > 0l ->
+      Error (`Msg "Ipaddr: highest address has been reached")
+    | _ -> Error (`Msg "Ipaddr: unexpected error with B128")
+
+  let pred (a,b,c,d) =
+    let cb (n,tl) v =
+      match n with
+      | 0l -> (0l,v::tl)
+      | n ->
+         let n =
+           if v = 0x00_00_00_00l then
+             n
+           else
+             0l
+         in
+         (n,Int32.pred v::tl)
+    in
+    match List.fold_left cb (-1l,[]) [d;c;b;a] with
+    | 0l, [a;b;c;d] -> Ok (of_int32 (a,b,c,d))
+    | n, [_;_;_;_] when n < 0l ->
+      Error (`Msg "Ipaddr: lowest address has been reached")
+    | _ -> Error (`Msg "Ipaddr: unexpected error with B128")
+
+  let shift_right (a,b,c,d) sz =
+    let rec loop (a,b,c,d) sz =
+      if sz < 32 then (sz, (a,b,c,d))
+      else loop (0l,a,b,c) (sz - 32)
+    in
+    let (sz, (a,b,c,d)) = loop (a,b,c,d) sz in
+    let fn (saved,tl) part =
+      let new_saved = Int32.logand part (0xFF_FF_FF_FFl >|> sz) in
+      let new_part = (part >|> sz) ||| (saved <|< 32 - sz) in
+      (new_saved, new_part::tl)
+    in
+    match List.fold_left fn (0l,[]) [a;b;c;d] with
+    | _, [d;c;b;a] -> Ok (of_int32 (a, b, c, d))
+    | _ -> Error (`Msg "Ipaddr: unexpected error with B128.shift_right")
 end
 
 module V6 = struct
@@ -862,6 +945,17 @@ module V6 = struct
     let network (pre,_) = pre
     let bits (_,sz) = sz
     let netmask subnet = mask (bits subnet)
+
+    let first (pre,sz) =
+      if sz > 126 then
+        pre
+      else
+        succ pre |> failwith_msg
+
+    let last (pre,sz) =
+      let ffff = ip 0xffff 0xffff 0xffff 0xffff
+          0xffff 0xffff 0xffff 0xffff in
+      logor pre (shift_right ffff sz |> failwith_msg)
   end
 
   (* TODO: This could be optimized with something trie-like *)
@@ -995,6 +1089,14 @@ let of_domain_name n =
     end
   | _ -> None
 
+let succ = function
+  | V4 addr -> map_result (V4.succ addr) (fun v -> V4 v)
+  | V6 addr -> map_result (V6.succ addr) (fun v -> V6 v)
+
+let pred = function
+  | V4 addr -> map_result (V4.pred addr) (fun v -> V4 v)
+  | V6 addr -> map_result (V6.pred addr) (fun v -> V6 v)
+
 module Prefix = struct
   module Addr = struct
     let to_v6 = to_v6
@@ -1069,4 +1171,13 @@ module Prefix = struct
 
   let pp ppf i =
     Format.fprintf ppf "%s" (to_string i)
+
+  let first = function
+    | V4 p -> V4 (V4.Prefix.first p)
+    | V6 p -> V6 (V6.Prefix.first p)
+
+  let last = function
+    | V4 p -> V4 (V4.Prefix.last p)
+    | V6 p -> V6 (V6.Prefix.last p)
+
 end
