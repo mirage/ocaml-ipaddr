@@ -308,10 +308,12 @@ module V4 = struct
       else if sz >= 32 then 0x0_FF_FF_FF_FF_l
       else 0x0_FF_FF_FF_FF_l <|< (32 - sz)
 
-    let make sz pre = (pre &&& (mask sz),sz)
+    let prefix (pre,sz) = (pre &&& (mask sz), sz)
+
+    let make sz pre = (pre,sz)
 
     let network_address (pre,sz) addr =
-      pre ||| (addr &&& Int32.lognot (mask sz))
+      (pre &&& (mask sz)) ||| (addr &&& Int32.lognot (mask sz))
 
     (* string conversion *)
 
@@ -403,21 +405,22 @@ module V4 = struct
     ]
 
     let broadcast (pre,sz) = pre ||| (0x0_FF_FF_FF_FF_l >|> sz)
-    let network (pre,_) = pre
+    let network (pre,sz) = pre &&& mask sz
+    let address (addr,_) = addr
     let bits (_,sz) = sz
     let netmask subnet = mask (bits subnet)
 
-    let first (pre,sz) =
+    let first (_,sz as cidr) =
       if sz > 30 then
-        pre
+        network cidr
       else
-        succ pre |> failwith_msg
+        network cidr |> succ |> failwith_msg
 
-    let last (_,sz as t) =
+    let last (_,sz as cidr) =
       if sz > 30 then
-        broadcast t
+        broadcast cidr
       else
-        broadcast t |> pred |> failwith_msg
+        broadcast cidr |> pred |> failwith_msg
   end
 
   (* TODO: this could be optimized with something trie-like *)
@@ -854,10 +857,12 @@ module V6 = struct
       mask (sz - 64),
       mask (sz - 96))
 
-    let make sz pre = (logand pre (mask sz),sz)
+    let prefix (pre,sz) = (logand pre (mask sz),sz)
+
+    let make sz pre = (pre,sz)
 
     let network_address (pre,sz) addr =
-      logor pre (logand addr (lognot (mask sz)))
+      logor (logand pre (mask sz)) (logand addr (lognot (mask sz)))
 
     let _of_string_raw s i =
       let v6 = of_string_raw s i in
@@ -942,20 +947,21 @@ module V6 = struct
     let noneui64_interface  = make   3 (ip 0x0000 0 0 0 0 0 0 0)
     let solicited_node      = make 104 (ip 0xff02 0 0 0 0 1 0xff00 0)
 
-    let network (pre,_) = pre
+    let network (pre,sz) = logand pre (mask sz)
+    let address (addr,_) = addr
     let bits (_,sz) = sz
     let netmask subnet = mask (bits subnet)
 
-    let first (pre,sz) =
+    let first (_,sz as cidr) =
       if sz > 126 then
-        pre
+        network cidr
       else
-        succ pre |> failwith_msg
+        network cidr |> succ |> failwith_msg
 
-    let last (pre,sz) =
+    let last (_,sz as cidr) =
       let ffff = ip 0xffff 0xffff 0xffff 0xffff
           0xffff 0xffff 0xffff 0xffff in
-      logor pre (shift_right ffff sz |> failwith_msg)
+      logor (network cidr) (shift_right ffff sz |> failwith_msg)
   end
 
   (* TODO: This could be optimized with something trie-like *)
