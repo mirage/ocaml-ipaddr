@@ -141,11 +141,13 @@ module Test_v4 = struct
     List.iter (fun (netaddr,net,addr) ->
       let netv4 = V4.Prefix.of_string_exn net in
       let addrv4 = V4.of_string_exn addr in
-      let prefix,v4 = V4.Prefix.of_address_string_exn netaddr in
-      let prefix = V4.Prefix.prefix prefix in
+      let cidr = V4.Prefix.of_string_exn netaddr in
+      let prefix = V4.Prefix.prefix cidr
+      and v4 = V4.Prefix.address cidr
+      in
       assert_equal ~msg:(net^" <> "^(V4.Prefix.to_string prefix)) netv4 prefix;
       assert_equal ~msg:(addr^" <> "^(V4.to_string v4)) addrv4 v4;
-      let addrstr = V4.Prefix.to_address_string prefix v4 in
+      let addrstr = V4.Prefix.to_string cidr in
       assert_equal ~msg:(netaddr^" <> "^addrstr) netaddr addrstr;
     ) netaddrs
 
@@ -186,13 +188,16 @@ module Test_v4 = struct
       "192.168.0.1/0", "0.0.0.0";
     ] in
     List.iter (fun (net_str,nm_str) ->
-      let prefix, address = V4.Prefix.of_address_string_exn net_str in
+      let cidr = V4.Prefix.of_string_exn net_str in
+      let prefix = V4.Prefix.prefix cidr
+      and address = V4.Prefix.address cidr
+      in
       let netmask = V4.Prefix.netmask prefix in
       let nnm_str = V4.to_string netmask in
       let msg = Printf.sprintf "netmask %s <> %s" nnm_str nm_str in
       assert_equal ~msg nnm_str nm_str;
       let prefix = V4.Prefix.of_netmask_exn ~netmask ~address in
-      let nns = V4.Prefix.to_address_string prefix address in
+      let nns = V4.Prefix.to_string prefix in
       let msg = Printf.sprintf "%s is %s under netmask iso" net_str nns in
       assert_equal ~msg net_str nns
     ) nets
@@ -564,11 +569,14 @@ module Test_v6 = struct
     List.iter (fun (netaddr,net,addr) ->
       let netv4 = V6.Prefix.of_string_exn net in
       let addrv4 = V6.of_string_exn addr in
-      let prefix,v4 = V6.Prefix.of_address_string_exn netaddr in
+      let cidr = V6.Prefix.of_string_exn netaddr in
+      let prefix = V6.Prefix.prefix cidr
+      and v4 = V6.Prefix.address cidr
+      in
       let prefix = V6.Prefix.prefix prefix in
       assert_equal ~msg:(net^" <> "^(V6.Prefix.to_string prefix)) netv4 prefix;
       assert_equal ~msg:(addr^" <> "^(V6.to_string v4)) addrv4 v4;
-      let addrstr = V6.Prefix.to_address_string prefix v4 in
+      let addrstr = V6.Prefix.to_string cidr in
       assert_equal ~msg:(netaddr^" <> "^addrstr) netaddr addrstr;
     ) netaddrs
 
@@ -598,13 +606,16 @@ module Test_v6 = struct
       "8::1/0",  "::";
     ] in
     List.iter (fun (net_str,nm_str) ->
-      let prefix, address = V6.Prefix.of_address_string_exn net_str in
+      let cidr = V6.Prefix.of_string_exn net_str in
+      let prefix = V6.Prefix.prefix cidr
+      and address = V6.Prefix.address cidr
+      in
       let netmask = V6.Prefix.netmask prefix in
       let nnm_str = V6.to_string netmask in
       let msg = Printf.sprintf "netmask %s <> %s" nnm_str nm_str in
       assert_equal ~msg nnm_str nm_str;
       let prefix = V6.Prefix.of_netmask_exn ~netmask ~address in
-      let nns = V6.Prefix.to_address_string prefix address in
+      let nns = V6.Prefix.to_string prefix in
       let msg = Printf.sprintf "%s is %s under netmask iso" net_str nns in
       assert_equal ~msg net_str nns
     ) nets
