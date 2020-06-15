@@ -339,11 +339,6 @@ module V4 = struct
 
     let of_string s = try_with_result of_string_exn s
 
-    let of_address_string_exn s =
-      let (p,quad) = _of_string_exn s in (make p quad, quad)
-
-    let of_address_string s = try_with_result of_address_string_exn s
-
     let _of_netmask_exn ~netmask address =
       let rec find_greatest_one bits i =
         if bits = 0_l then i-1 else find_greatest_one (bits >|> 1) (i+1)
@@ -368,14 +363,6 @@ module V4 = struct
 
     let pp ppf i =
       Format.fprintf ppf "%s" (to_string i)
-
-    let to_address_buffer buf ((_,sz) as subnet) addr =
-      to_buffer buf (network_address subnet addr,sz)
-
-    let to_address_string subnet addr =
-      let b = Buffer.create 18 in
-      to_address_buffer b subnet addr;
-      Buffer.contents b
 
     let mem ip (pre,sz) =
       let m = mask sz in
@@ -886,11 +873,6 @@ module V6 = struct
 
     let of_string s = try_with_result of_string_exn s
 
-    let of_address_string_exn s =
-      let (p,v6) = _of_string_exn s in (make p v6, v6)
-
-    let of_address_string s = try_with_result of_address_string_exn s
-
     let _of_netmask_exn ~netmask address =
       let nm =
         let bits netmask =
@@ -921,14 +903,6 @@ module V6 = struct
 
     let pp ppf i =
       Format.fprintf ppf "%s" (to_string i)
-
-    let to_address_buffer buf ((_,sz) as subnet) addr =
-      to_buffer buf (network_address subnet addr,sz)
-
-    let to_address_string subnet addr =
-      let b = Buffer.create 43 in
-      to_address_buffer b subnet addr;
-      Buffer.contents b
 
     let mem ip (pre,sz) =
       let m = mask sz in

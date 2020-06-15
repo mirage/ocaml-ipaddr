@@ -223,30 +223,9 @@ module V4 : sig
         to the formatter [f]. *)
     val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
-    (** [of_address_string_exn cidr] is the address and cidr
-        represented by [cidr]. Raises {!Parse_error} if [cidr] is not
-        a valid representation of a CIDR-scoped address. *)
-    val of_address_string_exn : string -> t * addr
-    [@@ocaml.deprecated "This function is deprecated, use [of_string_exn]."]
-
-    (** Same as {!of_address_string_exn} but returns a result type instead of
-        raising an exception. *)
-    val of_address_string : string -> (t * addr, [> `Msg of string ]) result
-    [@@ocaml.deprecated "This function is deprecated, use [of_string]."]
-
-    (** [to_address_string cidr addr] is the network address
-        constructed from [cidr] and [addr]. *)
-    val to_address_string : t -> addr -> string
-    [@@ocaml.deprecated "This function is deprecated, use [to_string]."]
-
     (** [to_buffer buf cidr] writes the string representation
         of [cidr] into the buffer [buf]. *)
     val to_buffer : Buffer.t -> t -> unit
-
-    (** [to_address_buffer buf cidr addr] writes string representation of the
-        network address representing [addr] in [cidr] to the buffer [buf]. *)
-    val to_address_buffer : Buffer.t -> t -> addr -> unit
-    [@@ocaml.deprecated "This function is deprecated, use [to_buffer]."]
 
     (** [of_netmask_exn ~netmask ~address] is the subnet prefix of [address]
         with netmask [netmask]. *)
@@ -515,30 +494,9 @@ module V6 : sig
         to the formatter [f]. *)
     val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
-    (** [of_address_string_exn cidr] is the address and cidr
-        represented by [cidr]. Raises {!Parse_error} if [cidr] is not
-        a valid representation of a CIDR-scoped address. *)
-    val of_address_string_exn : string -> t * addr
-    [@@ocaml.deprecated "This function is deprecated, use [of_string_exn]."]
-
-    (** Same as {!of_address_string_exn} but returns an option type instead of
-        raising an exception. *)
-    val of_address_string : string -> ((t * addr), [> `Msg of string]) result
-    [@@ocaml.deprecated "This function is deprecated, use [of_string]."]
-
-    (** [to_address_string cidr addr] is the network address
-        constructed from [cidr] and [addr]. *)
-    val to_address_string : t -> addr -> string
-    [@@ocaml.deprecated "This function is deprecated, use [to_string]."]
-
     (** [to_buffer buf cidr] writes the string representation
         of [cidr] to the buffer [buf]. *)
     val to_buffer : Buffer.t -> t -> unit
-
-    (** [to_address_buffer buf cidr addr] writes string representation of the
-        network address representing [addr] in [cidr] to the buffer [buf]. *)
-    val to_address_buffer : Buffer.t -> t -> addr -> unit
-    [@@ocaml.deprecated "This function is deprecated, use [to_buffer]."]
 
     (** [of_netmask_exn ~netmask ~address] is the subnet prefix of [address]
         with netmask [netmask]. *)
