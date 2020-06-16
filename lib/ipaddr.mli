@@ -178,20 +178,24 @@ module V4 : sig
   (** [localhost] is 127.0.0.1. *)
   val localhost : t
 
-  (** A module for manipulating IPv4 network prefixes. *)
+  (** A module for manipulating IPv4 network prefixes (CIDR). *)
   module Prefix : sig
     type addr = t
 
-    (** Type of a internet protocol subnet *)
+    (** Type of a internet protocol subnet: an address and prefix length. *)
     type t
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
     val mask : int -> addr
 
-    (** [make n addr] is the [n] bit subnet prefix to which [addr] belongs. *)
+    (** [make n addr] is the cidr of [addr] with [n] bits prefix. *)
     val make : int -> addr -> t
 
-    (** [network_address prefix addr] is the address with prefix [prefix]
+    (** [prefix cidr] is the subnet prefix of [cidr] where all non-prefix bits
+        set to 0. *)
+    val prefix : t -> t
+
+    (** [network_address cidr addr] is the address with prefix [cidr]
         and suffix from [addr].
         See <http://tools.ietf.org/html/rfc4291#section-2.3>. *)
     val network_address : t -> addr -> addr
@@ -211,40 +215,23 @@ module V4 : sig
         into the string for reading. *)
     val of_string_raw : string -> int ref -> t
 
-    (** [to_string prefix] is the CIDR notation string representation
-        of [prefix], i.e. [XXX.XX.X.XXX/XX]. *)
+    (** [to_string cidr] is the CIDR notation string representation
+        of [cidr], i.e. [XXX.XX.X.XXX/XX]. *)
     val to_string : t -> string
 
-    (** [pp f prefix] outputs a human-readable representation of [prefix]
+    (** [pp f cidr] outputs a human-readable representation of [cidr]
         to the formatter [f]. *)
     val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
-    (** [of_address_string_exn cidr_addr] is the address and prefix
-        represented by [cidr_addr]. Raises {!Parse_error} if [cidr_addr] is not
-        a valid representation of a CIDR-scoped address. *)
-    val of_address_string_exn : string -> t * addr
-
-    (** Same as {!of_address_string_exn} but returns a result type instead of
-        raising an exception. *)
-    val of_address_string : string -> (t * addr, [> `Msg of string ]) result
-
-    (** [to_address_string prefix addr] is the network address
-        constructed from [prefix] and [addr]. *)
-    val to_address_string : t -> addr -> string
-
-    (** [to_buffer buf prefix] writes the string representation
-        of [prefix] into the buffer [buf]. *)
+    (** [to_buffer buf cidr] writes the string representation
+        of [cidr] into the buffer [buf]. *)
     val to_buffer : Buffer.t -> t -> unit
-
-    (** [to_address_buffer buf prefix addr] writes string representation of the
-        network address representing [addr] in [prefix] to the buffer [buf]. *)
-    val to_address_buffer : Buffer.t -> t -> addr -> unit
 
     (** [of_netmask_exn ~netmask ~address] is the subnet prefix of [address]
         with netmask [netmask]. *)
     val of_netmask_exn : netmask:addr -> address:addr -> t
 
-    (** [of_netmask ~netmask ~address] is the subnet prefix of [address] with
+    (** [of_netmask ~netmask ~address] is the cidr of [address] with
         netmask [netmask]. *)
     val of_netmask : netmask:addr -> address:addr ->
       (t, [> `Msg of string ]) result
@@ -297,13 +284,16 @@ module V4 : sig
     (** [netmask subnet] is the netmask for [subnet]. *)
     val netmask : t -> addr
 
-    (** [bits subnet] is the bit size of the [subnet] prefix. *)
+    (** [address cidr] is the address for [cidr]. *)
+    val address : t -> addr
+
+    (** [bits cidr] is the bit size of the [cidr] prefix. *)
     val bits : t -> int
 
-    (** [first subnet] is first valid unicast address in this [subnet]. *)
+    (** [first cidr] is first valid unicast address in this [cidr]. *)
     val first : t -> addr
 
-    (** [last subnet] is last valid unicast address in this [subnet]. *)
+    (** [last cidr] is last valid unicast address in this [cidr]. *)
     val last : t -> addr
 
     include Map.OrderedType with type t := t
@@ -386,7 +376,7 @@ module V6 : sig
       from offset [off] within [b].  [b] must be at least [off+16] bytes long or
       an error is returned. *)
   val write_octets : ?off:int -> t -> bytes -> (unit, [> `Msg of string ]) result
- 
+
   (** [to_octets ipv6] returns the 16 bytes representing the [ipv6] octets. *)
   val to_octets : t -> string
 
@@ -461,20 +451,24 @@ module V6 : sig
   (** [site_routers] is ff05::02. *)
   val site_routers : t
 
-  (** A module for manipulating IPv6 network prefixes. *)
+  (** A module for manipulating IPv6 network prefixes (CIDR). *)
   module Prefix : sig
     type addr = t
 
-    (** Type of a internet protocol subnet *)
+    (** Type of a internet protocol subnet: an address and a prefix length. *)
     type t
 
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
     val mask : int -> addr
 
-    (** [make n addr] is the [n] bit subnet prefix to which [addr] belongs. *)
+    (** [make n addr] is the cidr of [addr] with [n] bit prefix. *)
     val make : int -> addr -> t
 
-    (** [network_address prefix addr] is the address with prefix [prefix]
+    (** [prefix cidr] is the subnet prefix of [cidr] where all non-prefix bits
+        set to 0. *)
+    val prefix : t -> t
+
+    (** [network_address cidr addr] is the address with prefix [cidr]
         and suffix from [addr].
         See <http://tools.ietf.org/html/rfc4291#section-2.3>. *)
     val network_address : t -> addr -> addr
@@ -492,40 +486,23 @@ module V6 : sig
         into the string for reading. *)
     val of_string_raw : string -> int ref -> t
 
-    (** [to_string prefix] is the CIDR notation string representation
-        of [prefix], i.e. XXX:XX:X::XXX/XX. *)
+    (** [to_string cidr] is the CIDR notation string representation
+        of [cidr], i.e. XXX:XX:X::XXX/XX. *)
     val to_string : t -> string
 
-    (** [pp f prefix] outputs a human-readable representation of [prefix]
+    (** [pp f cidr] outputs a human-readable representation of [cidr]
         to the formatter [f]. *)
     val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
 
-    (** [of_address_string_exn cidr_addr] is the address and prefix
-        represented by [cidr_addr]. Raises {!Parse_error} if [cidr_addr] is not
-        a valid representation of a CIDR-scoped address. *)
-    val of_address_string_exn : string -> t * addr
-
-    (** Same as {!of_address_string_exn} but returns an option type instead of
-        raising an exception. *)
-    val of_address_string : string -> ((t * addr), [> `Msg of string]) result
-
-    (** [to_address_string prefix addr] is the network address
-        constructed from [prefix] and [addr]. *)
-    val to_address_string : t -> addr -> string
-
-    (** [to_buffer buf prefix] writes the string representation
-        of [prefix] to the buffer [buf]. *)
+    (** [to_buffer buf cidr] writes the string representation
+        of [cidr] to the buffer [buf]. *)
     val to_buffer : Buffer.t -> t -> unit
-
-    (** [to_address_buffer buf prefix addr] writes string representation of the
-        network address representing [addr] in [prefix] to the buffer [buf]. *)
-    val to_address_buffer : Buffer.t -> t -> addr -> unit
 
     (** [of_netmask_exn ~netmask ~address] is the subnet prefix of [address]
         with netmask [netmask]. *)
     val of_netmask_exn : netmask:addr -> address:addr -> t
 
-    (** [of_netmask ~netmask ~address] is the subnet prefix of [address] with
+    (** [of_netmask ~netmask ~address] is the cidr of [address] with
         netmask [netmask]. *)
     val of_netmask : netmask:addr -> address:addr ->
       (t, [> `Msg of string ]) result
@@ -568,6 +545,9 @@ module V6 : sig
 
     (** [netmask subnet] is the netmask for [subnet]. *)
     val netmask : t -> addr
+
+    (** [address cidr] is the address for [cidr]. *)
+    val address : t -> addr
 
     (** [bits subnet] is the bit size of the [subnet] prefix. *)
     val bits : t -> int

@@ -1,10 +1,38 @@
 ## v5.0.0
 
-* Use stdlib-shims to prevent deprecation warnings on OCaml 4.08
-  (@avsm)
+* Do not zero out the non-prefix-length part of the address in
+  `{V4,V6}.Prefix.t` (#99 @hannesm)
+  Removed `{V4,V6}.Prefix.of_address_string{,_exn}` and
+  `{V4,V6}.Prefix.to_address_{string.buffer}`
+
+  To port code:
+  - if you rely on `Prefix.of_string` to zero out the non-prefix-length address
+    bits, call `Prefix.prefix : t -> t` subsequently.
+  - `Prefix.of_address_string{,_exn}` can be replaced by
+    `Prefix.of_string{,_exn}`, to retrieve the address use
+    `Prefix.address : t -> addr`.
+  - The `Prefix.to_address_{string,buffer}` can be replaced by
+    `Prefix.to_{string,buffer}`, where `Prefix.t` already contains the IP
+    address to be printed.
+  - Instead of passing `{V4,V6}.t * {V4,V6}.Prefix.t` for an
+    address and subnet configuration, `{V4,V6}.Prefix.t` is sufficient.
+
+* Implement `{V4,V6,}.succ`, `{V4,V6,}.pred`, `{V4,V6}.Prefix.first`, and
+  `{V4,V6}.Prefix.last` functions (#94 @NightBlues)
+
 * Rename `Prefix.of_netmask` to `Prefix.of_netmask_exn` with labelled
   arguments (~netmask and ~address), provide `Prefix.of_netmask` which returns
   a (t, [> `Msg of string ]) result value (#95 @hannesm)
+
+* Fix undefined behaviour of `V4.Prefix.mem` with a CIDR with prefix length 0
+  (#98 @verbosemode)
+
+* Use stdlib-shims to prevent deprecation warnings on OCaml 4.08
+  (@avsm)
+
+* Remove unnecessary "sexplib0" dependency (#95 @hannesm)
+
+* Remove "{build}" directive from "dune" dependency (#93 @CraigFe)
 
 ## v4.0.0 (2019-07-12)
 
