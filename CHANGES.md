@@ -1,4 +1,4 @@
-## v5.0.0
+## v5.0.0 (2020-06-16)
 
 * Do not zero out the non-prefix-length part of the address in
   `{V4,V6}.Prefix.t` (#99 @hannesm)
