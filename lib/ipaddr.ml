@@ -399,7 +399,8 @@ module V4 = struct
     let private_blocks =
       [ loopback; link; private_10; private_172; private_192 ]
 
-    let broadcast (pre, sz) = pre ||| (0x0_FF_FF_FF_FF_l >|> sz)
+    let broadcast (pre, sz) =
+      Int32.logor pre (Int32.logxor (mask sz) 0xFF_FF_FF_FFl)
 
     let network (pre, sz) = pre &&& mask sz
 
