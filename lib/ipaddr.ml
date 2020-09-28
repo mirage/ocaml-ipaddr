@@ -94,7 +94,7 @@ let parse_int base s i =
       let k = int_of_char c in
       if is_number base k then (
         incr i;
-        next ((prev * base) + k) )
+        next ((prev * base) + k))
       else prev
   in
   let i = !i in
@@ -264,7 +264,7 @@ module V4 = struct
         try
           let ( + ) = Int32.add in
           Some (conv 0 a + conv 8 b + conv 16 c + conv 24 d)
-        with Parse_error _ -> None )
+        with Parse_error _ -> None)
     | _ -> None
 
   let succ t =
@@ -482,8 +482,8 @@ module B128 = struct
     match V4.compare a1 a2 with
     | 0 -> (
         match V4.compare b1 b2 with
-        | 0 -> ( match V4.compare c1 c2 with 0 -> V4.compare d1 d2 | n -> n )
-        | n -> n )
+        | 0 -> ( match V4.compare c1 c2 with 0 -> V4.compare d1 d2 | n -> n)
+        | n -> n)
     | n -> n
 
   let logand (a1, b1, c1, d1) (a2, b2, c2, d2) =
@@ -559,8 +559,8 @@ module V6 = struct
         if s.[!i] = ':' then (
           compressed := true;
           incr i;
-          [ -1 ] )
-        else raise (bad_char !i s) )
+          [ -1 ])
+        else raise (bad_char !i s))
       else []
     in
 
@@ -578,20 +578,20 @@ module V6 = struct
             if s.[!i] = ':' then
               if !compressed then (
                 decr i;
-                x :: acc (* trailing :: *) )
+                x :: acc (* trailing :: *))
               else (
                 compressed := true;
                 incr i;
-                loop (nb + 2) (-1 :: x :: acc) )
+                loop (nb + 2) (-1 :: x :: acc))
             else if is_number 16 (int_of_char s.[!i]) then
               loop (nb + 1) (x :: acc)
             else raise (bad_char !i s)
-          else raise (need_more s) )
+          else raise (need_more s))
         else if !i < len && s.[!i] = '.' then (
           i := pos;
           let v4 = V4.of_string_raw s i in
           let hi, lo = V4.to_int16 v4 in
-          lo :: hi :: acc )
+          lo :: hi :: acc)
         else x :: acc
     in
 
@@ -616,7 +616,7 @@ module V6 = struct
                 raise
                   (Parse_error (Printf.sprintf "component %d out of bounds" i, s));
               a.(i) <- x;
-              i - 1 ))
+              i - 1))
           7 res
       in
       if use_bracket then expect_char s i ']';
@@ -1012,7 +1012,7 @@ let of_string_raw s offset =
             Printf.sprintf "not an IPv4 address: %s\nnot an IPv6 address: %s"
               v4_msg v6_msg
           in
-          raise (Parse_error (msg, s)) ) )
+          raise (Parse_error (msg, s))))
 
 let of_string_exn s = of_string_raw s (ref 0)
 
@@ -1054,9 +1054,9 @@ let to_domain_name = function
 let of_domain_name n =
   match Domain_name.count_labels n with
   | 6 -> (
-      match V4.of_domain_name n with None -> None | Some x -> Some (V4 x) )
+      match V4.of_domain_name n with None -> None | Some x -> Some (V4 x))
   | 34 -> (
-      match V6.of_domain_name n with None -> None | Some x -> Some (V6 x) )
+      match V6.of_domain_name n with None -> None | Some x -> Some (V6 x))
   | _ -> None
 
 let succ = function
@@ -1099,7 +1099,7 @@ module Prefix = struct
               Printf.sprintf "not an IPv4 prefix: %s\nnot an IPv6 prefix: %s"
                 v4_msg v6_msg
             in
-            raise (Parse_error (msg, s)) ) )
+            raise (Parse_error (msg, s))))
 
   let of_string_exn s = of_string_raw s (ref 0)
 

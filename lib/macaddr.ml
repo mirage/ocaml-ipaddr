@@ -55,7 +55,7 @@ let parse_hex_int term s i =
       let k = int_of_hex_char c in
       if is_hex k then (
         incr i;
-        hex ((prev lsl 4) + k) )
+        hex ((prev lsl 4) + k))
       else if List.mem c term then prev
       else raise (bad_char j s)
   in

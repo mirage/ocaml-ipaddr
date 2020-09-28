@@ -33,7 +33,7 @@ let assert_raises ~msg exn test_fn =
       with rtexn ->
         if exn <> rtexn then (
           Printf.eprintf "Stacktrace for '%s':\n%!" msg;
-          Printexc.print_backtrace stderr );
+          Printexc.print_backtrace stderr);
         raise rtexn)
 
 module Test_v4 = struct
