@@ -522,19 +522,23 @@ module B128 = struct
         Error (`Msg "Ipaddr: lowest address has been reached")
     | _ -> Error (`Msg "Ipaddr: unexpected error with B128")
 
+  (* result is unspecified if sz < 0 *)
   let shift_right (a, b, c, d) sz =
-    let rec loop (a, b, c, d) sz =
-      if sz < 32 then (sz, (a, b, c, d)) else loop (0l, a, b, c) (sz - 32)
-    in
-    let sz, (a, b, c, d) = loop (a, b, c, d) sz in
-    let fn (saved, tl) part =
-      let new_saved = Int32.logand part (0xFF_FF_FF_FFl >|> sz) in
-      let new_part = part >|> sz ||| (saved <|< 32 - sz) in
-      (new_saved, new_part :: tl)
-    in
-    match List.fold_left fn (0l, []) [ a; b; c; d ] with
-    | _, [ d; c; b; a ] -> Ok (of_int32 (a, b, c, d))
-    | _ -> Error (`Msg "Ipaddr: unexpected error with B128.shift_right")
+    if sz < 0 || sz > 128 then
+      Error (`Msg "Ipaddr: unexpected argument sz (must be >= 0 and < 128)")
+    else
+      let rec loop (a, b, c, d) sz =
+        if sz < 32 then (sz, (a, b, c, d)) else loop (0l, a, b, c) (sz - 32)
+      in
+      let sz, (a, b, c, d) = loop (a, b, c, d) sz in
+      let fn (saved, tl) part =
+        let new_saved = Int32.logand part (0xFF_FF_FF_FFl >|> sz) in
+        let new_part = part >|> sz ||| (saved <|< 32 - sz) in
+        (new_saved, new_part :: tl)
+      in
+      match List.fold_left fn (0l, []) [ a; b; c; d ] with
+      | _, [ d; c; b; a ] -> Ok (of_int32 (a, b, c, d))
+      | _ -> Error (`Msg "Ipaddr: unexpected error with B128.shift_right")
 end
 
 module V6 = struct
