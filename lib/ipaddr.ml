@@ -94,7 +94,7 @@ let parse_int base s i =
       let k = int_of_char c in
       if is_number base k then (
         incr i;
-        next ((prev * base) + k) )
+        next ((prev * base) + k))
       else prev
   in
   let i = !i in
@@ -264,7 +264,7 @@ module V4 = struct
         try
           let ( + ) = Int32.add in
           Some (conv 0 a + conv 8 b + conv 16 c + conv 24 d)
-        with Parse_error _ -> None )
+        with Parse_error _ -> None)
     | _ -> None
 
   let succ t =
@@ -399,7 +399,8 @@ module V4 = struct
     let private_blocks =
       [ loopback; link; private_10; private_172; private_192 ]
 
-    let broadcast (pre, sz) = pre ||| (0x0_FF_FF_FF_FF_l >|> sz)
+    let broadcast (pre, sz) =
+      Int32.logor pre (Int32.logxor (mask sz) 0xFF_FF_FF_FFl)
 
     let network (pre, sz) = pre &&& mask sz
 
@@ -481,8 +482,8 @@ module B128 = struct
     match V4.compare a1 a2 with
     | 0 -> (
         match V4.compare b1 b2 with
-        | 0 -> ( match V4.compare c1 c2 with 0 -> V4.compare d1 d2 | n -> n )
-        | n -> n )
+        | 0 -> ( match V4.compare c1 c2 with 0 -> V4.compare d1 d2 | n -> n)
+        | n -> n)
     | n -> n
 
   let logand (a1, b1, c1, d1) (a2, b2, c2, d2) =
@@ -521,19 +522,23 @@ module B128 = struct
         Error (`Msg "Ipaddr: lowest address has been reached")
     | _ -> Error (`Msg "Ipaddr: unexpected error with B128")
 
+  (* result is unspecified if sz < 0 *)
   let shift_right (a, b, c, d) sz =
-    let rec loop (a, b, c, d) sz =
-      if sz < 32 then (sz, (a, b, c, d)) else loop (0l, a, b, c) (sz - 32)
-    in
-    let sz, (a, b, c, d) = loop (a, b, c, d) sz in
-    let fn (saved, tl) part =
-      let new_saved = Int32.logand part (0xFF_FF_FF_FFl >|> sz) in
-      let new_part = part >|> sz ||| (saved <|< 32 - sz) in
-      (new_saved, new_part :: tl)
-    in
-    match List.fold_left fn (0l, []) [ a; b; c; d ] with
-    | _, [ d; c; b; a ] -> Ok (of_int32 (a, b, c, d))
-    | _ -> Error (`Msg "Ipaddr: unexpected error with B128.shift_right")
+    if sz < 0 || sz > 128 then
+      Error (`Msg "Ipaddr: unexpected argument sz (must be >= 0 and < 128)")
+    else
+      let rec loop (a, b, c, d) sz =
+        if sz < 32 then (sz, (a, b, c, d)) else loop (0l, a, b, c) (sz - 32)
+      in
+      let sz, (a, b, c, d) = loop (a, b, c, d) sz in
+      let fn (saved, tl) part =
+        let new_saved = Int32.logand part (0xFF_FF_FF_FFl >|> sz) in
+        let new_part = part >|> sz ||| (saved <|< 32 - sz) in
+        (new_saved, new_part :: tl)
+      in
+      match List.fold_left fn (0l, []) [ a; b; c; d ] with
+      | _, [ d; c; b; a ] -> Ok (of_int32 (a, b, c, d))
+      | _ -> Error (`Msg "Ipaddr: unexpected error with B128.shift_right")
 end
 
 module V6 = struct
@@ -558,8 +563,8 @@ module V6 = struct
         if s.[!i] = ':' then (
           compressed := true;
           incr i;
-          [ -1 ] )
-        else raise (bad_char !i s) )
+          [ -1 ])
+        else raise (bad_char !i s))
       else []
     in
 
@@ -577,20 +582,20 @@ module V6 = struct
             if s.[!i] = ':' then
               if !compressed then (
                 decr i;
-                x :: acc (* trailing :: *) )
+                x :: acc (* trailing :: *))
               else (
                 compressed := true;
                 incr i;
-                loop (nb + 2) (-1 :: x :: acc) )
+                loop (nb + 2) (-1 :: x :: acc))
             else if is_number 16 (int_of_char s.[!i]) then
               loop (nb + 1) (x :: acc)
             else raise (bad_char !i s)
-          else raise (need_more s) )
+          else raise (need_more s))
         else if !i < len && s.[!i] = '.' then (
           i := pos;
           let v4 = V4.of_string_raw s i in
           let hi, lo = V4.to_int16 v4 in
-          lo :: hi :: acc )
+          lo :: hi :: acc)
         else x :: acc
     in
 
@@ -615,7 +620,7 @@ module V6 = struct
                 raise
                   (Parse_error (Printf.sprintf "component %d out of bounds" i, s));
               a.(i) <- x;
-              i - 1 ))
+              i - 1))
           7 res
       in
       if use_bracket then expect_char s i ']';
@@ -1011,7 +1016,7 @@ let of_string_raw s offset =
             Printf.sprintf "not an IPv4 address: %s\nnot an IPv6 address: %s"
               v4_msg v6_msg
           in
-          raise (Parse_error (msg, s)) ) )
+          raise (Parse_error (msg, s))))
 
 let of_string_exn s = of_string_raw s (ref 0)
 
@@ -1053,9 +1058,9 @@ let to_domain_name = function
 let of_domain_name n =
   match Domain_name.count_labels n with
   | 6 -> (
-      match V4.of_domain_name n with None -> None | Some x -> Some (V4 x) )
+      match V4.of_domain_name n with None -> None | Some x -> Some (V4 x))
   | 34 -> (
-      match V6.of_domain_name n with None -> None | Some x -> Some (V6 x) )
+      match V6.of_domain_name n with None -> None | Some x -> Some (V6 x))
   | _ -> None
 
 let succ = function
@@ -1098,7 +1103,7 @@ module Prefix = struct
               Printf.sprintf "not an IPv4 prefix: %s\nnot an IPv6 prefix: %s"
                 v4_msg v6_msg
             in
-            raise (Parse_error (msg, s)) ) )
+            raise (Parse_error (msg, s))))
 
   let of_string_exn s = of_string_raw s (ref 0)
 

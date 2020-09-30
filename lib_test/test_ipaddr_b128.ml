@@ -37,9 +37,11 @@ let test_shift_right () =
     (B128.shift_right (of_string_exn "ffff::") 128);
   assert_equal ~msg:"aaaa:bbbb:cccc:dddd:: >> 120" (of_string "::aa")
     (B128.shift_right (of_string_exn "aaaa:bbbb:cccc:dddd::") 120);
-  assert_equal ~msg:"ffff:: >> 140" (of_string "::")
+  assert_equal ~msg:"ffff:: >> 140"
+    (Error (`Msg "Ipaddr: unexpected argument sz (must be >= 0 and < 128)"))
     (B128.shift_right (of_string_exn "ffff::") 140);
-  assert_equal ~msg:"::ffff:ffff >> -8" (of_string "::")
+  assert_equal ~msg:"::ffff:ffff >> -8"
+    (Error (`Msg "Ipaddr: unexpected argument sz (must be >= 0 and < 128)"))
     (B128.shift_right (of_string_exn "::ffff:ffff") (-8))
 
 let suite = "Test B128 module" >::: [ "shift_right" >:: test_shift_right ]

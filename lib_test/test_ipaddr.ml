@@ -33,7 +33,7 @@ let assert_raises ~msg exn test_fn =
       with rtexn ->
         if exn <> rtexn then (
           Printf.eprintf "Stacktrace for '%s':\n%!" msg;
-          Printexc.print_backtrace stderr );
+          Printexc.print_backtrace stderr);
         raise rtexn)
 
 module Test_v4 = struct
@@ -174,6 +174,8 @@ module Test_v4 = struct
         ("192.168.0.0/24", "192.168.0.255");
         ("192.168.1.1/24", "192.168.1.255");
         ("192.168.0.128/29", "192.168.0.135");
+        ("192.168.0.0/31", "192.168.0.1");
+        ("192.168.0.0/32", "192.168.0.0");
         ("0.0.0.0/0", "255.255.255.255");
       ]
     in
