@@ -1,7 +1,7 @@
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["David Sheets" "Anil Madhavapeddy" "Hugo Heuzard"]
-synopsis: "A library for manipulation of IP address representations usnig sexp"
+synopsis: "A library for manipulation of IP address representations using sexp"
 description: """
 Sexp convertions for ipaddr
 """
