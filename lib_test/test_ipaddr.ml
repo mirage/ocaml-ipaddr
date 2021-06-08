@@ -423,7 +423,6 @@ module Test_v4 = struct
       (Ipaddr.V4.of_string_exn "169.254.169.254")
       (last (of_string_exn "169.254.169.254/32"))
 
-
   let test_reject_octal () =
     let bad_addrs =
       [
@@ -435,10 +434,8 @@ module Test_v4 = struct
     in
     List.iter
       (fun (addr, exn) ->
-         assert_raises ~msg:addr exn (fun () ->
-           V4.of_string_exn addr))
+        assert_raises ~msg:addr exn (fun () -> V4.of_string_exn addr))
       bad_addrs
-
 
   let test_reject_prefix_octal () =
     let bad_addrs =
@@ -451,10 +448,8 @@ module Test_v4 = struct
     in
     List.iter
       (fun (addr, exn) ->
-         assert_raises ~msg:addr exn (fun () ->
-           V4.Prefix.of_string_exn addr))
+        assert_raises ~msg:addr exn (fun () -> V4.Prefix.of_string_exn addr))
       bad_addrs
-
 
   let suite =
     "Test V4"
