@@ -119,7 +119,8 @@ let expect_end s i = if String.length s <= !i then () else raise (bad_char !i s)
 
 let reject_octal s i =
   if !i + 1 < String.length s then
-    if s.[!i] == '0' && is_number 10 (int_of_char s.[!i + 1]) then raise (octal_notation s)
+    if s.[!i] == '0' && is_number 10 (int_of_char s.[!i + 1]) then
+      raise (octal_notation s)
 
 let hex_char_of_int = function
   | 0 -> '0'
