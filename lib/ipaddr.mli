@@ -309,6 +309,10 @@ module V4 : sig
       addresses a node. *)
 
   include Map.OrderedType with type t := t
+
+  module Set : Set.S with type elt := t
+
+  module Map : Map.S with type key := t
 end
 
 (** A collection of functions for IPv6 addresses. *)
@@ -576,6 +580,10 @@ module V6 : sig
       addresses a node. *)
 
   include Map.OrderedType with type t := t
+
+  module Set : Set.S with type elt := t
+
+  module Map : Map.S with type key := t
 end
 
 (** Type of either an IPv4 value or an IPv6 value *)
@@ -726,3 +734,7 @@ module Prefix : sig
 end
 
 include Map.OrderedType with type t := t
+
+module Set : Set.S with type elt := t
+
+module Map : Map.S with type key := t
