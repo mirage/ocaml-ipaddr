@@ -309,9 +309,7 @@ module V4 : sig
       addresses a node. *)
 
   include Map.OrderedType with type t := t
-
   module Set : Set.S with type elt := t
-
   module Map : Map.S with type key := t
 end
 
@@ -580,9 +578,7 @@ module V6 : sig
       addresses a node. *)
 
   include Map.OrderedType with type t := t
-
   module Set : Set.S with type elt := t
-
   module Map : Map.S with type key := t
 end
 
@@ -734,7 +730,5 @@ module Prefix : sig
 end
 
 include Map.OrderedType with type t := t
-
 module Set : Set.S with type elt := t
-
 module Map : Map.S with type key := t

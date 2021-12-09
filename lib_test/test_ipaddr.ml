@@ -19,7 +19,6 @@ open OUnit
 open Ipaddr
 
 let error s msg = (s, Parse_error (msg, s))
-
 let need_more s = error s "not enough data"
 
 let bad_char i s =
@@ -1054,8 +1053,8 @@ let suite =
          "prefix_mem" >:: test_prefix_mem;
          "prefix_subset" >:: test_prefix_subset;
        ]
-
 ;;
+
 let _results = run_test_tt_main Test_v4.suite in
 let _results = run_test_tt_main Test_v6.suite in
 let _results = run_test_tt_main suite in
