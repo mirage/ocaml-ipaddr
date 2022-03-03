@@ -954,6 +954,59 @@ let test_string_raw_rt () =
       assert_equal ~msg (ts, !c) (result, cursor))
     addrs
 
+let test_with_port_of_string () =
+  let default = 8080 in
+  let addrs =
+    [
+      ("127.0.0.1", (Ipaddr.(V4 V4.localhost), default));
+      ("127.0.0.1:8080", (Ipaddr.(V4 V4.localhost), 8080));
+      ("127.0.0.1:4343", (Ipaddr.(V4 V4.localhost), 4343));
+      ("::1", (Ipaddr.(V6 V6.localhost), default));
+      ("0:0:0:0:0:0:0:1:8080", (Ipaddr.(V6 V6.localhost), 8080));
+      ("0:0:0:0:0:0:0:1:4343", (Ipaddr.(V6 V6.localhost), 4343));
+    ]
+  in
+  List.iter
+    (fun (inet_addr, result) ->
+      match Ipaddr.with_port_of_string ~default inet_addr with
+      | Ok ((V4 ipv4, port) as result') ->
+          let result'' = V4.with_port_of_string ~default inet_addr in
+          let msg =
+            Format.asprintf "%s <> %a:%d" inet_addr Ipaddr.V4.pp ipv4 port
+          in
+          assert_equal ~msg result result';
+          assert_equal ~msg (Ok (ipv4, port)) result''
+      | Ok ((V6 ipv6, port) as result') ->
+          let result'' = V6.with_port_of_string ~default inet_addr in
+          let msg =
+            Format.asprintf "%s <> %a:%d" inet_addr Ipaddr.V6.pp ipv6 port
+          in
+          assert_equal ~msg result result';
+          assert_equal ~msg (Ok (ipv6, port)) result''
+      | Error (`Msg err) ->
+          assert_failure (Format.asprintf "%s: %s" inet_addr err))
+    addrs
+
+let test_invalid_with_port_of_string () =
+  let default = 8080 in
+  let addrs =
+    [
+      "127.0.0.1:"; "127.0.0.1!8080"; "0:0:0:0:0:0:0:1!8080"; "0:0:0:0:0:0:0:1:";
+    ]
+  in
+  List.iter
+    (fun inet_addr ->
+      match
+        ( Ipaddr.with_port_of_string ~default inet_addr,
+          Ipaddr.V4.with_port_of_string ~default inet_addr,
+          Ipaddr.V4.with_port_of_string ~default inet_addr )
+      with
+      | Error _, Error _, Error _ -> ()
+      | _ ->
+          assert_failure
+            (Format.asprintf "Unexpected valid inet_addr: %S" inet_addr))
+    addrs
+
 let test_string_raw_rt_bad () =
   let error (s, c) msg c' = ((s, c), (Parse_error (msg, s), c')) in
   let addrs =
@@ -1052,6 +1105,8 @@ let suite =
          "map" >:: test_map;
          "prefix_mem" >:: test_prefix_mem;
          "prefix_subset" >:: test_prefix_subset;
+         "with_port" >:: test_with_port_of_string;
+         "invalid_with_port" >:: test_invalid_with_port_of_string;
        ]
 ;;
 
