@@ -1005,7 +1005,12 @@ let of_string_raw s offset =
           in
           raise (Parse_error (msg, s))))
 
-let of_string_exn s = of_string_raw s (ref 0)
+let of_string_exn s =
+  let o = ref 0 in
+  let x = of_string_raw s o in
+  expect_end s o;
+  x
+
 let of_string s = try_with_result of_string_exn s
 
 let v6_of_v4 v4 =
@@ -1087,7 +1092,12 @@ module Prefix = struct
             in
             raise (Parse_error (msg, s))))
 
-  let of_string_exn s = of_string_raw s (ref 0)
+  let of_string_exn s =
+    let o = ref 0 in
+    let x = of_string_raw s o in
+    expect_end s o;
+    x
+
   let of_string s = try_with_result of_string_exn s
 
   let v6_of_v4 v4 =
