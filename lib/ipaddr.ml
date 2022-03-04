@@ -172,6 +172,20 @@ module V4 = struct
 
   let of_string s = try_with_result of_string_exn s
 
+  let with_port_of_string ~default s =
+    try
+      let len = String.length s and o = ref 0 in
+      let ipv4 = of_string_raw s o in
+      if !o < len && s.[!o] = ':' then (
+        incr o;
+        let port = parse_dec_int s o in
+        expect_end s o;
+        Ok (ipv4, port))
+      else (
+        expect_end s o;
+        Ok (ipv4, default))
+    with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
+
   let to_buffer b i =
     Printf.bprintf b "%ld.%ld.%ld.%ld" (i >! 24) (i >! 16) (i >! 8) (i >! 0)
 
@@ -626,6 +640,20 @@ module V6 = struct
 
   let of_string s = try_with_result of_string_exn s
 
+  let with_port_of_string ~default s =
+    let len = String.length s and o = ref 0 in
+    try
+      let ipv6 = of_string_raw s o in
+      if !o < len && s.[!o] = ':' then (
+        incr o;
+        let port = parse_dec_int s o in
+        expect_end s o;
+        Ok (ipv6, port))
+      else (
+        expect_end s o;
+        Ok (ipv6, default))
+    with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
+
   (* http://tools.ietf.org/html/rfc5952 *)
   let to_buffer buf addr =
     let ((a, b, c, d, e, f, g, h) as comp) = to_int16 addr in
@@ -1012,6 +1040,20 @@ let of_string_exn s =
   x
 
 let of_string s = try_with_result of_string_exn s
+
+let with_port_of_string ~default s =
+  let len = String.length s and o = ref 0 in
+  try
+    let ipv6 = of_string_raw s o in
+    if !o < len && s.[!o] = ':' then (
+      incr o;
+      let port = parse_dec_int s o in
+      expect_end s o;
+      Ok (ipv6, port))
+    else (
+      expect_end s o;
+      Ok (ipv6, default))
+  with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
 
 let v6_of_v4 v4 =
   V6.(Prefix.(network_address ipv4_mapped (of_int32 (0l, 0l, 0l, v4))))
