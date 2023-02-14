@@ -452,9 +452,15 @@ module B128 = struct
         to_int32 b )
 
   let to_int64 (a, b, c, d) =
+    let of_uint32 i =
+      if i < 0l then
+        let ( + ) = Int64.add in
+        Int64.of_int32 i + Int64.shift_left 1L 32
+      else Int64.of_int32 i
+    in
     Int64.
-      ( logor (shift_left (of_int32 a) 32) (of_int32 b),
-        logor (shift_left (of_int32 c) 32) (of_int32 d) )
+      ( logor (shift_left (of_int32 a) 32) (of_uint32 b),
+        logor (shift_left (of_int32 c) 32) (of_uint32 d) )
 
   let of_int32 x = x
   let to_int32 x = x
