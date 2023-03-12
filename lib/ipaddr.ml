@@ -108,27 +108,6 @@ let reject_octal s i =
     if s.[!i] == '0' && is_number 10 (int_of_char s.[!i + 1]) then
       raise (octal_notation s)
 
-let hex_char_of_int = function
-  | 0 -> '0'
-  | 1 -> '1'
-  | 2 -> '2'
-  | 3 -> '3'
-  | 4 -> '4'
-  | 5 -> '5'
-  | 6 -> '6'
-  | 7 -> '7'
-  | 8 -> '8'
-  | 9 -> '9'
-  | 10 -> 'a'
-  | 11 -> 'b'
-  | 12 -> 'c'
-  | 13 -> 'd'
-  | 14 -> 'e'
-  | 15 -> 'f'
-  | _ -> raise (Invalid_argument "not a hex int")
-
-let hex_string_of_int32 i = String.make 1 (hex_char_of_int (Int32.to_int i))
-
 module V4 = struct
   type t = int32
 
@@ -454,9 +433,7 @@ module B128 = struct
   type t = Bytes.t
 
   let zero () = Bytes.make 16 '\x00'
-  let min_int () = zero ()
   let max_int () = Bytes.make 16 '\xff'
-  let equal = Bytes.equal
   let compare = Bytes.compare
 
   let fold_left f a b =
@@ -490,16 +467,12 @@ module B128 = struct
       done;
       b
 
-  let of_string s = try Some (of_string_exn s) with Invalid_argument _ -> None
-
   let to_string b =
     let l = ref [] in
     for i = 15 downto 0 do
       l := Printf.sprintf "%.2x" (Bytes.get_uint8 b i) :: !l
     done;
-    String.concat "" !l
-
-  let pp ppf b = Format.fprintf ppf "%s" (to_string b)
+    String.concat "" !l[@@ocaml.warning "-32"] (* used in the tests *)
 
   let of_int64 (a, b) =
     let b' = zero () in
@@ -560,8 +533,6 @@ module B128 = struct
       x y;
     if !carry <> 0 then raise Overflow else b
 
-  let add x y = try Some (add_exn x y) with Overflow -> None
-
   let sub_exn x y =
     if Bytes.compare x y = -1 then raise Overflow
     else
@@ -578,9 +549,6 @@ module B128 = struct
         x y;
       if !carry <> 0 then raise Overflow else b
 
-  let sub x y =
-    try Some (sub_exn x y) with Overflow -> None | Invalid_argument _ -> None
-
   let logand x y =
     let b = zero () in
     iteri_right2 (fun i x y -> Bytes.set_uint8 b i (x land y)) x y;
@@ -589,11 +557,6 @@ module B128 = struct
   let logor x y =
     let b = zero () in
     iteri_right2 (fun i x y -> Bytes.set_uint8 b i (x lor y)) x y;
-    b
-
-  let logxor x y =
-    let b = zero () in
-    iteri_right2 (fun i x y -> Bytes.set_uint8 b i (x lxor y)) x y;
     b
 
   let lognot x =

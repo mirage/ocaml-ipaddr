@@ -61,8 +61,8 @@ let test_subtraction () =
   let d3 = B128.of_string_exn "000000000000000000000000000002d6" in
   assert_equal ~msg:"test subtraction carry over" d3 (B128.sub_exn d1 d2);
 
-  (* subtracting one from min_int overflows *)
-  let d1 = B128.min_int () in
+  (* subtracting one from zero overflows *)
+  let d1 = B128.zero () in
   let d2 = B128.of_string_exn "00000000000000000000000000000001" in
   assert_raises ~msg:"subtracting one from min_int overflows" B128.Overflow
     (fun () -> B128.sub_exn d1 d2)
