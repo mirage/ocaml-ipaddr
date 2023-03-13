@@ -634,13 +634,19 @@ module Test_v6 = struct
       addr
 
   let test_int64_rt () =
-    let ((a, b) as addr) =
-      0x2a01_04f9_c011_87adL, 0x0_0_0_0L
+    let tests =
+      [
+        (0x2a01_04f9_c011_87adL, 0x0_0_0_0L);
+        (0x0000_0000_8000_0000L, 0x0_0_0_0L);
+      ]
     in
-    assert_equal
-      ~msg:(Printf.sprintf "%016Lx %016Lx" a b)
-      V6.(to_int64 (of_int64 addr))
-      addr
+    List.iter
+      (fun ((a, b) as addr) ->
+        assert_equal
+          ~msg:(Printf.sprintf "%016Lx %016Lx" a b)
+          V6.(to_int64 (of_int64 addr))
+          addr)
+      tests
 
   let test_prefix_string_rt () =
     let subnets =
