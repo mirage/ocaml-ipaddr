@@ -639,7 +639,7 @@ module B128 = struct
     if Bytes.length b' + off > Bytes.length byte then
       raise
         (Parse_error
-           ("larger including offset than target bytes", String.of_bytes b'))
+           ("larger including offset than target bytes", Bytes.to_string b'))
     else Bytes.blit b' 0 byte off (Bytes.length b')
 
   let succ b =
