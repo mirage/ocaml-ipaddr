@@ -472,7 +472,9 @@ module B128 = struct
     for i = 15 downto 0 do
       l := Printf.sprintf "%.2x" (Bytes.get_uint8 b i) :: !l
     done;
-    String.concat "" !l[@@ocaml.warning "-32"] (* used in the tests *)
+    String.concat "" !l
+    [@@ocaml.warning "-32"]
+  (* used in the tests *)
 
   let of_int64 (a, b) =
     let b' = zero () in
@@ -601,16 +603,16 @@ module B128 = struct
         let b = zero () in
         let shift_bytes, shift_bits = (n / 8, n mod 8) in
         (if shift_bits = 0 then Bytes.blit x 0 b shift_bytes (16 - shift_bytes)
-        else
-          let carry = ref 0 in
-          for i = 0 to 15 - shift_bytes do
-            let x' = Bytes.get_uint8 x i in
-            let new_carry = Byte.get_lsbits shift_bits x' in
-            let shifted_value = x' lsr shift_bits in
-            let new_value = Byte.set_msbits shift_bits !carry shifted_value in
-            Bytes.set_uint8 b (i + shift_bytes) new_value;
-            carry := new_carry
-          done);
+         else
+           let carry = ref 0 in
+           for i = 0 to 15 - shift_bytes do
+             let x' = Bytes.get_uint8 x i in
+             let new_carry = Byte.get_lsbits shift_bits x' in
+             let shifted_value = x' lsr shift_bits in
+             let new_value = Byte.set_msbits shift_bits !carry shifted_value in
+             Bytes.set_uint8 b (i + shift_bytes) new_value;
+             carry := new_carry
+           done);
         b
     | _ -> raise (Invalid_argument "n must be >= 0 && <= 128")
 
@@ -622,16 +624,16 @@ module B128 = struct
         let b = zero () in
         let shift_bytes, shift_bits = (n / 8, n mod 8) in
         (if shift_bits = 0 then Bytes.blit x shift_bytes b 0 (16 - shift_bytes)
-        else
-          let carry = ref 0 in
-          for i = 15 downto 0 + shift_bytes do
-            let x' = Bytes.get_uint8 x i in
-            let new_carry = Byte.get_msbits shift_bits x' in
-            let shifted_value = x' lsl shift_bits in
-            let new_value = shifted_value lor !carry in
-            Bytes.set_uint8 b (i - shift_bytes) new_value;
-            carry := new_carry
-          done);
+         else
+           let carry = ref 0 in
+           for i = 15 downto 0 + shift_bytes do
+             let x' = Bytes.get_uint8 x i in
+             let new_carry = Byte.get_msbits shift_bits x' in
+             let shifted_value = x' lsl shift_bits in
+             let new_value = shifted_value lor !carry in
+             Bytes.set_uint8 b (i - shift_bytes) new_value;
+             carry := new_carry
+           done);
         b
     | _ -> raise (Invalid_argument "n must be >= 0 && <= 128")
 
