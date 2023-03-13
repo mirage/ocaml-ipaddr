@@ -1,3 +1,8 @@
+## v5.4.0 (2023-03-13)
+
+* Use Bytes.t for IPv6 addresses (#115 @verbosemode, fixes #16 @dsheets)
+* Also fixes V6.to_int64 (reported by @RyanGibb in #113)
+
 ## v5.3.1 (2022-07-04)
 
 * Remove stdlib-shims dependency, require OCaml 4.08+ (@hannesm, #112)
