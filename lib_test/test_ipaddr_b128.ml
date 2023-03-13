@@ -44,7 +44,18 @@ let test_shift_right () =
     (Error (`Msg "Ipaddr: unexpected argument sz (must be >= 0 and < 128)"))
     (B128.shift_right (of_string_exn "::ffff:ffff") (-8))
 
-let suite = "Test B128 module" >::: [ "shift_right" >:: test_shift_right ];;
+let test_to_int64 () =
+  let open Ipaddr_internal in
+  let open V6 in
+  let printer v =
+    let a, b = v in
+    Printf.sprintf "%Ld %Ld" a b
+  in
+  let assert_equal = assert_equal ~printer in
+  assert_equal ~msg:"to_int64 0:0:8000:0:0:0:0:0" (2147483648L, 0L)
+    (B128.to_int64 (of_string_exn "0:0:8000:0:0:0:0:0"))
+
+let suite = "Test B128 module" >::: [ "shift_right" >:: test_shift_right; "to_int64" >:: test_to_int64 ];;
 
 let _results = run_test_tt_main suite in
 ()
