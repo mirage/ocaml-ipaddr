@@ -638,6 +638,19 @@ val with_port_of_string :
     - [::1:8080] returns the IPv6 [::1:8080] with the [default] port
     - [0:0:0:0:0:0:0:1:8080] returns [::1] with the port [8080]. *)
 
+val of_octets_exn : string -> t
+(** [of_octets_exn octets] is the address {!t} represented by [octets]. The
+    [octets] must be 4 bytes long for a {!V4} or 16 if a {!V6}. Raises
+    {!Parse_error} if [octets] is not a valid representation of an address. *)
+
+val of_octets : string -> (t, [> `Msg of string ]) result
+(** Same as {!of_octets_exn} but returns a result type instead of raising an
+    exception. *)
+
+val to_octets : t -> string
+(** [to_octets addr] returns the bytes representing the [addr] octets, which
+    will be 4 bytes long if addr is a {!V4} or 16 if a {!V6}. *)
+
 val v4_of_v6 : V6.t -> V4.t option
 (** [v4_of_v6 ipv6] is the IPv4 representation of the IPv6 address [ipv6]. If
     [ipv6] is not an IPv4-mapped address, None is returned. *)
