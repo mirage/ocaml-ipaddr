@@ -1137,6 +1137,15 @@ let with_port_of_string ~default s =
       Ok (ipv6, default))
   with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
 
+let of_octets_exn bs =
+  match String.length bs with
+  | 4 -> V4 (V4.of_octets_exn bs)
+  | 16 -> V6 (V6.of_octets_exn bs)
+  | _ -> raise (Parse_error ("octets must be of length 4 or 16", bs))
+
+let of_octets bs = try_with_result of_octets_exn bs
+let to_octets i = match i with V4 p -> V4.to_octets p | V6 p -> V6.to_octets p
+
 let v6_of_v4 v4 =
   V6.(Prefix.(network_address ipv4_mapped (of_int32 (0l, 0l, 0l, v4))))
 
