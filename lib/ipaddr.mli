@@ -296,6 +296,15 @@ module V4 : sig
     val last : t -> addr
     (** [last cidr] is last valid unicast address in this [cidr]. *)
 
+    val hosts : ?usable:bool -> t -> addr Seq.t
+    (** [hosts cidr] is the sequence of host addresses in this [cidr]. By
+        default, network and broadcast addresses are omitted. This can be
+        changed by setting [usable] to false. *)
+
+    val subnets : int -> t -> t Seq.t
+    (** [subnets n cidr] is the sequence of subnets of [cidr] with a prefix
+        length of [n]. *)
+
     include Map.OrderedType with type t := t
   end
 
@@ -568,6 +577,15 @@ module V6 : sig
     val last : t -> addr
     (** [last subnet] is last valid unicast address in this [subnet]. *)
 
+    val hosts : ?usable:bool -> t -> addr Seq.t
+    (** [hosts subnet] is the sequence of host addresses in this [subnet]. By
+        default the Subnet-Router anycast address is omitted. This can be
+        changed by setting [usable] to false. *)
+
+    val subnets : int -> t -> t Seq.t
+    (** [subnets n subnet] is the sequence of subnets of [subnet] with a prefix
+        length of [n]. *)
+
     include Map.OrderedType with type t := t
   end
 
@@ -764,6 +782,16 @@ module Prefix : sig
 
   val last : t -> addr
   (** [last subnet] is last valid unicast address in this [subnet]. *)
+
+  val hosts : ?usable:bool -> t -> (V4.t Seq.t, V6.t Seq.t) v4v6
+  (** [hosts cidr] is the sequence of host addresses in this [cidr]. By default,
+      the network and broadcast addresses are omitted for IPv4. In the case of
+      IPv6, the Subnet-Router anycast address is omitted by default. This can be
+      changed by setting [usable] to false. *)
+
+  val subnets : int -> t -> (V4.Prefix.t Seq.t, V6.Prefix.t Seq.t) v4v6
+  (** [subnets n cidr] is the sequence of subnets of [cidr] with a prefix length
+      of [n]. *)
 
   include Map.OrderedType with type t := t
 end
