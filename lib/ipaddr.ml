@@ -468,6 +468,7 @@ module B128 = struct
   let zero () = Bytes.make 16 '\x00'
   let max_int () = Bytes.make 16 '\xff'
   let compare = Bytes.compare
+  let equal = Bytes.equal
 
   let fold_left f a b =
     let a' = ref a in
@@ -567,6 +568,8 @@ module B128 = struct
           Bytes.set_uint8 b i sum))
       x y;
     if !carry <> 0 then raise Overflow else b
+
+  let add x y = try Some (add_exn x y) with Overflow -> None
 
   let sub_exn x y =
     if Bytes.compare x y = -1 then raise Overflow
@@ -1065,19 +1068,29 @@ module V6 = struct
 
     let subnets n (_, sz as cidr) =
       let rec iter_seq start stop steps =
-        if B128.compare start stop > 0 then Seq.Nil
-        else
+        if (B128.compare start stop) > 0 then (
+          Seq.Nil
+        )
+        else (
           let prefix = make n start in
-          let start_succ = B128.add_exn start steps in
-          if start_succ = B128.zero () then Seq.Cons (prefix, fun () -> Seq.Nil)
-          else Seq.Cons (prefix, fun () -> iter_seq start_succ stop steps)
+          if (B128.equal start stop) then
+            Seq.Cons (prefix, fun () -> Seq.Nil)
+          else (
+            match B128.add start steps with
+            | None -> Seq.Cons (prefix, fun () -> Seq.Nil)
+            | Some start_succ -> Seq.Cons (prefix, fun () -> iter_seq start_succ stop steps)
+            )
+          )
       in
       if sz > n || n > 128 then fun () -> Seq.Nil
-      else
-        let start = network cidr in
-        let stop = last cidr in
-        let steps = B128.(shift_right (hostmask cidr) (n - sz)) in
-        fun () -> iter_seq start stop steps
+      else (
+          let start = network cidr in
+          let stop = last cidr in
+          let steps =
+            B128.(add_exn (shift_right (hostmask cidr) (n - sz)) (B128.of_string_exn "00000000000000000000000000000001"))
+          in
+          fun () -> iter_seq start stop steps
+        )
   end
 
   (* TODO: This could be optimized with something trie-like *)
