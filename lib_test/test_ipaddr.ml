@@ -25,7 +25,6 @@ let bad_char i s =
   error s (Printf.sprintf "invalid character '%c' at %d" s.[i] i)
 
 let string_of_list f l = "[" ^ (List.map f l |> String.concat "; ") ^ "]"
-
 let ( >>= ) v f = match v with Ok v -> f v | Error _ as e -> e
 
 let assert_raises ~msg exn test_fn =
@@ -456,28 +455,55 @@ module Test_v4 = struct
   let test_hosts () =
     let nets =
       [
-        ("255.255.255.255/32", ["255.255.255.255"], false);
+        ("255.255.255.255/32", [ "255.255.255.255" ], false);
         ("255.255.255.255/32", [], true);
-        ("255.255.255.254/31", ["255.255.255.254"; "255.255.255.255"], true);
-        ("255.255.255.254/31", ["255.255.255.254"; "255.255.255.255"], false);
-        ("255.255.255.252/30", ["255.255.255.253"; "255.255.255.254"], true);
-        ("255.255.255.252/30", ["255.255.255.252"; "255.255.255.253";
-        "255.255.255.254"; "255.255.255.255"], false);
-        ("192.0.2.0/29", ["192.0.2.0"; "192.0.2.1"; "192.0.2.2"; "192.0.2.3";
-        "192.0.2.4"; "192.0.2.5"; "192.0.2.6"; "192.0.2.7"], false);
-        ("192.0.2.0/29", ["192.0.2.1"; "192.0.2.2"; "192.0.2.3";
-        "192.0.2.4";"192.0.2.5";"192.0.2.6";], true);
+        ("255.255.255.254/31", [ "255.255.255.254"; "255.255.255.255" ], true);
+        ("255.255.255.254/31", [ "255.255.255.254"; "255.255.255.255" ], false);
+        ("255.255.255.252/30", [ "255.255.255.253"; "255.255.255.254" ], true);
+        ( "255.255.255.252/30",
+          [
+            "255.255.255.252";
+            "255.255.255.253";
+            "255.255.255.254";
+            "255.255.255.255";
+          ],
+          false );
+        ( "192.0.2.0/29",
+          [
+            "192.0.2.0";
+            "192.0.2.1";
+            "192.0.2.2";
+            "192.0.2.3";
+            "192.0.2.4";
+            "192.0.2.5";
+            "192.0.2.6";
+            "192.0.2.7";
+          ],
+          false );
+        ( "192.0.2.0/29",
+          [
+            "192.0.2.1";
+            "192.0.2.2";
+            "192.0.2.3";
+            "192.0.2.4";
+            "192.0.2.5";
+            "192.0.2.6";
+          ],
+          true );
       ]
     in
     List.iter
       (fun (net, hosts, usable_flag) ->
         let hosts = List.map V4.of_string_exn hosts in
-        let hosts_list = List.of_seq (V4.Prefix.hosts ~usable:usable_flag
-          (V4.Prefix.of_string_exn net)) in
+        let hosts_list =
+          List.of_seq
+            (V4.Prefix.hosts ~usable:usable_flag (V4.Prefix.of_string_exn net))
+        in
         let msg =
           Printf.sprintf
-            "incorrect sequence of hosts for %s (usable_flag: %b): %s"
-            net usable_flag (string_of_list V4.to_string hosts_list)
+            "incorrect sequence of hosts for %s (usable_flag: %b): %s" net
+            usable_flag
+            (string_of_list V4.to_string hosts_list)
         in
         assert_equal ~msg hosts_list hosts)
       nets
@@ -487,24 +513,31 @@ module Test_v4 = struct
       [
         ("255.255.255.255/32", [], 24);
         ("192.0.2.0/24", [], 23);
-        ("255.255.255.255/32", ["255.255.255.255/32"], 32);
-        ("255.255.255.254/31", ["255.255.255.254/32"; "255.255.255.255/32"], 32);
-        ("255.255.255.252/30", ["255.255.255.252/31"; "255.255.255.254/31"], 31);
-        ("192.0.2.0/29", ["192.0.2.0/30"; "192.0.2.4/30"], 30);
-        ("192.0.2.0/24", ["192.0.2.0/25"; "192.0.2.128/25"], 25);
-        ("192.0.2.0/24", ["192.0.2.0/24"], 24);
-        ("10.0.0.0/8", ["10.0.0.0/9"; "10.128.0.0/9"], 9);
+        ("255.255.255.255/32", [ "255.255.255.255/32" ], 32);
+        ( "255.255.255.254/31",
+          [ "255.255.255.254/32"; "255.255.255.255/32" ],
+          32 );
+        ( "255.255.255.252/30",
+          [ "255.255.255.252/31"; "255.255.255.254/31" ],
+          31 );
+        ("192.0.2.0/29", [ "192.0.2.0/30"; "192.0.2.4/30" ], 30);
+        ("192.0.2.0/24", [ "192.0.2.0/25"; "192.0.2.128/25" ], 25);
+        ("192.0.2.0/24", [ "192.0.2.0/24" ], 24);
+        ("10.0.0.0/8", [ "10.0.0.0/9"; "10.128.0.0/9" ], 9);
       ]
     in
     List.iter
       (fun (net, subnets, sz) ->
         let subnets = List.map V4.Prefix.of_string_exn subnets in
         let subnets_list =
-          List.of_seq (V4.Prefix.subnets sz (V4.Prefix.of_string_exn net)) in
+          List.of_seq (V4.Prefix.subnets sz (V4.Prefix.of_string_exn net))
+        in
         let msg =
           Printf.sprintf
             "incorrect sequence of subnets for %s (prefix length: %i): %s" net
-            sz (string_of_list V4.Prefix.to_string subnets_list) in
+            sz
+            (string_of_list V4.Prefix.to_string subnets_list)
+        in
         assert_equal ~msg subnets_list subnets)
       nets
 
@@ -982,27 +1015,39 @@ module Test_v6 = struct
   let test_hosts () =
     let nets =
       [
-        ("2001:db8:0:ffff::/128", ["2001:db8:0:ffff::"], false);
+        ("2001:db8:0:ffff::/128", [ "2001:db8:0:ffff::" ], false);
         ("2001:db8:0:ffff::/128", [], true);
-        ("2001:db8:0:ffff::/127", ["2001:db8:0:ffff::"; "2001:db8:0:ffff::1"],
-         false);
-        ("2001:db8:0:ffff::/127", ["2001:db8:0:ffff::"; "2001:db8:0:ffff::1"],
-         true);
-        ("2001:db8:0:ffff::/126", ["2001:db8:0:ffff::"; "2001:db8:0:ffff::1";
-         "2001:db8:0:ffff::2"; "2001:db8:0:ffff::3"], false);
-        ("2001:db8:0:ffff::/126", ["2001:db8:0:ffff::1"; "2001:db8:0:ffff::2";
-         "2001:db8:0:ffff::3"], true);
+        ( "2001:db8:0:ffff::/127",
+          [ "2001:db8:0:ffff::"; "2001:db8:0:ffff::1" ],
+          false );
+        ( "2001:db8:0:ffff::/127",
+          [ "2001:db8:0:ffff::"; "2001:db8:0:ffff::1" ],
+          true );
+        ( "2001:db8:0:ffff::/126",
+          [
+            "2001:db8:0:ffff::";
+            "2001:db8:0:ffff::1";
+            "2001:db8:0:ffff::2";
+            "2001:db8:0:ffff::3";
+          ],
+          false );
+        ( "2001:db8:0:ffff::/126",
+          [ "2001:db8:0:ffff::1"; "2001:db8:0:ffff::2"; "2001:db8:0:ffff::3" ],
+          true );
       ]
     in
     List.iter
       (fun (net, hosts, usable_flag) ->
         let hosts = List.map V6.of_string_exn hosts in
-        let hosts_list = List.of_seq (V6.Prefix.hosts ~usable:usable_flag
-          (V6.Prefix.of_string_exn net)) in
+        let hosts_list =
+          List.of_seq
+            (V6.Prefix.hosts ~usable:usable_flag (V6.Prefix.of_string_exn net))
+        in
         let msg =
           Printf.sprintf
-            "incorrect sequence of hosts for %s (usable_flag: %b): %s"
-            net usable_flag (string_of_list V6.to_string hosts_list)
+            "incorrect sequence of hosts for %s (usable_flag: %b): %s" net
+            usable_flag
+            (string_of_list V6.to_string hosts_list)
         in
         assert_equal ~msg hosts_list hosts)
       nets
@@ -1012,31 +1057,49 @@ module Test_v6 = struct
       [
         ("2001:db8:0:ffff::/128", [], 127);
         ("2001:db8:0:ffff::/64", [], 63);
-        ("2001:db8:0:ffff::/128", ["2001:db8:0:ffff::/128"], 128);
-        ("2001:db8:0:ffff::/127", ["2001:db8:0:ffff::/128";
-         "2001:db8:0:ffff::1/128"], 128);
-        ("::/0", ["::/1"; "8000::/1"], 1);
-        ("::/0", ["::/2"; "4000::/2"; "8000::/2"; "c000::/2"], 2);
-        ("2001:db8:0:ffff::/126", ["2001:db8:0:ffff::/127";
-         "2001:db8:0:ffff::2/127";], 127);
-        ("2001:db8:0:fff0::/60", ["2001:db8:0:fff0::/64";
-         "2001:db8:0:fff1::/64"; "2001:db8:0:fff2::/64"; "2001:db8:0:fff3::/64";
-         "2001:db8:0:fff4::/64"; "2001:db8:0:fff5::/64"; "2001:db8:0:fff6::/64";
-         "2001:db8:0:fff7::/64"; "2001:db8:0:fff8::/64"; "2001:db8:0:fff9::/64";
-         "2001:db8:0:fffa::/64"; "2001:db8:0:fffb::/64"; "2001:db8:0:fffc::/64";
-         "2001:db8:0:fffd::/64"; "2001:db8:0:fffe::/64"; "2001:db8:0:ffff::/64";
-         ], 64);
+        ("2001:db8:0:ffff::/128", [ "2001:db8:0:ffff::/128" ], 128);
+        ( "2001:db8:0:ffff::/127",
+          [ "2001:db8:0:ffff::/128"; "2001:db8:0:ffff::1/128" ],
+          128 );
+        ("::/0", [ "::/1"; "8000::/1" ], 1);
+        ("::/0", [ "::/2"; "4000::/2"; "8000::/2"; "c000::/2" ], 2);
+        ( "2001:db8:0:ffff::/126",
+          [ "2001:db8:0:ffff::/127"; "2001:db8:0:ffff::2/127" ],
+          127 );
+        ( "2001:db8:0:fff0::/60",
+          [
+            "2001:db8:0:fff0::/64";
+            "2001:db8:0:fff1::/64";
+            "2001:db8:0:fff2::/64";
+            "2001:db8:0:fff3::/64";
+            "2001:db8:0:fff4::/64";
+            "2001:db8:0:fff5::/64";
+            "2001:db8:0:fff6::/64";
+            "2001:db8:0:fff7::/64";
+            "2001:db8:0:fff8::/64";
+            "2001:db8:0:fff9::/64";
+            "2001:db8:0:fffa::/64";
+            "2001:db8:0:fffb::/64";
+            "2001:db8:0:fffc::/64";
+            "2001:db8:0:fffd::/64";
+            "2001:db8:0:fffe::/64";
+            "2001:db8:0:ffff::/64";
+          ],
+          64 );
       ]
     in
     List.iter
       (fun (net, subnets, sz) ->
         let subnets = List.map V6.Prefix.of_string_exn subnets in
         let subnets_list =
-          List.of_seq (V6.Prefix.subnets sz (V6.Prefix.of_string_exn net)) in
+          List.of_seq (V6.Prefix.subnets sz (V6.Prefix.of_string_exn net))
+        in
         let msg =
           Printf.sprintf
             "incorrect sequence of subnets for %s (prefix length: %i): %s" net
-            sz (string_of_list V6.Prefix.to_string subnets_list) in
+            sz
+            (string_of_list V6.Prefix.to_string subnets_list)
+        in
         assert_equal ~msg subnets_list subnets)
       nets
 

@@ -379,7 +379,6 @@ module V4 = struct
     let address (addr, _) = addr
     let bits (_, sz) = sz
     let netmask subnet = mask (bits subnet)
-
     let hostmask cidr = Int32.logxor (netmask cidr) 0xFF_FF_FF_FFl
 
     let first ((_, sz) as cidr) =
@@ -388,7 +387,7 @@ module V4 = struct
     let last ((_, sz) as cidr) =
       if sz > 30 then broadcast cidr else broadcast cidr |> pred |> failwith_msg
 
-    let hosts ?(usable=true) ((_, sz) as cidr) =
+    let hosts ?(usable = true) ((_, sz) as cidr) =
       let rec iter_seq start stop =
         if compare (start, 32) (stop, 32) > 0 then Seq.Nil
         else
@@ -396,14 +395,15 @@ module V4 = struct
           | Ok start_succ -> Seq.Cons (start, fun () -> iter_seq start_succ stop)
           | Error _ -> Seq.Cons (start, fun () -> Seq.Nil)
       in
-      if usable && sz = 32 then fun () -> Seq.Nil else
-      let start, stop =
-        if usable then first cidr, last cidr
-        else network cidr, broadcast cidr
-      in
-      fun () -> iter_seq start stop
+      if usable && sz = 32 then fun () -> Seq.Nil
+      else
+        let start, stop =
+          if usable then (first cidr, last cidr)
+          else (network cidr, broadcast cidr)
+        in
+        fun () -> iter_seq start stop
 
-    let subnets n (_, sz as cidr) =
+    let subnets n ((_, sz) as cidr) =
       let rec iter_seq start stop steps =
         if compare (start, 32) (stop, 32) > 0 then Seq.Nil
         else
@@ -416,7 +416,7 @@ module V4 = struct
       else
         let start = network cidr in
         let stop = broadcast cidr in
-        let steps = Int32.add (hostmask cidr) 1l >|> (n - sz) in
+        let steps = Int32.add (hostmask cidr) 1l >|> n - sz in
         fun () -> iter_seq start stop steps
   end
 
@@ -1041,7 +1041,6 @@ module V6 = struct
     let address (addr, _) = addr
     let bits (_, sz) = sz
     let netmask subnet = mask (bits subnet)
-
     let hostmask cidr = B128.logxor (netmask cidr) (B128.max_int ())
 
     let first ((_, sz) as cidr) =
@@ -1051,7 +1050,7 @@ module V6 = struct
       let ffff = B128.max_int () in
       logor (network cidr) (B128.shift_right ffff sz)
 
-    let hosts ?(usable=true) ((_, sz) as cidr) =
+    let hosts ?(usable = true) ((_, sz) as cidr) =
       let rec iter_seq start stop =
         if B128.compare start stop > 0 then Seq.Nil
         else
@@ -1059,38 +1058,36 @@ module V6 = struct
           | Ok start_succ -> Seq.Cons (start, fun () -> iter_seq start_succ stop)
           | Error _ -> Seq.Cons (start, fun () -> Seq.Nil)
       in
-      if usable && sz = 128 then fun () -> Seq.Nil else
-      let start, stop =
-        if usable then first cidr, last cidr
-        else network cidr, last cidr
-      in
-      fun () -> iter_seq start stop
+      if usable && sz = 128 then fun () -> Seq.Nil
+      else
+        let start, stop =
+          if usable then (first cidr, last cidr) else (network cidr, last cidr)
+        in
+        fun () -> iter_seq start stop
 
-    let subnets n (_, sz as cidr) =
+    let subnets n ((_, sz) as cidr) =
       let rec iter_seq start stop steps =
-        if (B128.compare start stop) > 0 then (
-          Seq.Nil
-        )
-        else (
+        if B128.compare start stop > 0 then Seq.Nil
+        else
           let prefix = make n start in
-          if (B128.equal start stop) then
-            Seq.Cons (prefix, fun () -> Seq.Nil)
-          else (
+          if B128.equal start stop then Seq.Cons (prefix, fun () -> Seq.Nil)
+          else
             match B128.add start steps with
             | None -> Seq.Cons (prefix, fun () -> Seq.Nil)
-            | Some start_succ -> Seq.Cons (prefix, fun () -> iter_seq start_succ stop steps)
-            )
-          )
+            | Some start_succ ->
+                Seq.Cons (prefix, fun () -> iter_seq start_succ stop steps)
       in
       if sz > n || n > 128 then fun () -> Seq.Nil
-      else (
-          let start = network cidr in
-          let stop = last cidr in
-          let steps =
-            B128.(add_exn (shift_right (hostmask cidr) (n - sz)) (B128.of_string_exn "00000000000000000000000000000001"))
-          in
-          fun () -> iter_seq start stop steps
-        )
+      else
+        let start = network cidr in
+        let stop = last cidr in
+        let steps =
+          B128.(
+            add_exn
+              (shift_right (hostmask cidr) (n - sz))
+              (B128.of_string_exn "00000000000000000000000000000001"))
+        in
+        fun () -> iter_seq start stop steps
   end
 
   (* TODO: This could be optimized with something trie-like *)
@@ -1362,7 +1359,7 @@ module Prefix = struct
     | V4 p -> V4 (V4.Prefix.last p)
     | V6 p -> V6 (V6.Prefix.last p)
 
-  let hosts ?(usable=true) = function
+  let hosts ?(usable = true) = function
     | V4 p -> V4 (V4.Prefix.hosts ~usable p)
     | V6 p -> V6 (V6.Prefix.hosts ~usable p)
 
