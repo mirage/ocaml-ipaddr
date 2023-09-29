@@ -463,11 +463,7 @@ module S128 : sig
   val equal : t -> t -> bool
   val fold_left : ('a -> int -> 'a) -> 'a -> t -> 'a
   val of_octets_exn : string -> t
-  val of_string_exn : string -> t
-  [@@ocaml.warning "-32"]
   val to_octets : t -> string
-  val to_string : t -> string
-  [@@ocaml.warning "-32"]
   val of_int64 : int64 * int64 -> t
   val to_int64 : t -> int64 * int64
   val of_int32 : int32 * int32 * int32 * int32 -> t
@@ -501,13 +497,6 @@ module S128 : sig
   val pred : t -> (t, [> `Msg of string ]) result
 end
 = struct
-  let int_of_hex_char c =
-    match c with
-    | '0' .. '9' -> Char.code c - 48
-    | 'a' .. 'f' -> Char.code c - 87
-    | 'A' .. 'F' -> Char.code c - 55
-    | _ -> invalid_arg "char is not a valid hex digit"
-
   exception Overflow
 
   type t = string
@@ -533,23 +522,7 @@ end
     if String.length s <> 16 then invalid_arg "not 16 bytes long";
     s
 
-  let of_string_exn s =
-    if String.length s <> 32 then invalid_arg "not 32 chars long";
-    Bytes.init 16
-      (fun bi ->
-         let i = bi * 2 in
-         let x = int_of_hex_char s.[i+1] and y = int_of_hex_char s.[i] in
-         char_of_int ((y lsl 4) + x))
-    |> Bytes.unsafe_to_string
-
   let to_octets = Fun.id
-
-  let to_string b =
-    List.init 16
-      (fun i -> Printf.sprintf "%.2x" (String.get_uint8 b i))
-    |> String.concat ""
-    [@@ocaml.warning "-32"]
-  (* used in the tests *)
 
   let of_int64 (a, b) =
     let b' = mk_zero () in
@@ -720,7 +693,7 @@ end
            ("larger including offset than target bytes", s))
     else Bytes.blit_string s 0 dest off (String.length s)
 
-  let succ_exn b = add_exn b (of_string_exn "00000000000000000000000000000001")
+  let succ_exn b = add_exn b (of_int64 (0L, 1L))
 
   let succ b =
     try Ok (succ_exn b)
