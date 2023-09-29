@@ -681,7 +681,7 @@ module Test_v6 = struct
       "\000\000\000\000\000\000\000\000\000\000\255\255\192\168\000\001"
     in
     let v6 = V6.of_octets_exn addr in
-    assert_equal ~msg:(String.escaped addr) V6.(to_octets v6) addr
+    assert_equal ~printer:String.escaped ~msg:(String.escaped addr) V6.(to_octets v6) addr
 
   let test_bytes_rt_bad () =
     let addrs =

@@ -453,7 +453,54 @@ module V4 = struct
   end)
 end
 
-module B128 = struct
+module S128 : sig
+  exception Overflow
+  type t
+  val zero : t
+  [@@ocaml.warning "-32"]
+  val max_int : t
+  val compare : t -> t -> int
+  val equal : t -> t -> bool
+  val fold_left : ('a -> int -> 'a) -> 'a -> t -> 'a
+  val of_octets_exn : string -> t
+  val of_string_exn : string -> t
+  [@@ocaml.warning "-32"]
+  val to_octets : t -> string
+  val to_string : t -> string
+  [@@ocaml.warning "-32"]
+  val of_int64 : int64 * int64 -> t
+  val to_int64 : t -> int64 * int64
+  val of_int32 : int32 * int32 * int32 * int32 -> t
+  val to_int32 : t -> int32 * int32 * int32 * int32
+  val of_int16 : int * int * int * int * int * int * int * int -> t
+  val to_int16 : t -> int * int * int * int * int * int * int * int
+  val add_exn : t -> t -> t
+  [@@ocaml.warning "-32"]
+  val pred_exn : t -> t
+  [@@ocaml.warning "-32"]
+  val add : t -> t -> t option
+  val logand : t -> t -> t
+  val logor : t -> t -> t
+  val logxor : t -> t -> t
+  val lognot : t -> t
+  module Byte :
+    sig
+      val get_lsbits : int -> int -> int
+      [@@ocaml.warning "-32"]
+      val get_msbits : int -> int -> int
+      [@@ocaml.warning "-32"]
+      val set_msbits : int -> int -> int -> int
+      [@@ocaml.warning "-32"]
+      val fold_left : ('a -> bool -> 'a) -> 'a -> int -> 'a
+    end
+  val shift_right : t -> int -> t
+  val shift_left : t -> int -> t
+  val write_octets_exn : ?off:int -> t -> bytes -> unit
+  val succ_exn : t -> t
+  val succ : t -> (t, [> `Msg of string ]) result
+  val pred : t -> (t, [> `Msg of string ]) result
+end
+= struct
   let int_of_hex_char c =
     match c with
     | '0' .. '9' -> Char.code c - 48
@@ -463,77 +510,71 @@ module B128 = struct
 
   exception Overflow
 
-  type t = Bytes.t
+  type t = string
 
-  let zero () = Bytes.make 16 '\x00'
-  let max_int () = Bytes.make 16 '\xff'
-  let compare = Bytes.compare
-  let equal = Bytes.equal
+  let mk_zero () = Bytes.make 16 '\x00'
+  let mk_max_int () = Bytes.make 16 '\xff'
+  let zero = Bytes.unsafe_to_string (mk_zero ())
+  let max_int = Bytes.unsafe_to_string (mk_max_int ())
+  let compare = String.compare
+  let equal = String.equal
 
-  let fold_left f a b =
-    let a' = ref a in
-    for i = 0 to 15 do
-      let x' = Bytes.get_uint8 b i in
-      a' := f !a' x'
-    done;
-    !a'
+  let fold_left f acc s =
+    String.fold_left (fun acc c -> f acc (Char.code c)) acc s
 
   let iteri_right2 f x y =
     for i = 15 downto 0 do
-      let x' = Bytes.get_uint8 x i in
-      let y' = Bytes.get_uint8 y i in
+      let x' = String.get_uint8 x i in
+      let y' = String.get_uint8 y i in
       f i x' y'
     done
 
+  let of_octets_exn s =
+    if String.length s <> 16 then invalid_arg "not 16 bytes long";
+    s
+
   let of_string_exn s =
-    let l = String.length s in
-    if l != 32 then invalid_arg "not 32 chars long"
-    else
-      let b = zero () in
-      let bi = ref 15 in
-      let i = ref (l - 1) in
-      while !i >= 0 do
-        let x = int_of_hex_char (String.get s !i) in
-        let y = int_of_hex_char (String.get s (!i - 1)) in
-        Bytes.set_uint8 b !bi ((y lsl 4) + x);
-        i := !i - 2;
-        bi := !bi - 1
-      done;
-      b
+    if String.length s <> 32 then invalid_arg "not 32 chars long";
+    Bytes.init 16
+      (fun bi ->
+         let i = bi * 2 in
+         let x = int_of_hex_char s.[i+1] and y = int_of_hex_char s.[i] in
+         char_of_int ((y lsl 4) + x))
+    |> Bytes.unsafe_to_string
+
+  let to_octets = Fun.id
 
   let to_string b =
-    let l = ref [] in
-    for i = 15 downto 0 do
-      l := Printf.sprintf "%.2x" (Bytes.get_uint8 b i) :: !l
-    done;
-    String.concat "" !l
+    List.init 16
+      (fun i -> Printf.sprintf "%.2x" (String.get_uint8 b i))
+    |> String.concat ""
     [@@ocaml.warning "-32"]
   (* used in the tests *)
 
   let of_int64 (a, b) =
-    let b' = zero () in
+    let b' = mk_zero () in
     Bytes.set_int64_be b' 0 a;
     Bytes.set_int64_be b' 8 b;
-    b'
+    Bytes.unsafe_to_string b'
 
-  let to_int64 b = (Bytes.get_int64_be b 0, Bytes.get_int64_be b 8)
+  let to_int64 b = (String.get_int64_be b 0, String.get_int64_be b 8)
 
   let of_int32 (a, b, c, d) =
-    let b' = zero () in
+    let b' = mk_zero () in
     Bytes.set_int32_be b' 0 a;
     Bytes.set_int32_be b' 4 b;
     Bytes.set_int32_be b' 8 c;
     Bytes.set_int32_be b' 12 d;
-    b'
+    Bytes.unsafe_to_string b'
 
   let to_int32 b =
-    ( Bytes.get_int32_be b 0,
-      Bytes.get_int32_be b 4,
-      Bytes.get_int32_be b 8,
-      Bytes.get_int32_be b 12 )
+    ( String.get_int32_be b 0,
+      String.get_int32_be b 4,
+      String.get_int32_be b 8,
+      String.get_int32_be b 12 )
 
   let of_int16 (a, b, c, d, e, f, g, h) =
-    let b' = zero () in
+    let b' = mk_zero () in
     Bytes.set_uint16_be b' 0 a;
     Bytes.set_uint16_be b' 2 b;
     Bytes.set_uint16_be b' 4 c;
@@ -542,20 +583,20 @@ module B128 = struct
     Bytes.set_uint16_be b' 10 f;
     Bytes.set_uint16_be b' 12 g;
     Bytes.set_uint16_be b' 14 h;
-    b'
+    Bytes.unsafe_to_string b'
 
   let to_int16 b =
-    ( Bytes.get_uint16_be b 0,
-      Bytes.get_uint16_be b 2,
-      Bytes.get_uint16_be b 4,
-      Bytes.get_uint16_be b 6,
-      Bytes.get_uint16_be b 8,
-      Bytes.get_uint16_be b 10,
-      Bytes.get_uint16_be b 12,
-      Bytes.get_uint16_be b 14 )
+    ( String.get_uint16_be b 0,
+      String.get_uint16_be b 2,
+      String.get_uint16_be b 4,
+      String.get_uint16_be b 6,
+      String.get_uint16_be b 8,
+      String.get_uint16_be b 10,
+      String.get_uint16_be b 12,
+      String.get_uint16_be b 14 )
 
   let add_exn x y =
-    let b = zero () in
+    let b = mk_zero () in
     let carry = ref 0 in
     iteri_right2
       (fun i x' y' ->
@@ -567,45 +608,39 @@ module B128 = struct
           carry := 0;
           Bytes.set_uint8 b i sum))
       x y;
-    if !carry <> 0 then raise Overflow else b
+    if !carry <> 0 then raise Overflow else Bytes.unsafe_to_string b
 
   let add x y = try Some (add_exn x y) with Overflow -> None
 
-  let sub_exn x y =
-    if Bytes.compare x y = -1 then raise Overflow
-    else
-      let b = zero () in
-      let carry = ref 0 in
-      iteri_right2
-        (fun i x' y' ->
-          if x' < y' then (
-            Bytes.set_uint8 b i (256 + x' - y' - !carry);
-            carry := 1)
-          else (
-            Bytes.set_uint8 b i (x' - y' - !carry);
-            carry := 0))
-        x y;
-      if !carry <> 0 then raise Overflow else b
+  let pred_exn x =
+    if equal x zero then raise Overflow;
+    let b = Bytes.of_string x in
+    let rec go i =
+      Bytes.set_uint8 b i (String.get_uint8 x i - 1);
+      if String.get_uint8 x i = 0 then go (Stdlib.pred i);
+    in
+    go 15;
+    Bytes.unsafe_to_string b
 
   let logand x y =
-    let b = zero () in
+    let b = mk_zero () in
     iteri_right2 (fun i x y -> Bytes.set_uint8 b i (x land y)) x y;
-    b
+    Bytes.unsafe_to_string b
 
   let logor x y =
-    let b = zero () in
+    let b = mk_zero () in
     iteri_right2 (fun i x y -> Bytes.set_uint8 b i (x lor y)) x y;
-    b
+    Bytes.unsafe_to_string b
 
   let logxor x y =
-    let b = zero () in
+    let b = mk_zero () in
     iteri_right2 (fun i x y -> Bytes.set_uint8 b i (x lxor y)) x y;
-    b
+    Bytes.unsafe_to_string b
 
   let lognot x =
-    let b = zero () in
-    Bytes.iteri (fun i _ -> Bytes.set_uint8 b i (lnot (Bytes.get_uint8 x i))) x;
-    b
+    let b = mk_zero () in
+    String.iteri (fun i _ -> Bytes.set_uint8 b i (lnot (String.get_uint8 x i))) x;
+    Bytes.unsafe_to_string b
 
   module Byte = struct
     (* Extract the [n] least significant bits from [i] *)
@@ -636,67 +671,69 @@ module B128 = struct
       !a'
   end
 
-  let shift_right x n =
+  let shift_right (x : string) n : string =
     match n with
     | 0 -> x
-    | 128 -> zero ()
+    | 128 -> zero
     | n when n > 0 && n < 128 ->
-        let b = zero () in
+        let b = mk_zero () in
         let shift_bytes, shift_bits = (n / 8, n mod 8) in
-        (if shift_bits = 0 then Bytes.blit x 0 b shift_bytes (16 - shift_bytes)
+        (if shift_bits = 0 then Bytes.blit_string x 0 b shift_bytes (16 - shift_bytes)
          else
            let carry = ref 0 in
            for i = 0 to 15 - shift_bytes do
-             let x' = Bytes.get_uint8 x i in
+             let x' = String.get_uint8 x i in
              let new_carry = Byte.get_lsbits shift_bits x' in
              let shifted_value = x' lsr shift_bits in
              let new_value = Byte.set_msbits shift_bits !carry shifted_value in
              Bytes.set_uint8 b (i + shift_bytes) new_value;
              carry := new_carry
            done);
-        b
+        Bytes.unsafe_to_string b
     | _ -> raise (Invalid_argument "n must be >= 0 && <= 128")
 
   let shift_left x n =
     match n with
     | 0 -> x
-    | 128 -> zero ()
+    | 128 -> zero
     | n when n > 0 && n < 128 ->
-        let b = zero () in
+        let b = mk_zero () in
         let shift_bytes, shift_bits = (n / 8, n mod 8) in
-        (if shift_bits = 0 then Bytes.blit x shift_bytes b 0 (16 - shift_bytes)
+        (if shift_bits = 0 then Bytes.blit_string x shift_bytes b 0 (16 - shift_bytes)
          else
            let carry = ref 0 in
            for i = 15 downto 0 + shift_bytes do
-             let x' = Bytes.get_uint8 x i in
+             let x' = String.get_uint8 x i in
              let new_carry = Byte.get_msbits shift_bits x' in
              let shifted_value = x' lsl shift_bits in
              let new_value = shifted_value lor !carry in
              Bytes.set_uint8 b (i - shift_bytes) new_value;
              carry := new_carry
            done);
-        b
+        Bytes.unsafe_to_string b
     | _ -> raise (Invalid_argument "n must be >= 0 && <= 128")
 
-  let write_octets_exn ?(off = 0) b' byte =
-    if Bytes.length b' + off > Bytes.length byte then
+  let write_octets_exn ?(off = 0) s dest =
+    if Bytes.length dest - off < 16 then
       raise
         (Parse_error
-           ("larger including offset than target bytes", Bytes.to_string b'))
-    else Bytes.blit b' 0 byte off (Bytes.length b')
+           ("larger including offset than target bytes", s))
+    else Bytes.blit_string s 0 dest off (String.length s)
+
+  let succ_exn b = add_exn b (of_string_exn "00000000000000000000000000000001")
 
   let succ b =
-    try Ok (add_exn b (of_string_exn "00000000000000000000000000000001"))
+    try Ok (succ_exn b)
     with Overflow -> Error (`Msg "Ipaddr: highest address has been reached")
 
   let pred b =
-    try Ok (sub_exn b (of_string_exn "00000000000000000000000000000001"))
+    try Ok (pred_exn b)
     with Overflow | Invalid_argument _ ->
       Error (`Msg "Ipaddr: lowest address has been reached")
 end
 
 module V6 = struct
-  include B128
+  include S128
 
   let make a b c d e f g h = of_int16 (a, b, c, d, e, f, g, h)
 
@@ -870,33 +907,31 @@ module V6 = struct
 
   let of_octets_exn ?(off = 0) bs =
     if String.length bs - off < 16 then raise (need_more bs)
-    else
-      let b = B128.zero () in
-      Bytes.blit_string bs off b 0 16;
-      b
+    else S128.of_octets_exn (String.sub bs off 16)
 
   let of_octets ?off bs = try_with_result (of_octets_exn ?off) bs
   let write_octets ?off i bs = try_with_result (write_octets_exn ?off i) bs
-  let to_octets = Bytes.to_string
+  let to_octets = S128.to_octets
 
   (* MAC *)
   (* {{:https://tools.ietf.org/html/rfc2464#section-7}RFC 2464}. *)
-  let multicast_to_mac b =
+  let multicast_to_mac s =
     let macb = Bytes.make 6 (Char.chr 0x33) in
-    Bytes.blit b 12 macb 2 4;
+    Bytes.blit_string (S128.to_octets s) 12 macb 2 4;
     Macaddr.of_octets_exn (Bytes.to_string macb)
 
   (* Host *)
   let to_domain_name b =
     let hexstr_of_int = Printf.sprintf "%x" in
-    let rec aux_fold_left a i =
-      if i = 16 then a
-      else
-        let x = hexstr_of_int (Bytes.get_uint8 b i land ((1 lsl 4) - 1)) in
-        let y = hexstr_of_int (Bytes.get_uint8 b i lsr 4) in
-        aux_fold_left (x :: y :: a) (i + 1)
+    let name =
+      S128.fold_left
+        (fun acc b ->
+           let x = hexstr_of_int (b land ((1 lsl 4) - 1)) in
+           let y = hexstr_of_int (b lsr 4) in
+           x :: y :: acc)
+        [ "ip6"; "arpa" ]
+        b
     in
-    let name = aux_fold_left [ "ip6"; "arpa" ] 0 in
     Domain_name.(host_exn (of_strings_exn name))
 
   let of_domain_name n =
@@ -925,18 +960,15 @@ module V6 = struct
       && Domain_name.equal_label labels.(0) "arpa"
       && Domain_name.equal_label labels.(1) "ip6"
     then
-      let b = B128.zero () in
-      let bi = ref 0 in
-      let i = ref 2 in
+      let b = Bytes.create 16 in
       try
-        while !i <= 32 do
-          let x = int_of_char_string labels.(!i) in
-          let y = int_of_char_string labels.(!i + 1) in
-          Bytes.set_uint8 b !bi (Int.logor (Int.shift_left x 4) y);
-          bi := !bi + 1;
-          i := !i + 2
+        for bi = 0 to 15 do
+          let i = 2 * Int.succ bi in
+          let x = int_of_char_string labels.(i) in
+          let y = int_of_char_string labels.(i + 1) in
+          Bytes.set_uint8 b bi (Int.logor (Int.shift_left x 4) y);
         done;
-        Some b
+        Some (S128.of_octets_exn (Bytes.unsafe_to_string b))
       with Failure _ -> None
     else None
 
@@ -959,7 +991,7 @@ module V6 = struct
       if c = 0 then Stdlib.compare sz sz' else c
 
     let ip = make
-    let mask sz = shift_left (max_int ()) (128 - sz)
+    let mask sz = shift_left max_int (128 - sz)
     let prefix (pre, sz) = (logand pre (mask sz), sz)
     let make sz pre = (pre, sz)
 
@@ -991,7 +1023,7 @@ module V6 = struct
 
     let _of_netmask_exn ~netmask address =
       let count_bits bits is_last_bit_set i =
-        B128.Byte.fold_left
+        S128.Byte.fold_left
           (fun (a, is_last_bit_set) e ->
             match (is_last_bit_set, e) with
             | true, false | false, false -> (a, false)
@@ -1002,7 +1034,7 @@ module V6 = struct
           (bits, is_last_bit_set) i
       in
       let nm_bits_set, _ =
-        B128.fold_left
+        S128.fold_left
           (fun (a, is_last_bit_set) e -> count_bits a is_last_bit_set e)
           (0, true) netmask
       in
@@ -1041,18 +1073,18 @@ module V6 = struct
     let address (addr, _) = addr
     let bits (_, sz) = sz
     let netmask subnet = mask (bits subnet)
-    let hostmask cidr = B128.logxor (netmask cidr) (B128.max_int ())
+    let hostmask cidr = S128.logxor (netmask cidr) S128.max_int
 
     let first ((_, sz) as cidr) =
       if sz > 126 then network cidr else network cidr |> succ |> failwith_msg
 
     let last ((_, sz) as cidr) =
-      let ffff = B128.max_int () in
-      logor (network cidr) (B128.shift_right ffff sz)
+      let ffff = S128.max_int in
+      logor (network cidr) (S128.shift_right ffff sz)
 
     let hosts ?(usable = true) ((_, sz) as cidr) =
       let rec iter_seq start stop =
-        if B128.compare start stop > 0 then Seq.Nil
+        if S128.compare start stop > 0 then Seq.Nil
         else
           match succ start with
           | Ok start_succ -> Seq.Cons (start, fun () -> iter_seq start_succ stop)
@@ -1067,12 +1099,12 @@ module V6 = struct
 
     let subnets n ((_, sz) as cidr) =
       let rec iter_seq start stop steps =
-        if B128.compare start stop > 0 then Seq.Nil
+        if S128.compare start stop > 0 then Seq.Nil
         else
           let prefix = make n start in
-          if B128.equal start stop then Seq.Cons (prefix, fun () -> Seq.Nil)
+          if S128.equal start stop then Seq.Cons (prefix, fun () -> Seq.Nil)
           else
-            match B128.add start steps with
+            match S128.add start steps with
             | None -> Seq.Cons (prefix, fun () -> Seq.Nil)
             | Some start_succ ->
                 Seq.Cons (prefix, fun () -> iter_seq start_succ stop steps)
@@ -1081,12 +1113,7 @@ module V6 = struct
       else
         let start = network cidr in
         let stop = last cidr in
-        let steps =
-          B128.(
-            add_exn
-              (shift_right (hostmask cidr) (n - sz))
-              (B128.of_string_exn "00000000000000000000000000000001"))
-        in
+        let steps = S128.(succ_exn (shift_right (hostmask cidr) (n - sz))) in
         fun () -> iter_seq start stop steps
   end
 

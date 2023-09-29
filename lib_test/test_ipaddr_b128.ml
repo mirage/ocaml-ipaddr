@@ -16,7 +16,7 @@
  *)
 
 open OUnit
-module B128 = Ipaddr_internal.B128
+module B128 = Ipaddr_internal.S128
 
 (* copied from test_ipaddr.ml *)
 let assert_raises ~msg exn test_fn =
@@ -28,11 +28,11 @@ let assert_raises ~msg exn test_fn =
           Printexc.print_backtrace stderr);
         raise rtexn)
 
-let assert_equal = assert_equal ~printer:Ipaddr_internal.B128.to_string
+let assert_equal = assert_equal ~printer:Ipaddr_internal.S128.to_string
 
 let test_addition () =
   (* simple addition *)
-  let d1 = B128.zero () in
+  let d1 = B128.zero in
   let d2 = B128.of_string_exn "00000000000000000000000000000001" in
   assert_equal ~msg:"adding one to zero is one" d2 (B128.add_exn d1 d2);
 
@@ -43,29 +43,25 @@ let test_addition () =
   assert_equal ~msg:"test addition carry over" d3 (B128.add_exn d1 d2);
 
   (* adding one to max_int overflows *)
-  let d1 = B128.max_int () in
+  let d1 = B128.max_int in
   let d2 = B128.of_string_exn "00000000000000000000000000000001" in
   assert_raises ~msg:"adding one to max_int overflows" B128.Overflow (fun () ->
       B128.add_exn d1 d2)
 
-let test_subtraction () =
+let test_pred () =
   (* simple subtraction *)
   let d1 = B128.of_string_exn "00000000000000000000000000000001" in
-  let d2 = B128.of_string_exn "00000000000000000000000000000001" in
-  let d3 = B128.zero () in
-  assert_equal ~msg:"subtracting one from one is zero" d3 (B128.sub_exn d1 d2);
+  let d2 = B128.zero in
+  assert_equal ~msg:"subtracting one from one is zero" d2 (B128.pred_exn d1);
 
   (* subtract carry *)
   let d1 = B128.of_string_exn "00000000000000000000000000000300" in
-  let d2 = B128.of_string_exn "0000000000000000000000000000002a" in
-  let d3 = B128.of_string_exn "000000000000000000000000000002d6" in
-  assert_equal ~msg:"test subtraction carry over" d3 (B128.sub_exn d1 d2);
+  let d2 = B128.of_string_exn "000000000000000000000000000002ff" in
+  assert_equal ~msg:"test subtraction carry over" d2 (B128.pred_exn d1);
 
   (* subtracting one from zero overflows *)
-  let d1 = B128.zero () in
-  let d2 = B128.of_string_exn "00000000000000000000000000000001" in
   assert_raises ~msg:"subtracting one from min_int overflows" B128.Overflow
-    (fun () -> B128.sub_exn d1 d2)
+    (fun () -> B128.pred_exn B128.zero)
 
 let test_of_to_string () =
   let s = "ff000000000000004200000000000001" in
@@ -169,7 +165,7 @@ let suite =
   "Test B128 module"
   >::: [
          "addition" >:: test_addition;
-         "subtraction" >:: test_subtraction;
+         "pred" >:: test_pred;
          "of_to_string" >:: test_of_to_string;
          "lognot" >:: test_lognot;
          "shift_left" >:: test_shift_left;
