@@ -502,7 +502,14 @@ end = struct
   let max_int = String.make 16 '\xff'
   let compare = String.compare
   let equal = String.equal
-  let fold_left f = String.fold_left (fun acc c -> f acc (Char.code c))
+  let fold_left f init s =
+    (* With OCaml>=4.13.0:
+       [String.fold_left (fun acc c -> f acc (Char.code c)) init s] *)
+    let a = ref init in
+    for i = 0 to 15 do
+      a := f !a (String.get_uint8 s i)
+    done;
+    !a
 
   let iteri_right2 f x y =
     for i = 15 downto 0 do
