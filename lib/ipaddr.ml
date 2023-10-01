@@ -498,9 +498,8 @@ end = struct
   type t = string
 
   let mk_zero () = Bytes.make 16 '\x00'
-  let mk_max_int () = Bytes.make 16 '\xff'
   let zero = Bytes.unsafe_to_string (mk_zero ())
-  let max_int = Bytes.unsafe_to_string (mk_max_int ())
+  let max_int = String.make 16 '\xff'
   let compare = String.compare
   let equal = String.equal
   let fold_left f = String.fold_left (fun acc c -> f acc (Char.code c))
@@ -640,7 +639,7 @@ end = struct
       !a'
   end
 
-  let shift_right (x : string) n : string =
+  let shift_right x n =
     match n with
     | 0 -> x
     | 128 -> zero
