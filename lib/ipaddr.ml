@@ -455,9 +455,10 @@ end
 
 module S128 : sig
   exception Overflow
+
   type t
-  val zero : t
-  [@@ocaml.warning "-32"]
+
+  val zero : t [@@ocaml.warning "-32"]
   val max_int : t
   val compare : t -> t -> int
   val equal : t -> t -> bool
@@ -470,33 +471,28 @@ module S128 : sig
   val to_int32 : t -> int32 * int32 * int32 * int32
   val of_int16 : int * int * int * int * int * int * int * int -> t
   val to_int16 : t -> int * int * int * int * int * int * int * int
-  val add_exn : t -> t -> t
-  [@@ocaml.warning "-32"]
-  val pred_exn : t -> t
-  [@@ocaml.warning "-32"]
+  val add_exn : t -> t -> t [@@ocaml.warning "-32"]
+  val pred_exn : t -> t [@@ocaml.warning "-32"]
   val add : t -> t -> t option
   val logand : t -> t -> t
   val logor : t -> t -> t
   val logxor : t -> t -> t
   val lognot : t -> t
-  module Byte :
-    sig
-      val get_lsbits : int -> int -> int
-      [@@ocaml.warning "-32"]
-      val get_msbits : int -> int -> int
-      [@@ocaml.warning "-32"]
-      val set_msbits : int -> int -> int -> int
-      [@@ocaml.warning "-32"]
-      val fold_left : ('a -> bool -> 'a) -> 'a -> int -> 'a
-    end
+
+  module Byte : sig
+    val get_lsbits : int -> int -> int [@@ocaml.warning "-32"]
+    val get_msbits : int -> int -> int [@@ocaml.warning "-32"]
+    val set_msbits : int -> int -> int -> int [@@ocaml.warning "-32"]
+    val fold_left : ('a -> bool -> 'a) -> 'a -> int -> 'a
+  end
+
   val shift_right : t -> int -> t
   val shift_left : t -> int -> t
   val write_octets_exn : ?off:int -> t -> bytes -> unit
   val succ_exn : t -> t
   val succ : t -> (t, [> `Msg of string ]) result
   val pred : t -> (t, [> `Msg of string ]) result
-end
-= struct
+end = struct
   exception Overflow
 
   type t = string
@@ -507,9 +503,7 @@ end
   let max_int = Bytes.unsafe_to_string (mk_max_int ())
   let compare = String.compare
   let equal = String.equal
-
-  let fold_left f acc s =
-    String.fold_left (fun acc c -> f acc (Char.code c)) acc s
+  let fold_left f = String.fold_left (fun acc c -> f acc (Char.code c))
 
   let iteri_right2 f x y =
     for i = 15 downto 0 do
@@ -590,7 +584,7 @@ end
     let b = Bytes.of_string x in
     let rec go i =
       Bytes.set_uint8 b i (String.get_uint8 x i - 1);
-      if String.get_uint8 x i = 0 then go (Stdlib.pred i);
+      if String.get_uint8 x i = 0 then go (Stdlib.pred i)
     in
     go 15;
     Bytes.unsafe_to_string b
@@ -612,7 +606,9 @@ end
 
   let lognot x =
     let b = mk_zero () in
-    String.iteri (fun i _ -> Bytes.set_uint8 b i (lnot (String.get_uint8 x i))) x;
+    String.iteri
+      (fun i _ -> Bytes.set_uint8 b i (lnot (String.get_uint8 x i)))
+      x;
     Bytes.unsafe_to_string b
 
   module Byte = struct
@@ -651,7 +647,8 @@ end
     | n when n > 0 && n < 128 ->
         let b = mk_zero () in
         let shift_bytes, shift_bits = (n / 8, n mod 8) in
-        (if shift_bits = 0 then Bytes.blit_string x 0 b shift_bytes (16 - shift_bytes)
+        (if shift_bits = 0 then
+           Bytes.blit_string x 0 b shift_bytes (16 - shift_bytes)
          else
            let carry = ref 0 in
            for i = 0 to 15 - shift_bytes do
@@ -672,7 +669,8 @@ end
     | n when n > 0 && n < 128 ->
         let b = mk_zero () in
         let shift_bytes, shift_bits = (n / 8, n mod 8) in
-        (if shift_bits = 0 then Bytes.blit_string x shift_bytes b 0 (16 - shift_bytes)
+        (if shift_bits = 0 then
+           Bytes.blit_string x shift_bytes b 0 (16 - shift_bytes)
          else
            let carry = ref 0 in
            for i = 15 downto 0 + shift_bytes do
@@ -688,9 +686,7 @@ end
 
   let write_octets_exn ?(off = 0) s dest =
     if Bytes.length dest - off < 16 then
-      raise
-        (Parse_error
-           ("larger including offset than target bytes", s))
+      raise (Parse_error ("larger including offset than target bytes", s))
     else Bytes.blit_string s 0 dest off (String.length s)
 
   let succ_exn b = add_exn b (of_int64 (0L, 1L))
@@ -899,11 +895,10 @@ module V6 = struct
     let name =
       S128.fold_left
         (fun acc b ->
-           let x = hexstr_of_int (b land ((1 lsl 4) - 1)) in
-           let y = hexstr_of_int (b lsr 4) in
-           x :: y :: acc)
-        [ "ip6"; "arpa" ]
-        b
+          let x = hexstr_of_int (b land ((1 lsl 4) - 1)) in
+          let y = hexstr_of_int (b lsr 4) in
+          x :: y :: acc)
+        [ "ip6"; "arpa" ] b
     in
     Domain_name.(host_exn (of_strings_exn name))
 
@@ -939,7 +934,7 @@ module V6 = struct
           let i = 2 * Int.succ bi in
           let x = int_of_char_string labels.(i) in
           let y = int_of_char_string labels.(i + 1) in
-          Bytes.set_uint8 b bi (Int.logor (Int.shift_left x 4) y);
+          Bytes.set_uint8 b bi (Int.logor (Int.shift_left x 4) y)
         done;
         Some (S128.of_octets_exn (Bytes.unsafe_to_string b))
       with Failure _ -> None
