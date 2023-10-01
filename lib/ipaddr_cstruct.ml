@@ -47,22 +47,14 @@ module V6 = struct
   let of_cstruct_exn cs =
     let len = Cstruct.length cs in
     if len < 16 then raise (need_more (Cstruct.to_string cs));
-    let hihi = Cstruct.BE.get_uint32 cs 0 in
-    let hilo = Cstruct.BE.get_uint32 cs 4 in
-    let lohi = Cstruct.BE.get_uint32 cs 8 in
-    let lolo = Cstruct.BE.get_uint32 cs 12 in
-    of_int32 (hihi, hilo, lohi, lolo)
+    of_octets_exn (Cstruct.to_string ~len:16 cs)
 
   let of_cstruct cs = try_with_result of_cstruct_exn cs
 
   let write_cstruct_exn i cs =
     let len = Cstruct.length cs in
     if len < 16 then raise (need_more (Cstruct.to_string cs));
-    let a, b, c, d = to_int32 i in
-    Cstruct.BE.set_uint32 cs 0 a;
-    Cstruct.BE.set_uint32 cs 4 b;
-    Cstruct.BE.set_uint32 cs 8 c;
-    Cstruct.BE.set_uint32 cs 12 d
+    Cstruct.blit_from_string (to_octets i) 0 cs 0 16
 
   let to_cstruct ?(allocator = Cstruct.create) i =
     let cs = allocator 16 in
