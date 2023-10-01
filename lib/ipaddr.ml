@@ -530,7 +530,7 @@ end = struct
     Bytes.set_int64_be b' 8 b;
     Bytes.unsafe_to_string b'
 
-  let to_int64 b = (String.get_int64_be b 0, String.get_int64_be b 8)
+  let to_int64 s = (String.get_int64_be s 0, String.get_int64_be s 8)
 
   let of_int32 (a, b, c, d) =
     let b' = mk_zero () in
@@ -540,11 +540,11 @@ end = struct
     Bytes.set_int32_be b' 12 d;
     Bytes.unsafe_to_string b'
 
-  let to_int32 b =
-    ( String.get_int32_be b 0,
-      String.get_int32_be b 4,
-      String.get_int32_be b 8,
-      String.get_int32_be b 12 )
+  let to_int32 s =
+    ( String.get_int32_be s 0,
+      String.get_int32_be s 4,
+      String.get_int32_be s 8,
+      String.get_int32_be s 12 )
 
   let of_int16 (a, b, c, d, e, f, g, h) =
     let b' = mk_zero () in
@@ -558,15 +558,15 @@ end = struct
     Bytes.set_uint16_be b' 14 h;
     Bytes.unsafe_to_string b'
 
-  let to_int16 b =
-    ( String.get_uint16_be b 0,
-      String.get_uint16_be b 2,
-      String.get_uint16_be b 4,
-      String.get_uint16_be b 6,
-      String.get_uint16_be b 8,
-      String.get_uint16_be b 10,
-      String.get_uint16_be b 12,
-      String.get_uint16_be b 14 )
+  let to_int16 s =
+    ( String.get_uint16_be s 0,
+      String.get_uint16_be s 2,
+      String.get_uint16_be s 4,
+      String.get_uint16_be s 6,
+      String.get_uint16_be s 8,
+      String.get_uint16_be s 10,
+      String.get_uint16_be s 12,
+      String.get_uint16_be s 14 )
 
   let add_exn x y =
     let b = mk_zero () in
@@ -695,14 +695,14 @@ end = struct
       raise (Parse_error ("larger including offset than target bytes", s))
     else Bytes.blit_string s 0 dest off (String.length s)
 
-  let succ_exn b = add_exn b (of_int64 (0L, 1L))
+  let succ_exn x = add_exn x (of_int64 (0L, 1L))
 
-  let succ b =
-    try Ok (succ_exn b)
+  let succ x =
+    try Ok (succ_exn x)
     with Overflow -> Error (`Msg "Ipaddr: highest address has been reached")
 
-  let pred b =
-    try Ok (pred_exn b)
+  let pred x =
+    try Ok (pred_exn x)
     with Overflow | Invalid_argument _ ->
       Error (`Msg "Ipaddr: lowest address has been reached")
 end
