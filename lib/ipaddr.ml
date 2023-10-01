@@ -112,7 +112,6 @@ module V4 = struct
   type t = int32
 
   let compare = Int32.unsigned_compare
-
   let make a b c d = ~|a <! 24 ||| (~|b <! 16) ||| (~|c <! 8 ||| (~|d <! 0))
 
   (* parsing *)
