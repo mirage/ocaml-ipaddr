@@ -502,6 +502,7 @@ end = struct
   let max_int = String.make 16 '\xff'
   let compare = String.compare
   let equal = String.equal
+
   let fold_left f init s =
     (* With OCaml>=4.13.0:
        [String.fold_left (fun acc c -> f acc (Char.code c)) init s] *)
