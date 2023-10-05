@@ -36,7 +36,7 @@ val scope_of_string : string -> (scope, [> `Msg of string ]) result
     Valid string values for [s] can be obtained via {!string_of_scope}. *)
 
 val pp_scope : Format.formatter -> scope -> unit
-  [@@ocaml.toplevel_printer]
+[@@ocaml.toplevel_printer]
 (** [pp_scope fmt scope] outputs a human-readable representation of {!scope} to
     the [fmt] formatter. *)
 
@@ -82,7 +82,7 @@ module V4 : sig
       buffer [buf]. *)
 
   val pp : Format.formatter -> t -> unit
-    [@@ocaml.toplevel_printer]
+  [@@ocaml.toplevel_printer]
   (** [pp f ipv4] outputs a human-readable representation of [ipv4] to the
       formatter [f]. *)
 
@@ -219,7 +219,7 @@ module V4 : sig
         i.e. [XXX.XX.X.XXX/XX]. *)
 
     val pp : Format.formatter -> t -> unit
-      [@@ocaml.toplevel_printer]
+    [@@ocaml.toplevel_printer]
     (** [pp f cidr] outputs a human-readable representation of [cidr] to the
         formatter [f]. *)
 
@@ -370,7 +370,7 @@ module V6 : sig
       buffer [buf]. *)
 
   val pp : Format.formatter -> t -> unit
-    [@@ocaml.toplevel_printer]
+  [@@ocaml.toplevel_printer]
   (** [pp f ipv6] outputs a human-readable representation of [ipv6] to the
       formatter [f]. *)
 
@@ -509,7 +509,7 @@ module V6 : sig
         i.e. XXX:XX:X::XXX/XX. *)
 
     val pp : Format.formatter -> t -> unit
-      [@@ocaml.toplevel_printer]
+    [@@ocaml.toplevel_printer]
     (** [pp f cidr] outputs a human-readable representation of [cidr] to the
         formatter [f]. *)
 
@@ -630,7 +630,7 @@ val to_buffer : Buffer.t -> t -> unit
     [buf]. *)
 
 val pp : Format.formatter -> t -> unit
-  [@@ocaml.toplevel_printer]
+[@@ocaml.toplevel_printer]
 (** [pp f ip] outputs a human-readable representation of [ip] to the formatter
     [f]. *)
 
@@ -731,7 +731,7 @@ module Prefix : sig
       into [buf]. *)
 
   val pp : Format.formatter -> t -> unit
-    [@@ocaml.toplevel_printer]
+  [@@ocaml.toplevel_printer]
   (** [pp f subnet] outputs a human-readable representation of [subnet] to the
       formatter [f]. *)
 
