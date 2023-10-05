@@ -111,11 +111,7 @@ let reject_octal s i =
 module V4 = struct
   type t = int32
 
-  let compare a b =
-    (* ignore the sign *)
-    let c = Int32.compare (a >|> 1) (b >|> 1) in
-    if c = 0 then Int32.compare (a &&& 1l) (b &&& 1l) else c
-
+  let compare = Int32.unsigned_compare
   let make a b c d = ~|a <! 24 ||| (~|b <! 16) ||| (~|c <! 8 ||| (~|d <! 0))
 
   (* parsing *)
