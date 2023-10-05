@@ -16,7 +16,7 @@
  *)
 
 open OUnit
-module B128 = Ipaddr_internal.B128
+module B128 = Ipaddr_internal.S128
 
 (* copied from test_ipaddr.ml *)
 let assert_raises ~msg exn test_fn =
@@ -28,53 +28,70 @@ let assert_raises ~msg exn test_fn =
           Printexc.print_backtrace stderr);
         raise rtexn)
 
-let assert_equal = assert_equal ~printer:Ipaddr_internal.B128.to_string
+let int_of_hex_char c =
+  match c with
+  | '0' .. '9' -> Char.code c - 48
+  | 'a' .. 'f' -> Char.code c - 87
+  | 'A' .. 'F' -> Char.code c - 55
+  | _ -> invalid_arg "char is not a valid hex digit"
+
+let to_string (s : Ipaddr_internal.S128.t) =
+  let s : string = Obj.magic s in
+  List.init 16 (fun i -> Printf.sprintf "%.2x" (String.get_uint8 s i))
+  |> String.concat ""
+
+let of_string_exn s : B128.t =
+  if String.length s <> 32 then invalid_arg "not 32 chars long";
+  Bytes.init 16 (fun bi ->
+      let i = bi * 2 in
+      let x = int_of_hex_char s.[i + 1] and y = int_of_hex_char s.[i] in
+      char_of_int ((y lsl 4) + x))
+  |> Bytes.unsafe_to_string
+  |> Obj.magic
+
+let assert_equal = assert_equal ~printer:to_string
 
 let test_addition () =
   (* simple addition *)
-  let d1 = B128.zero () in
-  let d2 = B128.of_string_exn "00000000000000000000000000000001" in
+  let d1 = B128.zero in
+  let d2 = of_string_exn "00000000000000000000000000000001" in
   assert_equal ~msg:"adding one to zero is one" d2 (B128.add_exn d1 d2);
 
   (* addition carry *)
-  let d1 = B128.of_string_exn "000000000000000000ff000000000000" in
-  let d2 = B128.of_string_exn "00000000000000000001000000000000" in
-  let d3 = B128.of_string_exn "00000000000000000100000000000000" in
+  let d1 = of_string_exn "000000000000000000ff000000000000" in
+  let d2 = of_string_exn "00000000000000000001000000000000" in
+  let d3 = of_string_exn "00000000000000000100000000000000" in
   assert_equal ~msg:"test addition carry over" d3 (B128.add_exn d1 d2);
 
   (* adding one to max_int overflows *)
-  let d1 = B128.max_int () in
-  let d2 = B128.of_string_exn "00000000000000000000000000000001" in
+  let d1 = B128.max_int in
+  let d2 = of_string_exn "00000000000000000000000000000001" in
   assert_raises ~msg:"adding one to max_int overflows" B128.Overflow (fun () ->
       B128.add_exn d1 d2)
 
-let test_subtraction () =
+let test_pred () =
   (* simple subtraction *)
-  let d1 = B128.of_string_exn "00000000000000000000000000000001" in
-  let d2 = B128.of_string_exn "00000000000000000000000000000001" in
-  let d3 = B128.zero () in
-  assert_equal ~msg:"subtracting one from one is zero" d3 (B128.sub_exn d1 d2);
+  let d1 = of_string_exn "00000000000000000000000000000001" in
+  let d2 = B128.zero in
+  assert_equal ~msg:"subtracting one from one is zero" d2 (B128.pred_exn d1);
 
   (* subtract carry *)
-  let d1 = B128.of_string_exn "00000000000000000000000000000300" in
-  let d2 = B128.of_string_exn "0000000000000000000000000000002a" in
-  let d3 = B128.of_string_exn "000000000000000000000000000002d6" in
-  assert_equal ~msg:"test subtraction carry over" d3 (B128.sub_exn d1 d2);
+  let d1 = of_string_exn "00000000000000000000000000000300" in
+  let d2 = of_string_exn "000000000000000000000000000002ff" in
+  assert_equal ~msg:"test subtraction carry over" d2 (B128.pred_exn d1);
 
   (* subtracting one from zero overflows *)
-  let d1 = B128.zero () in
-  let d2 = B128.of_string_exn "00000000000000000000000000000001" in
   assert_raises ~msg:"subtracting one from min_int overflows" B128.Overflow
-    (fun () -> B128.sub_exn d1 d2)
+    (fun () -> B128.pred_exn B128.zero)
 
 let test_of_to_string () =
   let s = "ff000000000000004200000000000001" in
   OUnit.assert_equal ~msg:"input of of_string is equal to output of to_string" s
-    (B128.of_string_exn s |> B128.to_string)
+    (of_string_exn s |> to_string)
 
 let test_lognot () =
-  let d1 = B128.of_string_exn "00000000000000000000000000000001" in
-  let d2 = B128.of_string_exn "fffffffffffffffffffffffffffffffe" in
+  let d1 = of_string_exn "00000000000000000000000000000001" in
+  let d2 = of_string_exn "fffffffffffffffffffffffffffffffe" in
   assert_equal ~msg:"lognot inverts bits" d2 (B128.lognot d1)
 
 let test_shift_left () =
@@ -103,8 +120,8 @@ let test_shift_left () =
     (fun (bits, input_value, expected_output) ->
       assert_equal
         ~msg:(Printf.sprintf "shift left by %i" bits)
-        (B128.of_string_exn expected_output)
-        (B128.shift_left (B128.of_string_exn input_value) bits))
+        (of_string_exn expected_output)
+        (B128.shift_left (of_string_exn input_value) bits))
     test_shifts
 
 let test_shift_right () =
@@ -144,8 +161,8 @@ let test_shift_right () =
     (fun (bits, input_value, expected_output) ->
       assert_equal
         ~msg:(Printf.sprintf "shift right by %i" bits)
-        (B128.of_string_exn expected_output)
-        (B128.shift_right (B128.of_string_exn input_value) bits))
+        (of_string_exn expected_output)
+        (B128.shift_right (of_string_exn input_value) bits))
     test_shifts
 
 let test_byte_module () =
@@ -169,7 +186,7 @@ let suite =
   "Test B128 module"
   >::: [
          "addition" >:: test_addition;
-         "subtraction" >:: test_subtraction;
+         "pred" >:: test_pred;
          "of_to_string" >:: test_of_to_string;
          "lognot" >:: test_lognot;
          "shift_left" >:: test_shift_left;
