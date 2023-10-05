@@ -37,7 +37,7 @@ let int_of_hex_char c =
 
 let to_string (s : Ipaddr_internal.S128.t) =
   let s : string = Obj.magic s in
-  List.init 16 (fun i -> Printf.sprintf "%.2x" (String.get_uint8 s i))
+  List.init 16 (fun i -> Printf.sprintf "%.2x" (Char.code (String.get s i)))
   |> String.concat ""
 
 let of_string_exn s : B128.t =

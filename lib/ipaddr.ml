@@ -504,14 +504,14 @@ end = struct
        [String.fold_left (fun acc c -> f acc (Char.code c)) init s] *)
     let a = ref init in
     for i = 0 to 15 do
-      a := f !a (String.get_uint8 s i)
+      a := f !a (Char.code (String.get s i))
     done;
     !a
 
   let iteri_right2 f x y =
     for i = 15 downto 0 do
-      let x' = String.get_uint8 x i in
-      let y' = String.get_uint8 y i in
+      let x' = Char.code (String.get x i) in
+      let y' = Char.code (String.get y i) in
       f i x' y'
     done
 
@@ -527,7 +527,10 @@ end = struct
     Bytes.set_int64_be b' 8 b;
     Bytes.unsafe_to_string b'
 
-  let to_int64 s = (String.get_int64_be s 0, String.get_int64_be s 8)
+  let to_int64 s =
+    (* with OCaml>=4.13, use String.get_int64_be *)
+    let b = Bytes.unsafe_of_string s in
+    (Bytes.get_int64_be b 0, Bytes.get_int64_be b 8)
 
   let of_int32 (a, b, c, d) =
     let b' = mk_zero () in
@@ -538,10 +541,12 @@ end = struct
     Bytes.unsafe_to_string b'
 
   let to_int32 s =
-    ( String.get_int32_be s 0,
-      String.get_int32_be s 4,
-      String.get_int32_be s 8,
-      String.get_int32_be s 12 )
+    (* with OCaml>=4.13, use String.get_int32_be *)
+    let b = Bytes.unsafe_of_string s in
+    ( Bytes.get_int32_be b 0,
+      Bytes.get_int32_be b 4,
+      Bytes.get_int32_be b 8,
+      Bytes.get_int32_be b 12 )
 
   let of_int16 (a, b, c, d, e, f, g, h) =
     let b' = mk_zero () in
@@ -556,14 +561,16 @@ end = struct
     Bytes.unsafe_to_string b'
 
   let to_int16 s =
-    ( String.get_uint16_be s 0,
-      String.get_uint16_be s 2,
-      String.get_uint16_be s 4,
-      String.get_uint16_be s 6,
-      String.get_uint16_be s 8,
-      String.get_uint16_be s 10,
-      String.get_uint16_be s 12,
-      String.get_uint16_be s 14 )
+    (* with OCaml>=4.13, use String.get_uint16_be *)
+    let b = Bytes.unsafe_of_string s in
+    ( Bytes.get_uint16_be b 0,
+      Bytes.get_uint16_be b 2,
+      Bytes.get_uint16_be b 4,
+      Bytes.get_uint16_be b 6,
+      Bytes.get_uint16_be b 8,
+      Bytes.get_uint16_be b 10,
+      Bytes.get_uint16_be b 12,
+      Bytes.get_uint16_be b 14 )
 
   let add_exn x y =
     let b = mk_zero () in
@@ -586,8 +593,8 @@ end = struct
     if equal x zero then raise Overflow;
     let b = Bytes.of_string x in
     let rec go i =
-      Bytes.set_uint8 b i (String.get_uint8 x i - 1);
-      if String.get_uint8 x i = 0 then go (Stdlib.pred i)
+      Bytes.set_uint8 b i (Char.code (String.get x i) - 1);
+      if Char.code (String.get x i) = 0 then go (Stdlib.pred i)
     in
     go 15;
     Bytes.unsafe_to_string b
@@ -610,7 +617,7 @@ end = struct
   let lognot x =
     let b = mk_zero () in
     String.iteri
-      (fun i _ -> Bytes.set_uint8 b i (lnot (String.get_uint8 x i)))
+      (fun i _ -> Bytes.set_uint8 b i (lnot (Char.code (String.get x i))))
       x;
     Bytes.unsafe_to_string b
 
@@ -655,7 +662,7 @@ end = struct
          else
            let carry = ref 0 in
            for i = 0 to 15 - shift_bytes do
-             let x' = String.get_uint8 x i in
+             let x' = Char.code (String.get x i) in
              let new_carry = Byte.get_lsbits shift_bits x' in
              let shifted_value = x' lsr shift_bits in
              let new_value = Byte.set_msbits shift_bits !carry shifted_value in
@@ -677,7 +684,7 @@ end = struct
          else
            let carry = ref 0 in
            for i = 15 downto 0 + shift_bytes do
-             let x' = String.get_uint8 x i in
+             let x' = Char.code (String.get x i) in
              let new_carry = Byte.get_msbits shift_bits x' in
              let shifted_value = x' lsl shift_bits in
              let new_value = shifted_value lor !carry in
