@@ -1,3 +1,16 @@
+## v5.6.0 (2024-05-22)
+
+* Add host and subnet Seq.t iterators for Ipaddr.V4.prefix, Ipaddr.V6.Prefix
+  and Ipaddr.Prefix (#107 @verbosemode @dinosaure)
+* Ipaddr.V4.compare: use Int32.unsigned_compare, as provided since OCaml 4.08
+  (#118 @reynir)
+* Ipaddr.V6.t is a string, not a byte vector anymore (so it is immutable)
+  (#119 @reynir, restoring 4.08 compatibility #121)
+* Provide Ipaddr.Prefix.address (since 5.0.0, Ipaddr.V4.Prefix.address and
+  Ipaddr.V6.Prefix.address have been provided, but Ipaddr.Prefix.address was
+  forgotten) (#122 @hannesm)
+* Fix further docstrings (#123, fixes #81, @hannesm @reynir)
+
 ## v5.5.0 (2023-03-31)
 
 * add `Ipaddr` `of_octet` functions (#117, @ryangibb).
