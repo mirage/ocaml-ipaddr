@@ -23,7 +23,6 @@ let try_with_result fn a =
   try Ok (fn a) with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
 
 let failwith_msg = function Ok x -> x | Error (`Msg m) -> failwith m
-let map_result v f = match v with Ok v -> Ok (f v) | Error _ as e -> e
 
 let string_of_scope = function
   | Point -> "point"
@@ -1271,12 +1270,12 @@ let of_domain_name n =
   | _ -> None
 
 let succ = function
-  | V4 addr -> map_result (V4.succ addr) (fun v -> V4 v)
-  | V6 addr -> map_result (V6.succ addr) (fun v -> V6 v)
+  | V4 addr -> Result.map (fun v -> V4 v) (V4.succ addr)
+  | V6 addr -> Result.map (fun v -> V6 v) (V6.succ addr)
 
 let pred = function
-  | V4 addr -> map_result (V4.pred addr) (fun v -> V4 v)
-  | V6 addr -> map_result (V6.pred addr) (fun v -> V6 v)
+  | V4 addr -> Result.map (fun v -> V4 v) (V4.pred addr)
+  | V6 addr -> Result.map (fun v -> V6 v) (V6.pred addr)
 
 module Prefix = struct
   module Addr = struct
