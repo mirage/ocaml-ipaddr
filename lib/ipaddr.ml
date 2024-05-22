@@ -1354,6 +1354,10 @@ module Prefix = struct
     | V4 p -> V4 (V4.Prefix.netmask p)
     | V6 p -> V6 (V6.Prefix.netmask p)
 
+  let address = function
+    | V4 p -> V4 (V4.Prefix.address p)
+    | V6 p -> V6 (V6.Prefix.address p)
+
   let pp ppf i = Format.fprintf ppf "%s" (to_string i)
 
   let first = function

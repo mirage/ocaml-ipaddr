@@ -777,6 +777,9 @@ module Prefix : sig
   val netmask : t -> addr
   (** [netmask subnet] is the netmask for [subnet]. *)
 
+  val address : t -> addr
+  (** [address cidr] is the address for [cidr]. *)
+
   val first : t -> addr
   (** [first subnet] is first valid unicast address in this [subnet]. *)
 
