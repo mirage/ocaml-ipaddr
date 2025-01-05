@@ -26,3 +26,4 @@ dev-repo: "git+https://github.com/mirage/ocaml-ipaddr.git"
 description: """
 Sexp convertions for macaddr
 """
+x-maintenance-intent: [ "(latest)" ]
