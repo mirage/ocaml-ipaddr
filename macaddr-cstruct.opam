@@ -22,3 +22,4 @@ dev-repo: "git+https://github.com/mirage/ocaml-ipaddr.git"
 description: """
 Cstruct convertions for macaddr
 """
+x-maintenance-intent: [ "(latest)" ]
