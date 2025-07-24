@@ -1357,6 +1357,7 @@ module Prefix = struct
     | V4 p -> V4 (V4.Prefix.address p)
     | V6 p -> V6 (V6.Prefix.address p)
 
+  let bits = function V4 p -> V4.Prefix.bits p | V6 p -> V6.Prefix.bits p
   let pp ppf i = Format.fprintf ppf "%s" (to_string i)
 
   let first = function

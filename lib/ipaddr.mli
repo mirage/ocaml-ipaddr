@@ -784,6 +784,9 @@ module Prefix : sig
   val address : t -> addr
   (** [address cidr] is the address for [cidr]. *)
 
+  val bits : t -> int
+  (** [bits cidr] is the bit size of the [cidr] prefix. *)
+
   val first : t -> addr
   (** [first subnet] is first valid unicast address in this [subnet]. *)
 
