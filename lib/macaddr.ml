@@ -52,13 +52,19 @@ let of_string_exn x =
   let m = Bytes.create 6 in
   try
     for i = 0 to 5 do
-      Bytes.set_uint8 m i (hex_byte x (3 * i));
-      if i < 5 then
-        match String.get x ((3 * i) + 2) with
-        | ':' | '-' -> ()
-        | c ->
-            raise
-              (Parse_error (Printf.sprintf "Invalid macaddr separator: %C" c, x))
+      Bytes.set_uint8 m i (hex_byte x (3 * i))
+    done;
+    let sep = x.[2] in
+    (match sep with
+    | ':' | '-' -> ()
+    | _ ->
+        raise
+          (Parse_error (Printf.sprintf "Invalid macaddr separator: %C" sep, x)));
+    for i = 1 to 4 do
+      if x.[(3 * i) + 2] <> sep then
+        raise
+          (Parse_error
+             (Printf.sprintf "Invalid macaddr separator: %C" x.[(3 * i) + 2], x))
     done;
     Bytes.unsafe_to_string m
   with Invalid_hex_digit c ->
