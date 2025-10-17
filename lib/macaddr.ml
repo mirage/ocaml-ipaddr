@@ -33,62 +33,37 @@ let of_octets_exn x =
 
 let of_octets x = try_with_result of_octets_exn x
 
-let int_of_hex_char c =
-  let c = int_of_char (Char.uppercase_ascii c) - 48 in
-  if c > 9 then
-    if c > 16 then c - 7 (* upper hex offset *) else -1 (* :;<=>?@ *)
-  else c
+exception Invalid_hex_digit of char
 
-let is_hex i = i >= 0 && i < 16
+let hex_digit c =
+  match Char.uppercase_ascii c with
+  | '0' .. '9' as c -> Char.code c - 48
+  | 'A' .. 'F' as c -> Char.code c - 55
+  | c -> raise_notrace (Invalid_hex_digit c)
 
-let bad_char i s =
-  let msg = Printf.sprintf "invalid character '%c' at %d" s.[i] i in
-  Parse_error (msg, s)
-
-let parse_hex_int term s i =
-  let len = String.length s in
-  let rec hex prev =
-    let j = !i in
-    if j >= len then prev
-    else
-      let c = s.[j] in
-      let k = int_of_hex_char c in
-      if is_hex k then (
-        incr i;
-        hex ((prev lsl 4) + k))
-      else if List.mem c term then prev
-      else raise (bad_char j s)
-  in
-  let i = !i in
-  if i < len then
-    if is_hex (int_of_hex_char s.[i]) then hex 0 else raise (bad_char i s)
-  else raise (need_more s)
-
-let parse_sextuple s i =
-  let m = Bytes.create 6 in
-  try
-    let p = !i in
-    Bytes.set m 0 (Char.chr (parse_hex_int [ ':'; '-' ] s i));
-    if !i >= String.length s then raise (need_more s)
-    else
-      let sep = [ s.[!i] ] in
-      if !i - p <> 2 then raise (Parse_error ("hex pairs required", s));
-      incr i;
-      for k = 1 to 4 do
-        let p = !i in
-        Bytes.set m k (Char.chr (parse_hex_int sep s i));
-        if !i - p <> 2 then raise (Parse_error ("hex pairs required", s));
-        incr i
-      done;
-      let p = !i in
-      Bytes.set m 5 (Char.chr (parse_hex_int [] s i));
-      if !i - p <> 2 then raise (Parse_error ("hex pairs required", s));
-      m
-  with Invalid_argument _ ->
-    raise (Parse_error ("address segment too large", s))
+let hex_byte x i =
+  (hex_digit (String.get x i) lsl 4) + hex_digit (String.get x (succ i))
 
 (* Read a MAC address colon-separated string *)
-let of_string_exn x = Bytes.unsafe_to_string (parse_sextuple x (ref 0))
+let of_string_exn x =
+  if String.length x < (2 * 6) + 5 then raise (need_more x);
+  if String.length x <> (2 * 6) + 5 then
+    raise (Parse_error ("macaddr string is too long", x));
+  let m = Bytes.create 6 in
+  try
+    for i = 0 to 5 do
+      Bytes.set_uint8 m i (hex_byte x (3 * i));
+      if i < 5 then
+        match String.get x ((3 * i) + 2) with
+        | ':' | '-' -> ()
+        | c ->
+            raise
+              (Parse_error (Printf.sprintf "Invalid macaddr separator: %C" c, x))
+    done;
+    Bytes.unsafe_to_string m
+  with Invalid_hex_digit c ->
+    raise (Parse_error (Printf.sprintf "Invalid macaddr hex digit: %C" c, x))
+
 let of_string x = try_with_result of_string_exn x
 let chri x i = Char.code x.[i]
 
