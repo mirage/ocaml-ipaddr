@@ -22,14 +22,14 @@ let need_more x = Parse_error ("not enough data", x)
 let try_with_result fn a =
   try Ok (fn a) with Parse_error (msg, _) -> Error (`Msg ("Macaddr: " ^ msg))
 
-type t = Bytes.t (* length 6 only *)
+type t = string (* length 6 only *)
 
-let compare = Bytes.compare
+let compare = String.compare
 
 (* Raw MAC address off the wire (network endian) *)
 let of_octets_exn x =
   if String.length x <> 6 then raise (Parse_error ("MAC is exactly 6 bytes", x))
-  else Bytes.of_string x
+  else x
 
 let of_octets x = try_with_result of_octets_exn x
 
@@ -88,17 +88,17 @@ let parse_sextuple s i =
     raise (Parse_error ("address segment too large", s))
 
 (* Read a MAC address colon-separated string *)
-let of_string_exn x = parse_sextuple x (ref 0)
+let of_string_exn x = Bytes.unsafe_to_string (parse_sextuple x (ref 0))
 let of_string x = try_with_result of_string_exn x
-let chri x i = Char.code (Bytes.get x i)
+let chri x i = Char.code x.[i]
 
 let to_string ?(sep = ':') x =
   Printf.sprintf "%02x%c%02x%c%02x%c%02x%c%02x%c%02x" (chri x 0) sep (chri x 1)
     sep (chri x 2) sep (chri x 3) sep (chri x 4) sep (chri x 5)
 
-let to_octets x = Bytes.to_string x
+let to_octets x = x
 let pp ppf i = Format.fprintf ppf "%s" (to_string i)
-let broadcast = Bytes.make 6 '\255'
+let broadcast = String.make 6 '\255'
 
 let make_local bytegenf =
   let x = Bytes.create 6 in
@@ -107,7 +107,7 @@ let make_local bytegenf =
   for i = 1 to 5 do
     Bytes.set x i (Char.chr (bytegenf i))
   done;
-  x
+  Bytes.unsafe_to_string x
 
 let get_oui x = (chri x 0 lsl 16) lor (chri x 1 lsl 8) lor chri x 2
 let is_local x = (chri x 0 lsr 1) land 1 = 1
