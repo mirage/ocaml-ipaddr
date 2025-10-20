@@ -22,83 +22,67 @@ let need_more x = Parse_error ("not enough data", x)
 let try_with_result fn a =
   try Ok (fn a) with Parse_error (msg, _) -> Error (`Msg ("Macaddr: " ^ msg))
 
-type t = Bytes.t (* length 6 only *)
+type t = string (* length 6 only *)
 
-let compare = Bytes.compare
+let compare = String.compare
 
 (* Raw MAC address off the wire (network endian) *)
 let of_octets_exn x =
   if String.length x <> 6 then raise (Parse_error ("MAC is exactly 6 bytes", x))
-  else Bytes.of_string x
+  else x
 
 let of_octets x = try_with_result of_octets_exn x
 
-let int_of_hex_char c =
-  let c = int_of_char (Char.uppercase_ascii c) - 48 in
-  if c > 9 then
-    if c > 16 then c - 7 (* upper hex offset *) else -1 (* :;<=>?@ *)
-  else c
+exception Invalid_hex_digit of char
 
-let is_hex i = i >= 0 && i < 16
+let hex_digit c =
+  match Char.uppercase_ascii c with
+  | '0' .. '9' as c -> Char.code c - 48
+  | 'A' .. 'F' as c -> Char.code c - 55
+  | c -> raise_notrace (Invalid_hex_digit c)
 
-let bad_char i s =
-  let msg = Printf.sprintf "invalid character '%c' at %d" s.[i] i in
-  Parse_error (msg, s)
-
-let parse_hex_int term s i =
-  let len = String.length s in
-  let rec hex prev =
-    let j = !i in
-    if j >= len then prev
-    else
-      let c = s.[j] in
-      let k = int_of_hex_char c in
-      if is_hex k then (
-        incr i;
-        hex ((prev lsl 4) + k))
-      else if List.mem c term then prev
-      else raise (bad_char j s)
-  in
-  let i = !i in
-  if i < len then
-    if is_hex (int_of_hex_char s.[i]) then hex 0 else raise (bad_char i s)
-  else raise (need_more s)
-
-let parse_sextuple s i =
-  let m = Bytes.create 6 in
-  try
-    let p = !i in
-    Bytes.set m 0 (Char.chr (parse_hex_int [ ':'; '-' ] s i));
-    if !i >= String.length s then raise (need_more s)
-    else
-      let sep = [ s.[!i] ] in
-      if !i - p <> 2 then raise (Parse_error ("hex pairs required", s));
-      incr i;
-      for k = 1 to 4 do
-        let p = !i in
-        Bytes.set m k (Char.chr (parse_hex_int sep s i));
-        if !i - p <> 2 then raise (Parse_error ("hex pairs required", s));
-        incr i
-      done;
-      let p = !i in
-      Bytes.set m 5 (Char.chr (parse_hex_int [] s i));
-      if !i - p <> 2 then raise (Parse_error ("hex pairs required", s));
-      m
-  with Invalid_argument _ ->
-    raise (Parse_error ("address segment too large", s))
+let hex_byte x i =
+  (hex_digit (String.get x i) lsl 4) + hex_digit (String.get x (succ i))
 
 (* Read a MAC address colon-separated string *)
-let of_string_exn x = parse_sextuple x (ref 0)
+let of_string_exn x =
+  if String.length x < (2 * 6) + 5 then raise (need_more x);
+  if String.length x <> (2 * 6) + 5 then
+    raise (Parse_error ("macaddr string is too long", x));
+  let m = Bytes.create 6 in
+  try
+    for i = 0 to 5 do
+      Bytes.set_uint8 m i (hex_byte x (3 * i))
+    done;
+    let sep = x.[2] in
+    (match sep with
+    | ':' | '-' -> ()
+    | _ ->
+        raise
+          (Parse_error (Printf.sprintf "Invalid macaddr separator: %C" sep, x)));
+    for i = 1 to 4 do
+      if x.[(3 * i) + 2] <> sep then
+        raise
+          (Parse_error
+             ( Printf.sprintf "Invalid macaddr separator, first was %C, now %C"
+                 sep
+                 x.[(3 * i) + 2],
+               x ))
+    done;
+    Bytes.unsafe_to_string m
+  with Invalid_hex_digit c ->
+    raise (Parse_error (Printf.sprintf "Invalid macaddr hex digit: %C" c, x))
+
 let of_string x = try_with_result of_string_exn x
-let chri x i = Char.code (Bytes.get x i)
+let chri x i = Char.code x.[i]
 
 let to_string ?(sep = ':') x =
   Printf.sprintf "%02x%c%02x%c%02x%c%02x%c%02x%c%02x" (chri x 0) sep (chri x 1)
     sep (chri x 2) sep (chri x 3) sep (chri x 4) sep (chri x 5)
 
-let to_octets x = Bytes.to_string x
+let to_octets x = x
 let pp ppf i = Format.fprintf ppf "%s" (to_string i)
-let broadcast = Bytes.make 6 '\255'
+let broadcast = String.make 6 '\255'
 
 let make_local bytegenf =
   let x = Bytes.create 6 in
@@ -107,7 +91,7 @@ let make_local bytegenf =
   for i = 1 to 5 do
     Bytes.set x i (Char.chr (bytegenf i))
   done;
-  x
+  Bytes.unsafe_to_string x
 
 let get_oui x = (chri x 0 lsl 16) lor (chri x 1 lsl 8) lor chri x 2
 let is_local x = (chri x 0 lsr 1) land 1 = 1

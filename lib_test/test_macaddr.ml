@@ -93,6 +93,10 @@ let test_make_local () =
   assert_equal ~msg:"get_oui" (get_oui local_addr)
     ((254 lsl 16) + (254 lsl 8) + 253)
 
+let test_bad_sep_mix () =
+  let s = "00:11-22:33-44:55" in
+  assert_result_failure ~msg:s (of_string s)
+
 let suite =
   "Test"
   >::: [
@@ -103,6 +107,7 @@ let suite =
          "cstruct_rt" >:: test_cstruct_rt;
          "cstruct_rt_bad" >:: test_cstruct_rt_bad;
          "make_local" >:: test_make_local;
+         "bad_sep_mix" >:: test_bad_sep_mix;
        ]
 ;;
 
