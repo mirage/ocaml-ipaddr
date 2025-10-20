@@ -64,7 +64,10 @@ let of_string_exn x =
       if x.[(3 * i) + 2] <> sep then
         raise
           (Parse_error
-             (Printf.sprintf "Invalid macaddr separator: %C" x.[(3 * i) + 2], x))
+             ( Printf.sprintf "Invalid macaddr separator, first was %C, now %C"
+                 sep
+                 x.[(3 * i) + 2],
+               x ))
     done;
     Bytes.unsafe_to_string m
   with Invalid_hex_digit c ->
