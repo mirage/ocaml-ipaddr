@@ -484,6 +484,8 @@ module V6 : sig
     val mask : int -> addr
     (** [mask n] is the pseudo-address of an [n] bit subnet mask. *)
 
+    val size : t -> int
+
     val make : int -> addr -> t
     (** [make n addr] is the cidr of [addr] with [n] bit prefix. *)
 

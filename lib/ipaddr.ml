@@ -969,6 +969,7 @@ module V6 = struct
 
     let ip = make
     let mask sz = shift_left max_int (128 - sz)
+    let size (_, sz) = sz
     let prefix (pre, sz) = (logand pre (mask sz), sz)
     let make sz pre = (pre, sz)
 
