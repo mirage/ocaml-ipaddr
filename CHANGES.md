@@ -1,3 +1,8 @@
+## v5.6.2 (2026-02-19)
+
+* Macaddr: use string as internal type t (thus, to_octets and of_octets no
+  longer allocate) (#126 @reynir)
+
 ## v5.6.1 (2025-08-01)
 
 * Add Ipaddr.Prefix.bits (#125 @psafont)
